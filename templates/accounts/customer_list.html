@@ -1,0 +1,184 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Customer List{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Customer List</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Customer Management</h4>
+                    <p>View and manage all customers in the system.</p>
+                    
+                    <!-- Customer Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Customers</h5>
+                                    <h3>{{ total_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Active Customers</h5>
+                                    <h3>{{ active_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>New This Month</h5>
+                                    <h3>{{ new_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>VIP Customers</h5>
+                                    <h3>{{ vip_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <form method="GET" class="d-flex">
+                                <input type="text" name="search" class="form-control" placeholder="Search customers..." value="{{ search_query }}">
+                                <button type="submit" class="btn btn-primary ms-2">Search</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="btn-group" role="group">
+                                <a href="?status=all" class="btn btn-outline-primary">All</a>
+                                <a href="?status=active" class="btn btn-outline-success">Active</a>
+                                <a href="?status=inactive" class="btn btn-outline-danger">Inactive</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Customers Table -->
+                    {% if customers %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Orders</th>
+                                    <th>Total Spent</th>
+                                    <th>Status</th>
+                                    <th>Date Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customers %}
+                                <tr>
+                                    <td>{{ customer.username }}</td>
+                                    <td>{{ customer.email }}</td>
+                                    <td>{{ customer.get_full_name|default:"N/A" }}</td>
+                                    <td>{{ customer.orders.count|default:"0" }}</td>
+                                    <td>${{ customer.total_spent|default:"0"|floatformat:2 }}</td>
+                                    <td>
+                                        {% if customer.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ customer.date_joined|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'customer_detail' customer.id %}" class="btn btn-sm btn-info">View</a>
+                                        <a href="{% url 'edit_user' customer.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if customers.has_other_pages %}
+                    <nav aria-label="Customer pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if customers.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ customers.previous_page_number }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ customers.number }} of {{ customers.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if customers.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ customers.next_page_number }}">Next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ customers.paginator.num_pages }}">Last</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="alert alert-info">
+                        <h5>No customers found</h5>
+                        <p>There are currently no customers in the system.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'customer_analytics' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-chart-bar"></i> Customer Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'customer_segments' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-users"></i> Customer Segments
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'export_analytics' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-download"></i> Export Data
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'user_management' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-cog"></i> User Management
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

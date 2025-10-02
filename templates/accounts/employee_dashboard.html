@@ -1,0 +1,151 @@
+{% extends 'base/employee_base.html' %}
+{% load static %}
+
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block content %}
+<!-- Employee Notice -->
+<div class="employee-alert alert-info">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+        <div>
+            <h6 class="mb-1"><strong>Employee Access</strong></h6>
+            <p class="mb-0">You have full access to manage all customer orders. You can assign, confirm, and update order status.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="employee-stats">
+    <div class="stat-card">
+        <h3>{{ stats.total_orders }}</h3>
+        <p><i class="fas fa-shopping-cart"></i> Total Orders</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.pending_orders }}</h3>
+        <p><i class="fas fa-clock"></i> Pending Orders</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.confirmed_orders }}</h3>
+        <p><i class="fas fa-check-circle"></i> Confirmed Orders</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.my_orders }}</h3>
+        <p><i class="fas fa-user-tie"></i> My Orders</p>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="employee-card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list"></i> All Customer Orders</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="employee-table">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Assigned To</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <strong>{{ order.order_id }}</strong>
+                        </td>
+                        <td>
+                            <div>
+                                <strong>{{ order.user.get_full_name|default:order.user.username }}</strong>
+                                <br>
+                                <small class="text-muted">{{ order.user.email }}</small>
+                            </div>
+                        </td>
+                        <td>{{ order.order_date|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <span class="employee-badge badge-{{ order.status }}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>${{ order.grand_total }}</strong>
+                        </td>
+                        <td>
+                            {% if order.assigned_employee %}
+                                <span class="text-success">
+                                    <i class="fas fa-user-check"></i> {{ order.assigned_employee.get_full_name|default:order.assigned_employee.username }}
+                                </span>
+                            {% else %}
+                                <span class="text-warning">
+                                    <i class="fas fa-user-times"></i> Unassigned
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'employee_order_detail' order.order_id %}" 
+                                   class="btn btn-employee btn-sm">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                {% if not order.assigned_employee %}
+                                    <a href="{% url 'assign_order' order.order_id %}" 
+                                       class="btn btn-employee-success btn-sm">
+                                        <i class="fas fa-user-plus"></i> Assign
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No orders found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if orders.has_other_pages %}
+<div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Order pagination">
+        <ul class="pagination">
+            {% if orders.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">
+                    Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+                </span>
+            </li>
+            
+            {% if orders.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.paginator.num_pages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}
+{% endblock %}

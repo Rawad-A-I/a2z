@@ -1,0 +1,147 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Analytics Dashboard</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Business Analytics</h4>
+                    <p>Comprehensive analytics and reporting for your eCommerce store.</p>
+                    
+                    <!-- Key Metrics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Revenue</h5>
+                                    <h3>${{ total_revenue|default:"0"|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Total Orders</h5>
+                                    <h3>{{ total_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Total Customers</h5>
+                                    <h3>{{ total_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>Total Products</h5>
+                                    <h3>{{ total_products|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sales Analytics -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Sales Overview</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Sales performance over time</p>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-chart-line"></i> Sales chart would be displayed here
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Top Products</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Best performing products</p>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-box"></i> Product analytics would be displayed here
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Analytics -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Customer Analytics</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Customer behavior and insights</p>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-users"></i> Customer analytics would be displayed here
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Inventory Analytics</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Stock levels and inventory insights</p>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-warehouse"></i> Inventory analytics would be displayed here
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'sales_analytics' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-chart-bar"></i> Sales Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'customer_analytics' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-users"></i> Customer Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'product_analytics' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-box"></i> Product Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'export_analytics' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-download"></i> Export Data
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

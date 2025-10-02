@@ -1,0 +1,139 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Order Management Dashboard{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Order Management Dashboard</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Order Processing & Fulfillment</h4>
+                    <p>Manage orders, track fulfillment, and monitor order performance.</p>
+                    
+                    <!-- Order Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Orders</h5>
+                                    <h3>{{ total_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>Pending</h5>
+                                    <h3>{{ pending_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Processing</h5>
+                                    <h3>{{ processing_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Delivered</h5>
+                                    <h3>{{ delivered_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Orders -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Recent Orders</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if recent_orders %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Order ID</th>
+                                                    <th>Customer</th>
+                                                    <th>Total</th>
+                                                    <th>Status</th>
+                                                    <th>Date</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for order in recent_orders %}
+                                                <tr>
+                                                    <td>{{ order.order_id }}</td>
+                                                    <td>{{ order.user.username }}</td>
+                                                    <td>${{ order.grand_total }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ order.status|lower }}">
+                                                            {{ order.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ order.order_date|date:"M d, Y" }}</td>
+                                                    <td>
+                                                        <a href="{% url 'order_detail' order.order_id %}" class="btn btn-sm btn-info">View</a>
+                                                        <a href="{% url 'update_order_status' order.order_id %}" class="btn btn-sm btn-warning">Update</a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No recent orders found.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'order_list' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-list"></i> All Orders
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'fulfillment_center' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-shipping-fast"></i> Fulfillment Center
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'order_analytics' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-chart-bar"></i> Order Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'order_returns' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-undo"></i> Returns
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

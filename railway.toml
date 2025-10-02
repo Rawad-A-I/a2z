@@ -1,0 +1,19 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn ecomm.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 120 --max-requests 1000 --max-requests-jitter 100"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[environments.production]
+variables = { 
+    DEBUG = "False", 
+    ALLOWED_HOSTS = "*.railway.app",
+    SECURE_SSL_REDIRECT = "True",
+    SECURE_PROXY_SSL_HEADER = "True",
+    SESSION_COOKIE_SECURE = "True",
+    CSRF_COOKIE_SECURE = "True"
+}

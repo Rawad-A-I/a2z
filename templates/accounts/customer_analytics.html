@@ -1,0 +1,201 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Customer Analytics{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Customer Analytics</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Customer Behavior Analytics</h4>
+                    <p>Analyze customer behavior, loyalty, and engagement metrics.</p>
+                    
+                    <!-- Customer Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Customers</h5>
+                                    <h3>{{ total_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Active Customers</h5>
+                                    <h3>{{ active_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>VIP Customers</h5>
+                                    <h3>{{ vip_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>New This Month</h5>
+                                    <h3>{{ new_customers|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Segments -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Customer Segments</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Segment</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Bronze</td>
+                                                    <td>{{ bronze_customers|default:"0" }}</td>
+                                                    <td>{{ bronze_percentage|default:"0" }}%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Silver</td>
+                                                    <td>{{ silver_customers|default:"0" }}</td>
+                                                    <td>{{ silver_percentage|default:"0" }}%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Gold</td>
+                                                    <td>{{ gold_customers|default:"0" }}</td>
+                                                    <td>{{ gold_percentage|default:"0" }}%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Platinum</td>
+                                                    <td>{{ platinum_customers|default:"0" }}</td>
+                                                    <td>{{ platinum_percentage|default:"0" }}%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Customer Engagement</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-chart-line"></i> Customer engagement metrics would be displayed here
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-heart"></i> Customer loyalty program statistics
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-shopping-cart"></i> Purchase behavior analysis
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Customers -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Top Customers by Spending</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if top_customers %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Customer</th>
+                                                    <th>Email</th>
+                                                    <th>Total Spent</th>
+                                                    <th>Orders</th>
+                                                    <th>Loyalty Tier</th>
+                                                    <th>Last Purchase</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for customer in top_customers %}
+                                                <tr>
+                                                    <td>{{ customer.username }}</td>
+                                                    <td>{{ customer.email }}</td>
+                                                    <td>${{ customer.total_spent|default:"0"|floatformat:2 }}</td>
+                                                    <td>{{ customer.order_count|default:"0" }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ customer.loyalty_tier|lower }}">
+                                                            {{ customer.loyalty_tier|title }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ customer.last_purchase|date:"M d, Y"|default:"Never" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No customer data available.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'analytics_dashboard' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-chart-bar"></i> Analytics Dashboard
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'customer_list' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-users"></i> Customer List
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'customer_segments' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-layer-group"></i> Customer Segments
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'export_analytics' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-download"></i> Export Data
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

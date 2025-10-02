@@ -1,0 +1,128 @@
+{% extends "base/base.html" %} {% load static %}
+{% block title %}Register{% endblock %}
+{% block start %}
+
+<style>
+  @media (max-width: 768px) {
+    .container-xl {
+      padding: 1rem;
+    }
+    
+    .card {
+      margin: 0.5rem;
+    }
+    
+    .btn-block {
+      width: 100%;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .alert {
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .card-header {
+      font-size: 1.2rem;
+      padding: 1rem;
+    }
+    
+    .form-control {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<!-- ============================ COMPONENT Sign-Up ================================= -->
+<section class="section-content padding-bottom">
+  <div class="container-xl d-flex justify-content-center align-items-center mt-5">
+    <div class="row justify-content-center w-100">
+      <div class="col-xl-4">
+        <div class="card mb-4">
+          <div class="card-header" style="text-align: center; font-size: 25px;">Sign Up</div>
+          <div class="card-body">
+            <form method="POST">
+              {% csrf_token %} {% include "base/alert.html" %}
+
+              <!-- form-group// -->
+              <div class="form-group">
+                <input
+                  class="form-control"
+                  required
+                  placeholder="Username"
+                  name="username"
+                  type="text"
+                  autocomplete="username"/>
+              </div>
+
+              <div class="form-group">
+                <input
+                  class="form-control"
+                  required
+                  placeholder="First Name"
+                  name="first_name"
+                  type="text"
+                  autocomplete="given-name"/>
+              </div>
+
+              <div class="form-group">
+                <input
+                  class="form-control"
+                  required
+                  placeholder="Last Name"
+                  name="last_name"
+                  type="text"
+                  autocomplete="family-name"/>
+              </div>
+
+              <div class="form-group">
+                <input
+                  class="form-control"
+                  required
+                  placeholder="Email"
+                  name="email"
+                  type="text"
+                  autocomplete="email"/>
+              </div>
+              
+              <div class="form-group">
+                <input
+                  class="form-control"
+                  required
+                  placeholder="Password"
+                  name="password"
+                  type="password"
+                />
+              </div>
+              
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block">
+                  Register
+                </button>
+              </div>
+
+              <p class="text-center mt-4">
+                Already have account? <a href="{% url 'login' %}">Sign in</a>
+              </p>
+              
+              <!-- Registration Notice -->
+              <div class="alert alert-success mt-3">
+                <small>
+                  <i class="fa fa-check-circle"></i>
+                  <strong>Welcome!</strong> Your account will be created immediately and you can login right away.
+                </small>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ============================ COMPONENT Sign-Up END ================================= -->
+
+{% endblock %}

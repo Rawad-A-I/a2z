@@ -1,0 +1,127 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Admin Dashboard</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Welcome to the Admin Dashboard!</h4>
+                    <p>You are successfully logged in as: <strong>{{ user.username }}</strong></p>
+                    
+                    <!-- Quick Stats -->
+                    <div class="row">
+                        <div class="col-lg-3 col-6 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h3>{{ total_orders|default:"0" }}</h3>
+                                    <p>Total Orders</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-6 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h3>${{ total_revenue|default:"0"|floatformat:2 }}</h3>
+                                    <p>Total Revenue</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-6 mb-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h3>{{ total_products|default:"0" }}</h3>
+                                    <p>Total Products</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-6 mb-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h3>{{ total_customers|default:"0" }}</h3>
+                                    <p>Total Customers</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'product_management' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-box"></i> Manage Products
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'order_management_admin' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-shopping-cart"></i> Manage Orders
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'analytics_dashboard' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-chart-bar"></i> View Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'user_management' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-users"></i> Customer Management
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Orders -->
+                    {% if recent_orders %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Recent Orders</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in recent_orders %}
+                                        <tr>
+                                            <td>{{ order.order_id }}</td>
+                                            <td>{{ order.user.username }}</td>
+                                            <td>${{ order.grand_total }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ order.status|lower }}">
+                                                    {{ order.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ order.order_date|date:"M d, Y" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

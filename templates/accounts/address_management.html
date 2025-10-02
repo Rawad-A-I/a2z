@@ -1,0 +1,463 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Address Management{% endblock %}
+
+{% block start %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  .map-container {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .address-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .store-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .store-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+  
+  .store-distance {
+    color: #28a745;
+    font-weight: bold;
+  }
+  
+  .btn-locate {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-locate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-map-marker-alt"></i> Address Management</h4>
+        </div>
+        <div class="card-body">
+          <!-- Current Address -->
+          <div class="mb-4">
+            <h5>Current Shipping Address</h5>
+            {% if profile.shipping_address %}
+              <p class="text-muted">{{ profile.shipping_address }}</p>
+            {% else %}
+              <p class="text-muted">No shipping address set</p>
+            {% endif %}
+          </div>
+          
+          <!-- Address Form -->
+          <div class="address-form">
+            <h5>Update Address</h5>
+            <form method="POST" action="{% url 'update_shipping_address' %}">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="address">Street Address</label>
+                    <input type="text" class="form-control" id="address" name="address" 
+                           placeholder="Enter street address" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" class="form-control" id="city" name="city" 
+                           placeholder="Enter city" required>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="state">State</label>
+                    <input type="text" class="form-control" id="state" name="state" 
+                           placeholder="Enter state" required>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="zip_code">ZIP Code</label>
+                    <input type="text" class="form-control" id="zip_code" name="zip_code" 
+                           placeholder="Enter ZIP code" required>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="country">Country</label>
+                    <select class="form-control" id="country" name="country">
+                      <option value="US">United States</option>
+                      <option value="CA">Canada</option>
+                      <option value="UK">United Kingdom</option>
+                      <option value="AU">Australia</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Hidden fields for coordinates -->
+              <input type="hidden" id="latitude" name="latitude">
+              <input type="hidden" id="longitude" name="longitude">
+              
+              <div class="text-center">
+                <button type="button" class="btn btn-locate" onclick="locateUser()">
+                  <i class="fas fa-crosshairs"></i> Use Current Location
+                </button>
+                <button type="button" class="btn btn-outline-primary ml-2" onclick="geocodeAddress()">
+                  <i class="fas fa-search"></i> Find on Map
+                </button>
+                <button type="submit" class="btn btn-success ml-2">
+                  <i class="fas fa-save"></i> Save Address
+                </button>
+              </div>
+            </form>
+          </div>
+          
+          <!-- OpenStreetMap -->
+          <div class="mt-4">
+            <h5>Map View</h5>
+            <div id="map" class="map-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <!-- Nearby Stores -->
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-store"></i> Nearby Stores</h5>
+        </div>
+        <div class="card-body">
+          <button class="btn btn-primary btn-block mb-3" onclick="findNearbyStores()">
+            <i class="fas fa-search-location"></i> Find Nearby Stores
+          </button>
+          
+          <div id="nearby-stores">
+            {% for store in store_locations %}
+            <div class="store-card">
+              <h6>{{ store.name }}</h6>
+              <p class="text-muted mb-1">{{ store.address }}</p>
+              <p class="text-muted mb-1">{{ store.city }}, {{ store.state }} {{ store.zip_code }}</p>
+              <p class="text-muted mb-1">
+                <i class="fas fa-phone"></i> {{ store.phone }}
+              </p>
+              <p class="text-muted mb-0">
+                <i class="fas fa-envelope"></i> {{ store.email }}
+              </p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Delivery Estimate -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h5><i class="fas fa-truck"></i> Delivery Estimate</h5>
+        </div>
+        <div class="card-body">
+          <button class="btn btn-info btn-block" onclick="getDeliveryEstimate()">
+            <i class="fas fa-clock"></i> Get Delivery Time
+          </button>
+          <div id="delivery-estimate" class="mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let map;
+let marker;
+let geocoder;
+
+// Initialize OpenStreetMap with Leaflet
+function initMap() {
+  map = L.map('map').setView([40.7128, -74.0060], 10); // Default to NYC
+  
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  
+  // Add click listener to map
+  map.on('click', function(event) {
+    const lat = event.latlng.lat;
+    const lng = event.latlng.lng;
+    
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+    
+    // Update marker
+    if (marker) {
+      map.removeLayer(marker);
+    }
+    
+    marker = L.marker([lat, lng]).addTo(map);
+    
+    // Reverse geocode to get address
+    reverseGeocode(lat, lng);
+  });
+}
+
+// Locate user's current position
+function locateUser() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        
+        // Update map
+        map.setView([lat, lng], 15);
+        
+        if (marker) {
+          map.removeLayer(marker);
+        }
+        
+        marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup('Your Location').openPopup();
+        
+        // Reverse geocode to get address
+        reverseGeocode(lat, lng);
+      },
+      function(error) {
+        alert('Error getting location: ' + error.message);
+      }
+    );
+  } else {
+    alert('Geolocation is not supported by this browser.');
+  }
+}
+
+// Geocode address using Nominatim
+function geocodeAddress() {
+  const address = document.getElementById('address').value + ' ' +
+                 document.getElementById('city').value + ' ' +
+                 document.getElementById('state').value + ' ' +
+                 document.getElementById('zip_code').value;
+  
+  if (!address.trim()) {
+    alert('Please enter an address first.');
+    return;
+  }
+  
+  // Use Nominatim API
+  fetch('{% url "geocode_address" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ address: address })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const lat = data.latitude;
+      const lng = data.longitude;
+      
+      document.getElementById('latitude').value = lat;
+      document.getElementById('longitude').value = lng;
+      
+      // Update map
+      map.setView([lat, lng], 15);
+      
+      if (marker) {
+        map.removeLayer(marker);
+      }
+      
+      marker = L.marker([lat, lng]).addTo(map);
+      marker.bindPopup('Selected Address').openPopup();
+    } else {
+      alert('Geocoding failed: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error geocoding address.');
+  });
+}
+
+// Reverse geocode coordinates to address using Nominatim
+function reverseGeocode(lat, lng) {
+  fetch('{% url "reverse_geocode" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ latitude: lat, longitude: lng })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const addressComponents = data.address_components;
+      
+      // Parse address components
+      let streetNumber = addressComponents.house_number || '';
+      let route = addressComponents.road || '';
+      let city = addressComponents.city || addressComponents.town || addressComponents.village || '';
+      let state = addressComponents.state || '';
+      let zipCode = addressComponents.postcode || '';
+      
+      // Update form fields
+      document.getElementById('address').value = (streetNumber + ' ' + route).trim();
+      document.getElementById('city').value = city;
+      document.getElementById('state').value = state;
+      document.getElementById('zip_code').value = zipCode;
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+// Find nearby stores
+function findNearbyStores() {
+  const lat = document.getElementById('latitude').value;
+  const lng = document.getElementById('longitude').value;
+  
+  if (!lat || !lng) {
+    alert('Please set your location first.');
+    return;
+  }
+  
+  fetch('{% url "find_nearby_stores" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({
+      latitude: parseFloat(lat),
+      longitude: parseFloat(lng),
+      radius: 10
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      displayNearbyStores(data.stores);
+    } else {
+      alert('Error finding nearby stores: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error finding nearby stores.');
+  });
+}
+
+// Display nearby stores
+function displayNearbyStores(stores) {
+  const container = document.getElementById('nearby-stores');
+  container.innerHTML = '';
+  
+  if (stores.length === 0) {
+    container.innerHTML = '<p class="text-muted">No stores found nearby.</p>';
+    return;
+  }
+  
+  stores.forEach(store => {
+    const storeDiv = document.createElement('div');
+    storeDiv.className = 'store-card';
+    storeDiv.innerHTML = `
+      <h6>${store.name}</h6>
+      <p class="text-muted mb-1">${store.address}</p>
+      <p class="text-muted mb-1">${store.city}, ${store.state} ${store.zip_code}</p>
+      <p class="text-muted mb-1">
+        <i class="fas fa-phone"></i> ${store.phone}
+      </p>
+      <p class="text-muted mb-1">
+        <i class="fas fa-envelope"></i> ${store.email}
+      </p>
+      <p class="store-distance">
+        <i class="fas fa-map-marker-alt"></i> ${store.distance} km away
+      </p>
+    `;
+    container.appendChild(storeDiv);
+  });
+}
+
+// Get delivery estimate
+function getDeliveryEstimate() {
+  const lat = document.getElementById('latitude').value;
+  const lng = document.getElementById('longitude').value;
+  
+  if (!lat || !lng) {
+    alert('Please set your location first.');
+    return;
+  }
+  
+  fetch('{% url "delivery_estimate" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({
+      latitude: parseFloat(lat),
+      longitude: parseFloat(lng)
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const estimateDiv = document.getElementById('delivery-estimate');
+      estimateDiv.innerHTML = `
+        <div class="alert alert-info">
+          <h6><i class="fas fa-truck"></i> Delivery Estimate</h6>
+          <p class="mb-1"><strong>Estimated delivery:</strong> ${data.delivery_days} business days</p>
+          <p class="mb-0"><strong>Nearest store:</strong> ${data.nearest_store.name} (${data.nearest_store.distance} km away)</p>
+        </div>
+      `;
+    } else {
+      alert('Error getting delivery estimate: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error getting delivery estimate.');
+  });
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initMap();
+});
+</script>
+{% endblock %}

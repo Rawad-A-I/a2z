@@ -1,0 +1,268 @@
+{% extends "base/base.html" %}
+{% block title %}API Documentation{% endblock %}
+
+{% block start %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">🛒 Django eCommerce API Documentation</h1>
+            
+            <div class="alert alert-info">
+                <h4>📋 Quick Start</h4>
+                <p>This API provides comprehensive endpoints for managing products, orders, cart, and user accounts.</p>
+                <ul>
+                    <li><strong>Base URL:</strong> <code>http://localhost:8000/api/</code></li>
+                    <li><strong>Authentication:</strong> Session or Token based</li>
+                    <li><strong>Format:</strong> JSON</li>
+                </ul>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>🔐 Authentication</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Session Authentication</h5>
+                            <p>Use Django's built-in session authentication for web clients.</p>
+                            <code>GET /api/auth/login/</code>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5>Token Authentication</h5>
+                            <p>Use token authentication for mobile apps and external services.</p>
+                            <code>Authorization: Token your-token-here</code>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h3>📊 Response Format</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Success Response</h5>
+                            <pre><code>{
+  "results": [...],
+  "count": 100,
+  "next": "http://api.example.com/items/?page=2",
+  "previous": null
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5>Error Response</h5>
+                            <pre><code>{
+  "error": "Error message",
+  "details": {...}
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="mt-5">🛍️ Products API</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Method</th>
+                            <th>Description</th>
+                            <th>Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/api/products/</code></td>
+                            <td>GET</td>
+                            <td>List all products</td>
+                            <td>search, category, ordering, page</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/products/{id}/</code></td>
+                            <td>GET</td>
+                            <td>Get product details</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/products/featured/</code></td>
+                            <td>GET</td>
+                            <td>Get featured products</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/products/bestsellers/</code></td>
+                            <td>GET</td>
+                            <td>Get bestseller products</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/products/{id}/add_to_cart/</code></td>
+                            <td>POST</td>
+                            <td>Add product to cart</td>
+                            <td>quantity, size, color</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/products/{id}/add_to_wishlist/</code></td>
+                            <td>POST</td>
+                            <td>Add product to wishlist</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="mt-5">🛒 Cart & Orders API</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Method</th>
+                            <th>Description</th>
+                            <th>Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/api/cart/</code></td>
+                            <td>GET</td>
+                            <td>Get user's cart</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/cart/{id}/checkout/</code></td>
+                            <td>POST</td>
+                            <td>Checkout cart</td>
+                            <td>shipping_address, payment_method</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/orders/</code></td>
+                            <td>GET</td>
+                            <td>List user's orders</td>
+                            <td>status, ordering, page</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/orders/{id}/cancel/</code></td>
+                            <td>POST</td>
+                            <td>Cancel order</td>
+                            <td>reason</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="mt-5">🔍 Search API</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Method</th>
+                            <th>Description</th>
+                            <th>Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/search/products/</code></td>
+                            <td>GET</td>
+                            <td>Search products</td>
+                            <td>q, category, min_price, max_price, sort</td>
+                        </tr>
+                        <tr>
+                            <td><code>/search/categories/</code></td>
+                            <td>GET</td>
+                            <td>Search categories</td>
+                            <td>q</td>
+                        </tr>
+                        <tr>
+                            <td><code>/search/suggestions/</code></td>
+                            <td>GET</td>
+                            <td>Get search suggestions</td>
+                            <td>q, limit</td>
+                        </tr>
+                        <tr>
+                            <td><code>/search/advanced/</code></td>
+                            <td>POST</td>
+                            <td>Advanced search</td>
+                            <td>JSON body with filters</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="mt-5">👤 User Management API</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Method</th>
+                            <th>Description</th>
+                            <th>Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/api/profile/</code></td>
+                            <td>GET/PUT</td>
+                            <td>Get/Update user profile</td>
+                            <td>profile_image, bio, shipping_address</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/loyalty/</code></td>
+                            <td>GET</td>
+                            <td>Get loyalty points and tier</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/reviews/</code></td>
+                            <td>GET/POST</td>
+                            <td>List/Create product reviews</td>
+                            <td>product, stars, content</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="mt-5">📝 Example Usage</h3>
+            <div class="card">
+                <div class="card-body">
+                    <h5>Search Products</h5>
+                    <pre><code>GET /api/products/?search=nike&category=shoes&ordering=price</code></pre>
+                    
+                    <h5 class="mt-3">Add to Cart</h5>
+                    <pre><code>POST /api/products/123e4567-e89b-12d3-a456-426614174000/add_to_cart/
+{
+  "quantity": 2,
+  "size": "L",
+  "color": "Red"
+}</code></pre>
+                    
+                    <h5 class="mt-3">Advanced Search</h5>
+                    <pre><code>POST /search/advanced/
+{
+  "query": "running shoes",
+  "filters": {
+    "categories": ["shoes", "sports"],
+    "price_range": {"min": 50, "max": 200},
+    "in_stock": true
+  },
+  "sort": {"field": "price", "order": "asc"}
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="alert alert-success mt-4">
+                <h4>🚀 Ready to Use!</h4>
+                <p>Your Django eCommerce API is now ready with comprehensive endpoints for all eCommerce operations.</p>
+                <p><strong>Interactive Documentation:</strong> <a href="/api/schema/swagger-ui/" target="_blank">Swagger UI</a> | <a href="/api/schema/redoc/" target="_blank">ReDoc</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

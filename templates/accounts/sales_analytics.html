@@ -1,0 +1,220 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Sales Analytics{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Sales Analytics</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Sales Performance Analytics</h4>
+                    <p>Analyze sales performance, revenue trends, and order metrics.</p>
+                    
+                    <!-- Sales Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Revenue</h5>
+                                    <h3>${{ total_revenue|default:"0"|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Total Orders</h5>
+                                    <h3>{{ total_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Average Order Value</h5>
+                                    <h3>${{ average_order_value|default:"0"|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>Conversion Rate</h5>
+                                    <h3>{{ conversion_rate|default:"0" }}%</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sales Trends -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Sales Trends</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-chart-line"></i> Sales trend chart would be displayed here
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Period</th>
+                                                    <th>Revenue</th>
+                                                    <th>Orders</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Today</td>
+                                                    <td>${{ today_revenue|default:"0"|floatformat:2 }}</td>
+                                                    <td>{{ today_orders|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>This Week</td>
+                                                    <td>${{ week_revenue|default:"0"|floatformat:2 }}</td>
+                                                    <td>{{ week_orders|default:"0" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>This Month</td>
+                                                    <td>${{ month_revenue|default:"0"|floatformat:2 }}</td>
+                                                    <td>{{ month_orders|default:"0" }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Order Status Distribution</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Count</th>
+                                                    <th>Percentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Pending</td>
+                                                    <td>{{ pending_orders|default:"0" }}</td>
+                                                    <td>{{ pending_percentage|default:"0" }}%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Confirmed</td>
+                                                    <td>{{ confirmed_orders|default:"0" }}</td>
+                                                    <td>{{ confirmed_percentage|default:"0" }}%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Shipped</td>
+                                                    <td>{{ shipped_orders|default:"0" }}</td>
+                                                    <td>{{ shipped_percentage|default:"0" }}%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Delivered</td>
+                                                    <td>{{ delivered_orders|default:"0" }}</td>
+                                                    <td>{{ delivered_percentage|default:"0" }}%</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Cancelled</td>
+                                                    <td>{{ cancelled_orders|default:"0" }}</td>
+                                                    <td>{{ cancelled_percentage|default:"0" }}%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Performing Products -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Top Performing Products</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if top_products %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Units Sold</th>
+                                                    <th>Revenue</th>
+                                                    <th>Category</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for product in top_products %}
+                                                <tr>
+                                                    <td>{{ product.product_name }}</td>
+                                                    <td>{{ product.units_sold|default:"0" }}</td>
+                                                    <td>${{ product.revenue|default:"0"|floatformat:2 }}</td>
+                                                    <td>{{ product.category.category_name }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No product sales data available.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'analytics_dashboard' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-chart-bar"></i> Analytics Dashboard
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'order_analytics' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-shopping-cart"></i> Order Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'product_analytics' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-box"></i> Product Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'export_analytics' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-download"></i> Export Data
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

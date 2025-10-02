@@ -1,0 +1,36 @@
+<!-- Product List -->
+<div class="row">
+    {% for product in list_products %}
+    <div class="col-md-3">
+      <figure class="card card-product-grid">
+        <div class="img-wrap">
+          <img src="/media/{{product.product_images.first.image}}" />
+          {% if not product.is_in_stock %}
+          <div class="badge badge-danger position-absolute" style="top: 10px; right: 10px;">
+            Out of Stock
+          </div>
+          {% elif product.stock_quantity > 0 and product.is_low_stock %}
+          <div class="badge badge-warning position-absolute" style="top: 10px; right: 10px;">
+            Low Stock
+          </div>
+          {% endif %}
+        </div>
+        <figcaption class="info-wrap border-top">
+          <a href="{% url 'get_product' product.slug %}" class="title">
+            <b>{{ product.product_name }}</b></a>
+          <div class="price mt-2">₹{{product.price}}.00</div>
+          {% if not product.is_in_stock %}
+          <div class="text-danger small mt-1">
+            <i class="fas fa-times"></i> Currently unavailable
+          </div>
+          {% elif product.stock_quantity > 0 and product.is_low_stock %}
+          <div class="text-warning small mt-1">
+            <i class="fas fa-exclamation-triangle"></i> Only {{ product.stock_quantity }} left
+          </div>
+          {% endif %}
+        </figcaption>
+      </figure>
+    </div>
+
+    {% endfor %}
+  </div>

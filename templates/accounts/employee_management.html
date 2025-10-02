@@ -1,0 +1,135 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Employee Management{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Employee Management</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Employee Management Dashboard</h4>
+                    <p>Manage employees, assign roles, and track performance.</p>
+                    
+                    <!-- Employee Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Employees</h5>
+                                    <h3>{{ total_employees|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Active Employees</h5>
+                                    <h3>{{ active_employees|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Departments</h5>
+                                    <h3>{{ total_departments|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>Assigned Orders</h5>
+                                    <h3>{{ assigned_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Employees Table -->
+                    {% if employees %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th>Store Location</th>
+                                    <th>Status</th>
+                                    <th>Hire Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in employees %}
+                                <tr>
+                                    <td>{{ employee.employee_id }}</td>
+                                    <td>{{ employee.user.get_full_name|default:employee.user.username }}</td>
+                                    <td>{{ employee.user.email }}</td>
+                                    <td>{{ employee.department }}</td>
+                                    <td>{{ employee.store_location.name|default:"N/A" }}</td>
+                                    <td>
+                                        {% if employee.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ employee.hire_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'user_detail' employee.user.id %}" class="btn btn-sm btn-info">View</a>
+                                        <a href="{% url 'edit_user' employee.user.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <h5>No employees found</h5>
+                        <p>There are currently no employees in the system.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'user_management' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-users"></i> User Management
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'order_management_dashboard' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-shopping-cart"></i> Order Management
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'store_locations_admin' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-map-marker-alt"></i> Store Locations
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'system_reports' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-file-alt"></i> Employee Reports
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
