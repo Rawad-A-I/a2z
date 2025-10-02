@@ -16,12 +16,6 @@ class ProductDocument(Document):
         fields={'raw': fields.KeywordField()}
     )
     product_description = fields.TextField(analyzer='standard')
-    price = fields.FloatField()
-    stock_quantity = fields.IntegerField()
-    is_in_stock = fields.BooleanField()
-    is_featured = fields.BooleanField()
-    is_bestseller = fields.BooleanField()
-    is_new_arrival = fields.BooleanField()
     
     # Faceted fields
     category_name = fields.TextField(fielddata=True)

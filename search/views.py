@@ -4,7 +4,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.core.paginator import Paginator
-from django_elasticsearch_dsl import Q
 from search.documents import ProductDocument, CategoryDocument
 import json
 

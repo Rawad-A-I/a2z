@@ -66,7 +66,7 @@ INSTALLED_APPS = [
     'accounts',
     'home',
     'api',
-    'search',
+    # 'search',  # Disabled - requires elasticsearch-dsl compatibility fix
 
     # for crispy forms
     'django_countries',
@@ -78,7 +78,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     
     # Search
-    'django_elasticsearch_dsl',
+    # 'django_elasticsearch_dsl',  # Disabled - requires elasticsearch-dsl compatibility fix
     
     # Caching
     'django_redis',

@@ -8,10 +8,10 @@ router = DefaultRouter()
 router.register(r'products', views.ProductViewSet)
 router.register(r'categories', views.CategoryViewSet)
 router.register(r'reviews', views.ProductReviewViewSet)
-router.register(r'orders', views.OrderViewSet)
-router.register(r'cart', views.CartViewSet)
-router.register(r'profile', views.ProfileViewSet)
-router.register(r'loyalty', views.CustomerLoyaltyViewSet)
+router.register(r'orders', views.OrderViewSet, basename='order')
+router.register(r'cart', views.CartViewSet, basename='cart')
+router.register(r'profile', views.ProfileViewSet, basename='profile')
+router.register(r'loyalty', views.CustomerLoyaltyViewSet, basename='loyalty')
 
 # API Documentation
 schema_view = get_schema_view(
@@ -23,6 +23,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('', include(router.urls)),
     path('schema/', schema_view, name='api-schema'),
-    path('docs/', include_docs_urls(title='eCommerce API Documentation')),
+    # path('docs/', include_docs_urls(title='eCommerce API Documentation')),  # Requires coreapi
     path('auth/', include('rest_framework.urls')),
 ]

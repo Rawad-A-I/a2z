@@ -17,10 +17,10 @@ urlpatterns = [
     path('api/', include('api.urls')),
     
     # Search endpoints
-    path('search/', include('search.urls')),
+    # path('search/', include('search.urls')),  # Disabled - requires elasticsearch-dsl fix
     
     # API Documentation
-    path('api/schema/', include('drf_spectacular.urls')),
+    # path('api/schema/', include('drf_spectacular.urls')),  # Commented out for local testing
 ]
 
 
