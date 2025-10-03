@@ -12,20 +12,10 @@ urlpatterns = [
     # Admin panel
     path('admin/', admin.site.urls),
     
-    # API endpoints
-    path('api/', include('api.urls')),
-    
-    # Products app
-    path('products/', include('products.urls')),
-    
-    # Accounts app
-    path('accounts/', include('accounts.urls')),
-    
-    # Home app
+    # Home app - MINIMAL
     path('', include('home.urls')),
 ]
 
-# Serve static and media files
+# Serve static files
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
