@@ -99,9 +99,9 @@ class Product(BaseModel):
     is_bestseller = models.BooleanField(default=False)
     is_new_arrival = models.BooleanField(default=False)
     
-    # Product relationships
-    related_products = models.ManyToManyField('self', blank=True, related_name="related_to")
-    bundle_products = models.ManyToManyField('self', blank=True, related_name="bundled_with")
+    # Product relationships (non-symmetrical for ecommerce)
+    related_products = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="related_to")
+    bundle_products = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="bundled_with")
     
     def save(self, *args, **kwargs):
         self.slug = slugify(self.product_name)

@@ -1,11 +1,12 @@
 from django.urls import path
 from home.views import *
-from home.health import health_check, readiness_check
+from home.health import health_check, readiness_check, liveness_check
 
 urlpatterns = [
-    # Health check endpoints (for Railway)
+    # Health check endpoints (for Railway and Kubernetes)
     path('health/', health_check, name='health_check'),
     path('ready/', readiness_check, name='readiness_check'),
+    path('live/', liveness_check, name='liveness_check'),
     
     # Main pages
     path('', redirect_homepage, name="redirect_homepage"),
