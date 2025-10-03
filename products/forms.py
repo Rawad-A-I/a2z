@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product, Category, Barcode, ColorVariant, SizeVariant
+from .models import Product, Category, Barcode, ColorVariant, SizeVariant, ProductReview
 from django.contrib.auth.models import User
 
 
@@ -101,3 +101,21 @@ class BulkBarcodeForm(forms.Form):
             })
         
         return processed_lines
+
+
+class ReviewForm(forms.ModelForm):
+    """Form for product reviews"""
+    class Meta:
+        model = ProductReview
+        fields = ['stars', 'content']
+        widgets = {
+            'stars': forms.Select(attrs={
+                'class': 'form-control',
+                'choices': [(i, i) for i in range(1, 6)]
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Write your review here...'
+            })
+        }
