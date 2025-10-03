@@ -1,1 +1,1 @@
-web: python minimal_app.py
+web: python django_app.py runserver 0.0.0.0:$PORT
