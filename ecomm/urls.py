@@ -12,7 +12,10 @@ urlpatterns = [
     # Admin panel
     path('admin/', admin.site.urls),
     
-    # Products app - Step 3
+    # API endpoints - Step 4
+    path('api/', include('api.urls')),
+    
+    # Products app
     path('products/', include('products.urls')),
     
     # Home app

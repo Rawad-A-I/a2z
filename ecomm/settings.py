@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 3: Add Products and Accounts Apps
+Django settings for ecomm project - Step 4: Add API App
 """
 import os
 from pathlib import Path
@@ -26,8 +26,9 @@ INSTALLED_APPS = [
     
     # Our apps (adding step by step)
     'home',
-    'products',  # Step 3: Add products app
-    'accounts',  # Step 3: Add accounts app (needed by products)
+    'products',
+    'accounts',
+    'api',  # Step 4: Add API app
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
-# Database - Step 3: Still using SQLite
+# Database - Step 4: Still using SQLite
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
