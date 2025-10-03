@@ -178,9 +178,15 @@ def cancel_order(request, order_id):
 
 def employee_dashboard_redirect(request):
     """Employee dashboard redirect page with two main options"""
+    print(f"DEBUG: Employee dashboard redirect accessed by user: {request.user}")
+    print(f"DEBUG: User is staff: {request.user.is_staff}")
+    
     if not is_employee(request.user):
+        print("DEBUG: User is not an employee, redirecting to index")
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
+    
+    print("DEBUG: User is employee, proceeding with dashboard")
     
     # Get basic statistics for the overview
     try:
@@ -199,6 +205,7 @@ def employee_dashboard_redirect(request):
     context = {
         'stats': stats,
     }
+    print("DEBUG: Rendering employee dashboard redirect template")
     return render(request, 'accounts/employee_dashboard_redirect.html', context)
 
 
