@@ -2,6 +2,7 @@
 """
 Railway-compatible WSGI server
 Handles Railway's dynamic PORT properly
+Successfully deployed with PostgreSQL database integration
 """
 import os
 import subprocess
