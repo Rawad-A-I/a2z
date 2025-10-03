@@ -20,6 +20,15 @@ def main():
         print(f"Migration failed: {e}")
         print("Continuing anyway...")
     
+    # Collect static files
+    print("Collecting static files...")
+    try:
+        subprocess.run(['python', 'manage.py', 'collectstatic', '--noinput'], check=True)
+        print("Static files collected successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"Static files collection failed: {e}")
+        print("Continuing anyway...")
+    
     # Get PORT from Railway environment
     port = os.environ.get('PORT', '8000')
     
