@@ -15,6 +15,9 @@ urlpatterns = [
     # API endpoints
     path('api/', include('api.urls')),
     
+    # Search functionality - Step 14
+    path('search/', include('search.urls')),
+    
     # Products app
     path('products/', include('products.urls')),
     
@@ -25,7 +28,7 @@ urlpatterns = [
     path('', include('home.urls')),
 ]
 
-# Serve static and media files - Step 12
+# Serve static and media files
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 12: Add Static Files and Templates
+Django settings for ecomm project - Step 14: Add Search Functionality
 """
 import os
 from pathlib import Path
@@ -32,12 +32,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'django_redis',
+    'django_elasticsearch_dsl',  # Step 14: Search functionality
     
     # Our apps
     'home',
     'products',
     'accounts',
     'api',
+    'search',  # Step 14: Search app
 ]
 
 MIDDLEWARE = [
@@ -64,7 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.media',  # Step 12: Media context processor
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -109,19 +111,13 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images) - Step 12
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Static files directories - Step 12
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-
-# WhiteNoise for static files in production - Step 12
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files - Step 12
+# Media files
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 MEDIA_URL = '/media/'
 
@@ -152,6 +148,22 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
+}
+
+# Elasticsearch Configuration - Step 14
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': config('ELASTICSEARCH_HOSTS', default='localhost:9200'),
+        'timeout': 20,
+    },
+}
+
+# Search settings - Step 14
+SEARCH_SETTINGS = {
+    'PRODUCTS_INDEX': 'products',
+    'CATEGORIES_INDEX': 'categories',
+    'DEFAULT_PAGE_SIZE': 20,
+    'MAX_PAGE_SIZE': 100,
 }
 
 # Caching & sessions (use Redis if REDIS_URL set, otherwise sane defaults)
