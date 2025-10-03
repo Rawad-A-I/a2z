@@ -55,28 +55,24 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.product_description.id_for_label }}" class="form-label">Product Description *</label>
-                            {{ form.product_description }}
-                            {% if form.product_description.errors %}
-                                <div class="text-danger">{{ form.product_description.errors }}</div>
+                            <label for="{{ form.product_desription.id_for_label }}" class="form-label">Product Description *</label>
+                            {{ form.product_desription }}
+                            {% if form.product_desription.errors %}
+                                <div class="text-danger">{{ form.product_desription.errors }}</div>
                             {% endif %}
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.product_image.id_for_label }}" class="form-label">Product Image</label>
-                                {{ form.product_image }}
-                                {% if form.product_image.errors %}
-                                    <div class="text-danger">{{ form.product_image.errors }}</div>
-                                {% endif %}
-                            </div>
-                            
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.dimensions.id_for_label }}" class="form-label">Dimensions</label>
                                 {{ form.dimensions }}
                                 {% if form.dimensions.errors %}
                                     <div class="text-danger">{{ form.dimensions.errors }}</div>
                                 {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <!-- Empty column for layout balance -->
                             </div>
                         </div>
 

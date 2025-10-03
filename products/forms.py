@@ -28,8 +28,8 @@ class ProductInsertionForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'product_name', 'category', 'price', 'product_description',
-            'product_image', 'is_in_stock', 'stock_quantity', 'dimensions'
+            'product_name', 'category', 'price', 'product_desription',
+            'is_in_stock', 'stock_quantity', 'dimensions'
         ]
         widgets = {
             'product_name': forms.TextInput(attrs={
@@ -42,12 +42,11 @@ class ProductInsertionForm(forms.ModelForm):
                 'step': '0.01',
                 'placeholder': '0.00'
             }),
-            'product_description': forms.Textarea(attrs={
+            'product_desription': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
                 'placeholder': 'Enter product description'
             }),
-            'product_image': forms.FileInput(attrs={'class': 'form-control'}),
             'is_in_stock': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'stock_quantity': forms.NumberInput(attrs={
                 'class': 'form-control',
