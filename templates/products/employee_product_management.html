@@ -83,7 +83,11 @@
                                                 <span class="badge bg-info">{{ barcodes.count }} barcode{{ barcodes.count|pluralize }}</span>
                                                 <br>
                                                 <small class="text-muted">
-                                                    Primary: {{ barcodes|first.barcode_value }}
+                                                    {% for barcode in barcodes %}
+                                                        {% if barcode.is_primary %}
+                                                            Primary: {{ barcode.barcode_value }}
+                                                        {% endif %}
+                                                    {% endfor %}
                                                 </small>
                                             {% else %}
                                                 <span class="badge bg-warning">No barcodes</span>
