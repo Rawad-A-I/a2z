@@ -14,7 +14,7 @@ SECRET_KEY = config("SECRET_KEY", default="m@_jb84-72!cpoq!#_==jjsfy@ntfb%szy@qf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,*.railway.app', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,*.railway.app,brave-rebirth-production-1fc1.up.railway.app', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # Application definition - Full Django eCommerce Application
 INSTALLED_APPS = [
