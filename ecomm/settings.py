@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 17: Add products app
+Django settings for ecomm project - Step 18: Add accounts app
 """
 import os
 from pathlib import Path
@@ -16,7 +16,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,*.railway.app', cast=lambda v: [s.strip() for s in v.split(',')])
 
-# Application definition - Step 17: Add products app
+# Application definition - Step 18: Add accounts app
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -25,9 +25,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Our apps - Step 17: Add products
+    # Our apps - Step 18: Add accounts
     'home',
     'products',
+    'accounts',
 ]
 
 MIDDLEWARE = [
