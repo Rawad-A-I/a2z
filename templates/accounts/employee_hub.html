@@ -65,42 +65,6 @@
                 </div>
             </div>
 
-            <!-- Quick Stats -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Quick Overview</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-md-3">
-                                    <div class="border-end">
-                                        <h4 class="text-primary mb-1">{{ stats.total_orders|default:"0" }}</h4>
-                                        <p class="text-muted mb-0">Total Orders</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="border-end">
-                                        <h4 class="text-warning mb-1">{{ stats.pending_orders|default:"0" }}</h4>
-                                        <p class="text-muted mb-0">Pending Orders</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="border-end">
-                                        <h4 class="text-success mb-1">{{ stats.confirmed_orders|default:"0" }}</h4>
-                                        <p class="text-muted mb-0">Confirmed Orders</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <h4 class="text-info mb-1">{{ stats.my_orders|default:"0" }}</h4>
-                                    <p class="text-muted mb-0">My Orders</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

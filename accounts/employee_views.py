@@ -71,7 +71,7 @@ def confirm_order(request, order_id):
     # Check if order is assigned to this employee
     if order.assigned_employee != request.user:
         messages.error(request, 'You can only confirm orders assigned to you.')
-        return redirect('employee_dashboard')
+        return redirect('employee_order_management')
     
     # Check if order is already confirmed
     if order.is_confirmed:
@@ -128,7 +128,7 @@ def update_order_status(request, order_id):
     try:
         if order.assigned_employee != request.user:
             messages.error(request, 'You can only update orders assigned to you.')
-            return redirect('employee_dashboard')
+            return redirect('employee_order_management')
     except Exception as e:
         print(f"Type mismatch in order assignment check: {e}")
         # Allow access if there's a type mismatch
@@ -163,7 +163,7 @@ def cancel_order(request, order_id):
     # Check if order is assigned to this employee
     if order.assigned_employee != request.user:
         messages.error(request, 'You can only cancel orders assigned to you.')
-        return redirect('employee_dashboard')
+        return redirect('employee_order_management')
     
     if order.is_confirmed:
         messages.warning(request, 'Cannot cancel confirmed order. Contact admin.')
@@ -215,24 +215,7 @@ def employee_hub(request):
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
     
-    # Get basic statistics for the overview
-    try:
-        my_orders_count = Order.objects.filter(assigned_employee=request.user).count()
-    except Exception as e:
-        print(f"Type mismatch in stats query: {e}")
-        my_orders_count = 0
-    
-    stats = {
-        'total_orders': Order.objects.count(),
-        'pending_orders': Order.objects.filter(status='pending').count(),
-        'confirmed_orders': Order.objects.filter(status='confirmed').count(),
-        'my_orders': my_orders_count,
-    }
-    
-    context = {
-        'stats': stats,
-    }
-    return render(request, 'accounts/employee_hub.html', context)
+    return render(request, 'accounts/employee_hub.html')
 
 
 def employee_order_management(request):
