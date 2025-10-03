@@ -1,9 +1,10 @@
 """
-Django settings for ecomm project - Step 4: Add API App
+Django settings for ecomm project - Step 5: Add PostgreSQL Database
 """
 import os
 from pathlib import Path
 from decouple import config
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,7 +29,7 @@ INSTALLED_APPS = [
     'home',
     'products',
     'accounts',
-    'api',  # Step 4: Add API app
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -62,13 +63,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
-# Database - Step 4: Still using SQLite
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database - Step 5: PostgreSQL with Railway
+if config('DATABASE_URL', default=None):
+    # Railway/Heroku style DATABASE_URL
+    DATABASES = {
+        'default': dj_database_url.parse(config('DATABASE_URL'))
     }
-}
+else:
+    # SQLite for development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
