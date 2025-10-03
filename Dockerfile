@@ -9,8 +9,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire project
 COPY . .
 
-# Expose port
-EXPOSE 8000
+# Expose port (Railway will set PORT environment variable)
+EXPOSE $PORT
 
-# Use the Procfile command
-CMD ["gunicorn", "wsgi_app:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# Use Railway's PORT environment variable
+CMD ["sh", "-c", "gunicorn wsgi_app:application --bind 0.0.0.0:$PORT --workers 3"]
