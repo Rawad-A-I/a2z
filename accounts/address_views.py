@@ -56,15 +56,20 @@ def update_shipping_address(request):
         
         # Update profile with new address
         profile.shipping_address = f"{address}, {city}, {state} {zip_code}, {country}"
-        profile.save()
+        
+        # Store individual address components
+        profile.street_address = address
+        profile.city = city
+        profile.state = state
+        profile.zip_code = zip_code
+        profile.country = country
         
         # Store coordinates if provided
         if latitude and longitude:
-            # You can add latitude/longitude fields to Profile model
-            # profile.latitude = latitude
-            # profile.longitude = longitude
-            # profile.save()
-            pass
+            profile.latitude = latitude
+            profile.longitude = longitude
+        
+        profile.save()
         
         messages.success(request, 'Shipping address updated successfully.')
         return redirect('address_management')

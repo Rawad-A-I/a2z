@@ -7,6 +7,7 @@ from accounts.order_management_views import *
 from accounts.customer_experience_views import *
 from accounts.analytics_views import *
 from accounts.address_views import *
+from accounts.address_management_views import *
 from accounts.admin_views import *
 from django.contrib.auth import views as auth_views
 
@@ -137,6 +138,15 @@ urlpatterns = [
     path('store-locator/', store_locator, name='store_locator'),
     path('click-collect/', click_and_collect, name='click_and_collect'),
     path('delivery-estimate/', delivery_estimate, name='delivery_estimate'),
+    
+    # Comprehensive Address Management URLs
+    path('addresses/', comprehensive_address_management, name='comprehensive_address_management'),
+    path('addresses/profile/update/', update_profile_address, name='update_profile_address'),
+    path('addresses/shipping/add/', add_shipping_address, name='add_shipping_address'),
+    path('addresses/shipping/<uuid:address_id>/edit/', edit_shipping_address, name='edit_shipping_address'),
+    path('addresses/shipping/<uuid:address_id>/delete/', delete_shipping_address, name='delete_shipping_address'),
+    path('addresses/shipping/<uuid:address_id>/set-default/', set_default_address, name='set_default_address'),
+    path('addresses/validate/', address_validation, name='address_validation'),
     
     # Admin URLs
     path('admin/dashboard/', admin_dashboard, name='admin_dashboard'),
