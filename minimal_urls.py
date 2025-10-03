@@ -1,3 +1,7 @@
+"""
+Minimal URL configuration for Railway deployment
+Only health check endpoints - no complex apps
+"""
 from django.contrib import admin
 from django.urls import path
 from home.health import health_check, readiness_check, liveness_check
@@ -14,11 +18,3 @@ urlpatterns = [
     # Simple home page
     path('', health_check, name='home'),
 ]
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL,
-                          document_root=settings.MEDIA_ROOT)
-
-
-urlpatterns += staticfiles_urlpatterns()
