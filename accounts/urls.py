@@ -60,6 +60,7 @@ urlpatterns = [
     
     # Employee URLs
     path('employee/dashboard/', employee_dashboard_redirect, name='employee_dashboard'),
+    path('employee/hub/', employee_hub, name='employee_hub'),
     path('employee/order-management/', employee_order_management, name='employee_order_management'),
     path('employee/order/<str:order_id>/', employee_order_detail, name='employee_order_detail'),
     path('employee/order/<str:order_id>/assign/', assign_order, name='assign_order'),

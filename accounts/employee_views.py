@@ -209,6 +209,32 @@ def employee_dashboard_redirect(request):
     return render(request, 'accounts/employee_dashboard_redirect.html', context)
 
 
+def employee_hub(request):
+    """New separate employee hub page - completely independent"""
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+    
+    # Get basic statistics for the overview
+    try:
+        my_orders_count = Order.objects.filter(assigned_employee=request.user).count()
+    except Exception as e:
+        print(f"Type mismatch in stats query: {e}")
+        my_orders_count = 0
+    
+    stats = {
+        'total_orders': Order.objects.count(),
+        'pending_orders': Order.objects.filter(status='pending').count(),
+        'confirmed_orders': Order.objects.filter(status='confirmed').count(),
+        'my_orders': my_orders_count,
+    }
+    
+    context = {
+        'stats': stats,
+    }
+    return render(request, 'accounts/employee_hub.html', context)
+
+
 def employee_order_management(request):
     """Employee order management dashboard - original dashboard functionality"""
     if not is_employee(request.user):

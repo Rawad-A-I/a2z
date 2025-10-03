@@ -141,8 +141,8 @@
                 <div>
                   <a href="{% url 'logout' %}">Logout</a>
                   {% if request.user.is_staff %}
-                  | <a href="{% url 'employee_dashboard' %}" class="text-warning">
-                    <i class="fas fa-briefcase"></i> Employee Dashboard
+                  | <a href="{% url 'employee_hub' %}" class="text-warning">
+                    <i class="fas fa-briefcase"></i> Employee Hub
                   </a>
                   {% endif %}
                 </div>

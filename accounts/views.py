@@ -50,7 +50,7 @@ def employee_login_page(request):
             if user_obj.is_staff:
                 login(request, user_obj)
                 messages.success(request, 'Employee login successful!')
-                return redirect('employee_dashboard')
+                return redirect('employee_hub')
             else:
                 messages.error(request, 'This account is not authorized for employee access. Please contact administrator.')
                 return HttpResponseRedirect(request.path_info)
