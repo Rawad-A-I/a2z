@@ -1,1 +1,1 @@
-web: ./start.sh
+web: python wsgi_server.py
