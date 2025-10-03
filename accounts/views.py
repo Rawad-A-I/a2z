@@ -1,7 +1,8 @@
 import os
 import json
 import uuid
-from weasyprint import CSS, HTML
+# Temporarily disable WeasyPrint to fix deployment
+# from weasyprint import CSS, HTML
 from django.utils import timezone
 from products.models import *
 from django.urls import reverse
@@ -329,22 +330,15 @@ def remove_coupon(request, cart_id):
 
 
 
-# HTML to PDF Conversion
+# HTML to PDF Conversion - Temporarily disabled due to WeasyPrint dependencies
 def render_to_pdf(template_src, context_dict={}):
-    template = get_template(template_src)
-    html = template.render(context_dict)
-
-    static_root = settings.STATIC_ROOT
-    css_files = [
-        os.path.join(static_root, 'css', 'bootstrap.css'),
-        os.path.join(static_root, 'css', 'responsive.css'),
-        os.path.join(static_root, 'css', 'ui.css'),
-    ]
-    css_objects = [CSS(filename=css_file) for css_file in css_files]
-    pdf_file = HTML(string=html).write_pdf(stylesheets=css_objects)
-
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{context_dict["order"].order_id}.pdf"'
+    # Temporarily return a simple text response instead of PDF
+    # TODO: Fix WeasyPrint system dependencies for PDF generation
+    response = HttpResponse(
+        f"PDF generation temporarily disabled. Order ID: {context_dict.get('order', {}).order_id if context_dict.get('order') else 'N/A'}",
+        content_type='text/plain'
+    )
+    response['Content-Disposition'] = f'attachment; filename="invoice_{context_dict.get("order", {}).order_id if context_dict.get("order") else "unknown"}.txt"'
     return response
 
 
