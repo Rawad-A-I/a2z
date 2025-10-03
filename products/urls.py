@@ -1,6 +1,6 @@
 from django.urls import path
 from products.views import *
-from products.employee_views import *
+# from products.employee_views import *  # Temporarily disabled until migration is applied
 
 urlpatterns = [
     path('', product_list, name='product_list'),
@@ -15,11 +15,11 @@ urlpatterns = [
     path('<slug>/', get_product, name='get_product'),
     path('<slug>/<review_uid>/delete/', delete_review, name='delete_review'),
     
-    # Employee product management URLs
-    path('employee/manage/', employee_product_management, name='employee_product_management'),
-    path('employee/add-product/', add_product, name='add_product'),
-    path('employee/barcode-management/<uuid:product_id>/', product_barcode_management, name='product_barcode_management'),
-    path('employee/bulk-barcode/', bulk_barcode_upload, name='bulk_barcode_upload'),
-    path('employee/barcode-search/', barcode_search, name='barcode_search'),
-    path('employee/delete-barcode/<uuid:barcode_id>/', delete_barcode, name='delete_barcode'),
+    # Employee product management URLs - Temporarily disabled until migration is applied
+    # path('employee/manage/', employee_product_management, name='employee_product_management'),
+    # path('employee/add-product/', add_product, name='add_product'),
+    # path('employee/barcode-management/<uuid:product_id>/', product_barcode_management, name='product_barcode_management'),
+    # path('employee/bulk-barcode/', bulk_barcode_upload, name='bulk_barcode_upload'),
+    # path('employee/barcode-search/', barcode_search, name='barcode_search'),
+    # path('employee/delete-barcode/<uuid:barcode_id>/', delete_barcode, name='delete_barcode'),
 ]
