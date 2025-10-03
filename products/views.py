@@ -11,6 +11,14 @@ from accounts.models import Wishlist
 
 # Create your views here.
 
+def product_list(request):
+    """Display all products"""
+    products = Product.objects.filter(parent=None).order_by('-created_at')
+    context = {
+        'products': products,
+    }
+    return render(request, 'products/product_list.html', context)
+
 def get_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
     sorted_size_variants = product.size_variant.all().order_by('size_name')

@@ -11,6 +11,8 @@ from accounts.admin_views import *
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    # Accounts dashboard
+    path('', accounts_dashboard, name='accounts_dashboard'),
     # User view urls with login, register, logout, and email activation.
     path('login/', login_page, name="login"),
     path('employee-login/', employee_login_page, name="employee_login"),

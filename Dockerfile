@@ -2,15 +2,23 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements and install dependencies
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire project
 COPY . .
 
-# Expose port (Railway will set PORT environment variable)
-EXPOSE $PORT
+# Create necessary directories
+RUN mkdir -p /app/staticfiles /app/mediafiles
 
-# Use Railway's PORT environment variable
-CMD ["sh", "-c", "gunicorn wsgi_app:application --bind 0.0.0.0:$PORT --workers 3"]
+# Expose port
+EXPOSE 8000
+
+# Run migrations, collect static files, and start the server
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn ecomm.wsgi:application --bind 0.0.0.0:$PORT --workers 3"]

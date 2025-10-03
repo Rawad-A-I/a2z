@@ -25,6 +25,12 @@ from accounts.forms import UserUpdateForm, UserProfileForm, ShippingAddressForm,
 
 # Create your views here.
 
+def accounts_dashboard(request):
+    """Accounts dashboard - redirect to login if not authenticated"""
+    if request.user.is_authenticated:
+        return redirect('profile', username=request.user.username)
+    else:
+        return redirect('login')
 
 def employee_login_page(request):
     """Dedicated employee login page"""

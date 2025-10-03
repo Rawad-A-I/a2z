@@ -1,9 +1,0 @@
-# Development Requirements
-# Install with: pip install -r requirements-dev.txt
-
-# Include production requirements
--r requirements.txt
-
-# Development-only packages
-coreapi==2.3.3
-

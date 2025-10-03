@@ -9,7 +9,7 @@ urlpatterns = [
     path('live/', liveness_check, name='liveness_check'),
     
     # Actual homepage and other pages
-    path('', views.index, name='home'),
+    path('', views.index, name='index'),
     path('search/', views.product_search, name='product_search'),
     path('contact/', views.contact, name='contact'),
     path('about/', views.about, name='about'),

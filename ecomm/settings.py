@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 19: Fix missing configurations
+Django settings for ecomm project - Full Django eCommerce Application
 """
 import os
 from pathlib import Path
@@ -16,7 +16,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,*.railway.app', cast=lambda v: [s.strip() for s in v.split(',')])
 
-# Application definition - Step 19: Fix configurations
+# Application definition - Full Django eCommerce Application
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -25,10 +25,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # Third-party apps
+    'django_countries',
+    'crispy_forms',
+    'crispy_bootstrap4',
+    
     # Our apps
     'home',
     'products',
     'accounts',
+    'api',
+    'search',
+    'base',
 ]
 
 MIDDLEWARE = [
@@ -103,7 +111,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']  # Fix the warning
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
@@ -112,6 +120,9 @@ MEDIA_URL = '/media/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Crispy Forms
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Security settings for production
 if not DEBUG:
