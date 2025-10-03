@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 5: Add PostgreSQL Database
+Django settings for ecomm project - Step 6: Add Missing Dependencies
 """
 import os
 from pathlib import Path
@@ -25,7 +25,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Our apps (adding step by step)
+    # Third-party apps - Step 6
+    'django_countries',
+    'crispy_forms',
+    'crispy_bootstrap4',
+    'rest_framework',
+    'drf_spectacular',
+    
+    # Our apps
     'home',
     'products',
     'accounts',
@@ -111,6 +118,32 @@ MEDIA_URL = '/media/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Crispy Forms - Step 6
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# REST Framework - Step 6
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# API Documentation - Step 6
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Django eCommerce API',
+    'DESCRIPTION': 'Complete eCommerce API with products, orders, cart, and user management',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+}
 
 # Security settings for Railway
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=not DEBUG, cast=bool)
