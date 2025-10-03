@@ -9,7 +9,7 @@
     <div class="d-flex align-items-center">
         <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
         <div>
-            <h6 class="mb-1"><strong>Order Management</strong></h6>
+            <h6 class="mb-1"><strong>Order Management Portal</strong></h6>
             <p class="mb-0">You have full access to manage all customer orders. You can assign, confirm, and update order status.</p>
         </div>
     </div>
@@ -35,10 +35,31 @@
     </div>
 </div>
 
+<!-- Back to Dashboard -->
+<div class="mb-4">
+    <a href="{% url 'employee_hub' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Employee Hub
+    </a>
+</div>
+
 <!-- Orders Table -->
 <div class="employee-card">
     <div class="card-header">
         <h5 class="mb-0"><i class="fas fa-list"></i> All Customer Orders</h5>
+        <div class="filter-options">
+            <form method="GET" action="{% url 'employee_order_management' %}">
+                <label for="status-filter">Filter by Status:</label>
+                <select name="status" id="status-filter" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">All</option>
+                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                    <option value="processing" {% if request.GET.status == 'processing' %}selected{% endif %}>Processing</option>
+                    <option value="shipped" {% if request.GET.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                    <option value="delivered" {% if request.GET.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                    <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </form>
+        </div>
     </div>
     <div class="card-body p-0">
         <div class="employee-table">
@@ -48,8 +69,8 @@
                         <th>Order ID</th>
                         <th>Customer</th>
                         <th>Date</th>
-                        <th>Status</th>
                         <th>Total</th>
+                        <th>Status</th>
                         <th>Assigned To</th>
                         <th>Actions</th>
                     </tr>
@@ -57,108 +78,53 @@
                 <tbody>
                     {% for order in orders %}
                     <tr>
+                        <td>{{ order.order_id }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td>{{ order.order_date|date:"M d, Y H:i" }}</td>
+                        <td>${{ order.order_total_price }}</td>
                         <td>
-                            <strong>{{ order.order_id }}</strong>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="employee-avatar">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div class="ms-2">
-                                    <div class="fw-bold">{{ order.user.username }}</div>
-                                    <small class="text-muted">{{ order.user.email }}</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>{{ order.order_date|date:"M d, Y" }}</td>
-                        <td>
-                            <span class="badge 
-                                {% if order.status == 'pending' %}bg-warning
-                                {% elif order.status == 'confirmed' %}bg-success
-                                {% elif order.status == 'cancelled' %}bg-danger
-                                {% else %}bg-secondary{% endif %}">
-                                {{ order.status|title }}
+                            <span class="badge {% if order.status == 'pending' %}bg-warning{% elif order.status == 'confirmed' %}bg-success{% elif order.status == 'shipped' %}bg-info{% elif order.status == 'delivered' %}bg-primary{% elif order.status == 'cancelled' %}bg-danger{% endif %}">
+                                {{ order.get_status_display }}
                             </span>
                         </td>
-                        <td>${{ order.total_amount }}</td>
                         <td>
                             {% if order.assigned_employee %}
-                                <span class="badge bg-info">{{ order.assigned_employee.username }}</span>
+                                {{ order.assigned_employee.username }}
                             {% else %}
-                                <span class="badge bg-secondary">Unassigned</span>
+                                <span class="text-muted">Unassigned</span>
                             {% endif %}
                         </td>
                         <td>
-                            <div class="btn-group" role="group">
-                                <a href="{% url 'employee_order_detail' order.order_id %}" 
-                                   class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
-                                {% if not order.assigned_employee %}
-                                <a href="{% url 'assign_order' order.order_id %}" 
-                                   class="btn btn-sm btn-outline-success">
-                                    <i class="fas fa-user-plus"></i> Assign
-                                </a>
-                                {% endif %}
-                                {% if order.status == 'pending' %}
-                                <a href="{% url 'confirm_order' order.order_id %}" 
-                                   class="btn btn-sm btn-outline-warning">
-                                    <i class="fas fa-check"></i> Confirm
-                                </a>
-                                {% endif %}
-                            </div>
+                            <a href="{% url 'employee_order_detail' order.order_id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-4">
-                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No orders found</p>
-                        </td>
+                        <td colspan="7" class="text-center">No orders found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-</div>
-
-<!-- Pagination -->
-{% if orders.has_other_pages %}
-<nav aria-label="Orders pagination" class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if orders.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1">First</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ orders.previous_page_number }}">Previous</a>
-            </li>
-        {% endif %}
-
-        <li class="page-item active">
-            <span class="page-link">
-                Page {{ orders.number }} of {{ orders.paginator.num_pages }}
-            </span>
-        </li>
-
-        {% if orders.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ orders.next_page_number }}">Next</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ orders.paginator.num_pages }}">Last</a>
-            </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
-
-<!-- Back to Dashboard -->
-<div class="mt-4 text-center">
-    <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
-    </a>
+    <div class="card-footer">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-0">
+                {% if orders.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+                <li class="page-item active"><a class="page-link" href="#">{{ orders.number }}</a></li>
+                {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
 </div>
 {% endblock %}
