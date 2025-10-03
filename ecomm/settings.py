@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 6: Add Missing Dependencies
+Django settings for ecomm project - Step 11: Add Redis Caching
 """
 import os
 from pathlib import Path
@@ -25,12 +25,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Third-party apps - Step 6
+    # Third-party apps
     'django_countries',
     'crispy_forms',
     'crispy_bootstrap4',
     'rest_framework',
     'drf_spectacular',
+    'django_redis',  # Step 11: Redis caching
     
     # Our apps
     'home',
@@ -70,7 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
-# Database - Step 5: PostgreSQL with Railway
+# Database - PostgreSQL with Railway
 if config('DATABASE_URL', default=None):
     # Railway/Heroku style DATABASE_URL
     DATABASES = {
@@ -119,10 +120,10 @@ MEDIA_URL = '/media/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Crispy Forms - Step 6
+# Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-# REST Framework - Step 6
+# REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
@@ -136,7 +137,7 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# API Documentation - Step 6
+# API Documentation
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Django eCommerce API',
     'DESCRIPTION': 'Complete eCommerce API with products, orders, cart, and user management',
@@ -144,6 +145,30 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
 }
+
+# Caching & sessions (use Redis if REDIS_URL set, otherwise sane defaults) - Step 11
+if config('REDIS_URL', default=None):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': config('REDIS_URL'),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake'
+        }
+    }
+
+# Cache settings (optimized for high volume) - Step 11
+CACHE_TTL = 60 * 5  # 5 minutes for faster updates
 
 # Security settings for Railway
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=not DEBUG, cast=bool)
