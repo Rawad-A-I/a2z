@@ -1,1 +1,1 @@
-Django==5.1.4
+# No dependencies - uses Python standard library only
