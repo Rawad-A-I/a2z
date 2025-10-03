@@ -237,30 +237,39 @@ def employee_hub(request):
 
 def employee_order_management(request):
     """Employee order management dashboard - original dashboard functionality"""
+    print(f"DEBUG: Order management accessed by user: {request.user}")
+    
     if not is_employee(request.user):
+        print("DEBUG: User is not an employee, redirecting to index")
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
+    
+    print("DEBUG: User is employee, proceeding with order management")
     
     # Get orders assigned to this employee or unassigned orders
     try:
         orders = Order.objects.filter(
             Q(assigned_employee=request.user) | Q(assigned_employee__isnull=True)
         ).order_by('-order_date')
+        print(f"DEBUG: Found {orders.count()} orders")
     except Exception as e:
         print(f"Type mismatch in employee query: {e}")
         orders = Order.objects.filter(
             Q(assigned_employee__isnull=True)
         ).order_by('-order_date')
+        print(f"DEBUG: Fallback query found {orders.count()} orders")
     
     # Filter by status if provided
     status_filter = request.GET.get('status')
     if status_filter:
         orders = orders.filter(status=status_filter)
+        print(f"DEBUG: Filtered by status {status_filter}, now {orders.count()} orders")
     
     # Pagination
     paginator = Paginator(orders, 10)
     page_number = request.GET.get('page')
     orders_page = paginator.get_page(page_number)
+    print(f"DEBUG: Paginated to page {orders_page.number} of {orders_page.paginator.num_pages}")
     
     # Statistics
     try:
@@ -276,8 +285,11 @@ def employee_order_management(request):
         'my_orders': my_orders_count,
     }
     
+    print(f"DEBUG: Stats: {stats}")
+    
     context = {
         'orders': orders_page,
         'stats': stats,
     }
+    print("DEBUG: Rendering employee order management template")
     return render(request, 'accounts/employee_order_management.html', context)

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, F
 from .models import Product, Barcode, Category
 from .forms import BarcodeForm, ProductInsertionForm, BulkBarcodeForm
 from accounts.models import Order
@@ -16,30 +16,55 @@ def is_employee(user):
 
 @login_required
 def employee_product_management(request):
-    """Employee product management dashboard"""
+    """Employee product management dashboard with advanced features"""
     if not is_employee(request.user):
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
     
-    # Get products with pagination
-    products = Product.objects.all().order_by('-created_at')
-    paginator = Paginator(products, 20)
+    # Get all products
+    products = Product.objects.all()
+    
+    # Advanced filtering
+    search_query = request.GET.get('search')
+    if search_query:
+        products = products.filter(
+            Q(product_name__icontains=search_query) |
+            Q(product_desription__icontains=search_query)
+        )
+    
+    # Category filter
+    category_filter = request.GET.get('category')
+    if category_filter:
+        products = products.filter(category_id=category_filter)
+    
+    # Stock filter
+    stock_filter = request.GET.get('stock')
+    if stock_filter == 'low':
+        products = products.filter(stock_quantity__lte=F('low_stock_threshold'))
+    elif stock_filter == 'out':
+        products = products.filter(stock_quantity=0)
+    elif stock_filter == 'in':
+        products = products.filter(stock_quantity__gt=0)
+    
+    # Sorting
+    sort_by = request.GET.get('sort', '-created_at')
+    products = products.order_by(sort_by)
+    
+    # Pagination
+    paginator = Paginator(products, 25)
     page_number = request.GET.get('page')
     products_page = paginator.get_page(page_number)
     
-    # Search functionality
-    search_query = request.GET.get('search')
-    if search_query:
-        products_page = Product.objects.filter(
-            Q(product_name__icontains=search_query) |
-            Q(product_description__icontains=search_query)
-        ).order_by('-created_at')
-        paginator = Paginator(products_page, 20)
-        products_page = paginator.get_page(page_number)
+    # Get categories for filter dropdown
+    categories = Category.objects.all()
     
     context = {
         'products': products_page,
+        'categories': categories,
         'search_query': search_query,
+        'category_filter': category_filter,
+        'stock_filter': stock_filter,
+        'sort_by': sort_by,
     }
     return render(request, 'products/employee_product_management.html', context)
 
