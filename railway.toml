@@ -1,0 +1,19 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health/"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[environments.production]
+variables = { 
+    DEBUG = "False", 
+    ALLOWED_HOSTS = "*.railway.app",
+    SECURE_SSL_REDIRECT = "True",
+    SECURE_PROXY_SSL_HEADER = "True",
+    SESSION_COOKIE_SECURE = "True",
+    CSRF_COOKIE_SECURE = "True"
+}
