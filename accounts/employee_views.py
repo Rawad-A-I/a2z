@@ -16,58 +16,7 @@ def is_employee(user):
     return user.is_staff
 
 
-@login_required
-def employee_dashboard(request):
-    """Employee dashboard for order management."""
-    if not is_employee(request.user):
-        messages.error(request, 'You do not have employee access.')
-        return redirect('index')
-    
-    # Get orders assigned to this employee or unassigned orders
-    # Handle both UUID and integer types for assigned_employee
-    try:
-        orders = Order.objects.filter(
-            Q(assigned_employee=request.user) | Q(assigned_employee__isnull=True)
-        ).order_by('-order_date')
-    except Exception as e:
-        # Fallback: get all orders if there's a type mismatch
-        print(f"Type mismatch in employee query: {e}")
-        orders = Order.objects.filter(
-            Q(assigned_employee__isnull=True)
-        ).order_by('-order_date')
-    
-    # Filter by status if provided
-    status_filter = request.GET.get('status')
-    if status_filter:
-        orders = orders.filter(status=status_filter)
-    
-    # Pagination
-    paginator = Paginator(orders, 10)
-    page_number = request.GET.get('page')
-    orders_page = paginator.get_page(page_number)
-    
-    # Statistics
-    try:
-        my_orders_count = Order.objects.filter(assigned_employee=request.user).count()
-    except Exception as e:
-        print(f"Type mismatch in stats query: {e}")
-        my_orders_count = 0
-    
-    stats = {
-        'total_orders': Order.objects.count(),
-        'pending_orders': Order.objects.filter(status='pending').count(),
-        'confirmed_orders': Order.objects.filter(status='confirmed').count(),
-        'my_orders': my_orders_count,
-    }
-    
-    context = {
-        'orders': orders_page,
-        'stats': stats,
-        'employee': request.user,
-        'status_choices': Order._meta.get_field('status').choices,
-    }
-    
-    return render(request, 'accounts/employee_dashboard.html', context)
+# Removed old employee_dashboard function - now using employee_dashboard_redirect
 
 
 @login_required
