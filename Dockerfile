@@ -53,6 +53,7 @@ echo "Collecting static files..."
 python manage.py collectstatic --noinput --clear
 
 echo "Starting Gunicorn..."
+echo "PORT: \${PORT:-8000}"
 exec gunicorn ecomm.wsgi:application \
     --bind 0.0.0.0:\${PORT:-8000} \
     --workers 3 \
