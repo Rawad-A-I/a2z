@@ -1,1 +1,1 @@
-web: chmod +x start.sh && ./start.sh
+web: gunicorn ecomm.wsgi:application
