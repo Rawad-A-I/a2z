@@ -16,6 +16,12 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,*.railway.app,brave-rebirth-production-1fc1.up.railway.app', cast=lambda v: [s.strip() for s in v.split(',')])
 
+# CSRF settings for Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://brave-rebirth-production-1fc1.up.railway.app',
+    'https://*.railway.app',
+]
+
 # Application definition - Full Django eCommerce Application
 INSTALLED_APPS = [
     'django.contrib.admin',
