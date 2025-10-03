@@ -1,19 +1,19 @@
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+builder = "nixpacks"
 
 [deploy]
-healthcheckPath = "/health/"
-healthcheckTimeout = 300
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
+startCommand = "python wsgi_server.py"
 
-[environments.production]
-variables = { 
-    DEBUG = "False", 
-    ALLOWED_HOSTS = "*.railway.app",
-    SECURE_SSL_REDIRECT = "True",
-    SECURE_PROXY_SSL_HEADER = "True",
-    SESSION_COOKIE_SECURE = "True",
-    CSRF_COOKIE_SECURE = "True"
-}
+[build.nixpacks]
+providers = ["python"]
+
+[build.nixpacks.apt]
+packages = [
+    "libgobject-2.0-0",
+    "libcairo2",
+    "libpango-1.0-0",
+    "libpangocairo-1.0-0",
+    "libgdk-pixbuf2.0-0",
+    "libffi-dev",
+    "shared-mime-info"
+]
