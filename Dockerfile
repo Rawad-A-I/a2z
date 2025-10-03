@@ -1,18 +1,16 @@
-# Simple Dockerfile for minimal app
 FROM python:3.11-slim
 
-# Set work directory
 WORKDIR /app
 
-# Copy requirements and install
-COPY requirements.txt /app/
+# Copy requirements and install dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app files
-COPY . /app/
+# Copy the entire project
+COPY . .
 
 # Expose port
 EXPOSE 8000
 
-# Run the minimal app
-CMD ["python", "minimal_app.py"]
+# Use the Procfile command
+CMD ["gunicorn", "wsgi_app:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
