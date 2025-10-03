@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Set default PORT if not provided
+export PORT=${PORT:-8000}
+echo "Using PORT: $PORT"
+
 # Apply database migrations
 echo "Applying database migrations..."
 python manage.py migrate --noinput
@@ -13,5 +17,5 @@ echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
 # Start Gunicorn with proper port handling
-echo "Starting Gunicorn on port ${PORT:-8000}..."
-exec gunicorn ecomm.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3
+echo "Starting Gunicorn on port $PORT..."
+exec gunicorn ecomm.wsgi:application --bind 0.0.0.0:$PORT --workers 3
