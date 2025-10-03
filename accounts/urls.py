@@ -59,7 +59,8 @@ urlpatterns = [
     path('delete-account/', delete_account, name='delete_account'),
     
     # Employee URLs
-    path('employee/dashboard/', employee_dashboard, name='employee_dashboard'),
+    path('employee/dashboard/', employee_dashboard_redirect, name='employee_dashboard'),
+    path('employee/order-management/', employee_order_management, name='employee_order_management'),
     path('employee/order/<str:order_id>/', employee_order_detail, name='employee_order_detail'),
     path('employee/order/<str:order_id>/assign/', assign_order, name='assign_order'),
     path('employee/order/<str:order_id>/confirm/', confirm_order, name='confirm_order'),

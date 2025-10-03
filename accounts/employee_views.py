@@ -225,3 +225,77 @@ def cancel_order(request, order_id):
     messages.success(request, f'Order {order_id} cancelled.')
     
     return redirect('employee_dashboard')
+
+
+def employee_dashboard_redirect(request):
+    """Employee dashboard redirect page with two main options"""
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+    
+    # Get basic statistics for the overview
+    try:
+        my_orders_count = Order.objects.filter(assigned_employee=request.user).count()
+    except Exception as e:
+        print(f"Type mismatch in stats query: {e}")
+        my_orders_count = 0
+    
+    stats = {
+        'total_orders': Order.objects.count(),
+        'pending_orders': Order.objects.filter(status='pending').count(),
+        'confirmed_orders': Order.objects.filter(status='confirmed').count(),
+        'my_orders': my_orders_count,
+    }
+    
+    context = {
+        'stats': stats,
+    }
+    return render(request, 'accounts/employee_dashboard_redirect.html', context)
+
+
+def employee_order_management(request):
+    """Employee order management dashboard - original dashboard functionality"""
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+    
+    # Get orders assigned to this employee or unassigned orders
+    try:
+        orders = Order.objects.filter(
+            Q(assigned_employee=request.user) | Q(assigned_employee__isnull=True)
+        ).order_by('-order_date')
+    except Exception as e:
+        print(f"Type mismatch in employee query: {e}")
+        orders = Order.objects.filter(
+            Q(assigned_employee__isnull=True)
+        ).order_by('-order_date')
+    
+    # Filter by status if provided
+    status_filter = request.GET.get('status')
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+    
+    # Pagination
+    paginator = Paginator(orders, 10)
+    page_number = request.GET.get('page')
+    orders_page = paginator.get_page(page_number)
+    
+    # Statistics
+    try:
+        my_orders_count = Order.objects.filter(assigned_employee=request.user).count()
+    except Exception as e:
+        print(f"Type mismatch in stats query: {e}")
+        my_orders_count = 0
+    
+    stats = {
+        'total_orders': Order.objects.count(),
+        'pending_orders': Order.objects.filter(status='pending').count(),
+        'confirmed_orders': Order.objects.filter(status='confirmed').count(),
+        'my_orders': my_orders_count,
+    }
+    
+    context = {
+        'orders': orders_page,
+        'stats': stats,
+    }
+    return render(request, 'accounts/employee_order_management.html', context)
