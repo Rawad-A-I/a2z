@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 2: Basic Settings
+Django settings for ecomm project - Step 3: Add Products and Accounts Apps
 """
 import os
 from pathlib import Path
@@ -24,8 +24,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Our apps (will add step by step)
+    # Our apps (adding step by step)
     'home',
+    'products',  # Step 3: Add products app
+    'accounts',  # Step 3: Add accounts app (needed by products)
 ]
 
 MIDDLEWARE = [
@@ -59,7 +61,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
-# Database - Step 2: Basic SQLite
+# Database - Step 3: Still using SQLite
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

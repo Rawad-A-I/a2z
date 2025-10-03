@@ -12,6 +12,9 @@ urlpatterns = [
     # Admin panel
     path('admin/', admin.site.urls),
     
+    # Products app - Step 3
+    path('products/', include('products.urls')),
+    
     # Home app
     path('', include('home.urls')),
 ]
