@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 14: Add Search Functionality
+Django settings for ecomm project - Working version without search
 """
 import os
 from pathlib import Path
@@ -32,14 +32,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'django_redis',
-    'django_elasticsearch_dsl',  # Step 14: Search functionality
     
     # Our apps
     'home',
     'products',
     'accounts',
     'api',
-    'search',  # Step 14: Search app
 ]
 
 MIDDLEWARE = [
@@ -148,22 +146,6 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
-}
-
-# Elasticsearch Configuration - Step 14
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': config('ELASTICSEARCH_HOSTS', default='localhost:9200'),
-        'timeout': 20,
-    },
-}
-
-# Search settings - Step 14
-SEARCH_SETTINGS = {
-    'PRODUCTS_INDEX': 'products',
-    'CATEGORIES_INDEX': 'categories',
-    'DEFAULT_PAGE_SIZE': 20,
-    'MAX_PAGE_SIZE': 100,
 }
 
 # Caching & sessions (use Redis if REDIS_URL set, otherwise sane defaults)

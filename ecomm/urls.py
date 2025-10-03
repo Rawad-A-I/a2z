@@ -15,9 +15,6 @@ urlpatterns = [
     # API endpoints
     path('api/', include('api.urls')),
     
-    # Search functionality - Step 14
-    path('search/', include('search.urls')),
-    
     # Products app
     path('products/', include('products.urls')),
     
