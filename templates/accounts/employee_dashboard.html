@@ -35,6 +35,25 @@
     </div>
 </div>
 
+<!-- Quick Actions -->
+<div class="employee-actions">
+    <h4><i class="fas fa-tools"></i> Quick Actions</h4>
+    <div class="action-buttons">
+        <a href="{% url 'employee_product_management' %}" class="btn btn-employee">
+            <i class="fas fa-boxes"></i> Manage Products
+        </a>
+        <a href="{% url 'add_product' %}" class="btn btn-employee-success">
+            <i class="fas fa-plus"></i> Add Product
+        </a>
+        <a href="{% url 'barcode_search' %}" class="btn btn-employee-info">
+            <i class="fas fa-barcode"></i> Barcode Search
+        </a>
+        <a href="{% url 'bulk_barcode_upload' %}" class="btn btn-employee-warning">
+            <i class="fas fa-upload"></i> Bulk Upload
+        </a>
+    </div>
+</div>
+
 <!-- Orders Table -->
 <div class="employee-card">
     <div class="card-header">

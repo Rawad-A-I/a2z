@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 import uuid
+import random
+import string
 
 
 class BaseModel(models.Model):
@@ -241,3 +243,48 @@ class StockMovement(BaseModel):
     
     def __str__(self):
         return f"{self.product.product_name} - {self.movement_type} {self.quantity}"
+
+
+class Barcode(BaseModel):
+    """Barcode model for products with support for multiple barcodes per product"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='barcodes')
+    barcode_value = models.CharField(max_length=50, unique=True, db_index=True)
+    barcode_type = models.CharField(max_length=20, choices=[
+        ('EAN13', 'EAN-13'),
+        ('UPC', 'UPC'),
+        ('CODE128', 'Code 128'),
+        ('CUSTOM', 'Custom'),
+        ('GENERATED', 'Auto-Generated'),
+    ], default='GENERATED')
+    is_primary = models.BooleanField(default=False, help_text="Primary barcode for this product")
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, null=True, help_text="Additional notes about this barcode")
+    
+    class Meta:
+        ordering = ['-is_primary', 'created_at']
+        unique_together = ['product', 'barcode_value']
+    
+    def __str__(self):
+        return f"{self.product.product_name} - {self.barcode_value} ({self.barcode_type})"
+    
+    def save(self, *args, **kwargs):
+        # If this is set as primary, unset other primary barcodes for this product
+        if self.is_primary:
+            Barcode.objects.filter(product=self.product, is_primary=True).update(is_primary=False)
+        super().save(*args, **kwargs)
+    
+    @staticmethod
+    def generate_barcode():
+        """Generate a unique barcode for products without one"""
+        while True:
+            # Generate a 13-digit EAN-13 compatible barcode
+            barcode = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+            # Add check digit (simplified EAN-13 check digit calculation)
+            check_digit = sum(int(digit) * (3 if i % 2 == 0 else 1) for i, digit in enumerate(barcode)) % 10
+            if check_digit != 0:
+                check_digit = 10 - check_digit
+            barcode += str(check_digit)
+            
+            # Check if barcode already exists
+            if not Barcode.objects.filter(barcode_value=barcode).exists():
+                return barcode
