@@ -1,5 +1,5 @@
 """
-Django settings for ecomm project - Step 11: Add Redis Caching
+Django settings for ecomm project - Step 12: Add Static Files and Templates
 """
 import os
 from pathlib import Path
@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'rest_framework',
     'drf_spectacular',
-    'django_redis',  # Step 11: Redis caching
+    'django_redis',
     
     # Our apps
     'home',
@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',  # Step 12: Media context processor
             ],
         },
     },
@@ -108,12 +109,19 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files (CSS, JavaScript, Images) - Step 12
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Static files directories - Step 12
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# WhiteNoise for static files in production - Step 12
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files
+# Media files - Step 12
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 MEDIA_URL = '/media/'
 
@@ -146,7 +154,7 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
 }
 
-# Caching & sessions (use Redis if REDIS_URL set, otherwise sane defaults) - Step 11
+# Caching & sessions (use Redis if REDIS_URL set, otherwise sane defaults)
 if config('REDIS_URL', default=None):
     CACHES = {
         'default': {
@@ -167,7 +175,7 @@ else:
         }
     }
 
-# Cache settings (optimized for high volume) - Step 11
+# Cache settings (optimized for high volume)
 CACHE_TTL = 60 * 5  # 5 minutes for faster updates
 
 # Security settings for Railway
