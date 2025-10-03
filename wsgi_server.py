@@ -11,13 +11,18 @@ def main():
     # Get PORT from environment variable
     port = os.environ.get('PORT', '8000')
     
-    # Convert to integer to validate
-    try:
-        port_int = int(port)
-        print(f"Starting server on port {port_int}")
-    except ValueError:
-        print(f"Invalid PORT value: {port}, using default 8000")
+    # Handle case where Railway passes literal '$PORT' string
+    if port == '$PORT':
+        print("Railway passed literal '$PORT' string, using default 8000")
         port_int = 8000
+    else:
+        # Convert to integer to validate
+        try:
+            port_int = int(port)
+            print(f"Starting server on port {port_int}")
+        except ValueError:
+            print(f"Invalid PORT value: {port}, using default 8000")
+            port_int = 8000
     
     # Start Gunicorn with the port
     cmd = [
