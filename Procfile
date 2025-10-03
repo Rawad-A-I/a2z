@@ -1,1 +1,1 @@
-web: gunicorn ecomm.wsgi:application
+web: ./start.sh
