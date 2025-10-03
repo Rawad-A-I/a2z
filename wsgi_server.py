@@ -10,6 +10,15 @@ import sys
 def main():
     print("Starting Django eCommerce server...")
     
+    # Run database migrations first
+    print("Running database migrations...")
+    try:
+        subprocess.run(['python', 'manage.py', 'migrate'], check=True)
+        print("Database migrations completed successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"Migration failed: {e}")
+        print("Continuing anyway...")
+    
     # Get PORT from Railway environment
     port = os.environ.get('PORT', '8000')
     

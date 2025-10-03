@@ -43,6 +43,8 @@ def index(request):
         products = paginator.page(paginator.num_pages)
     except Exception as e:
         print(e)
+        # Fallback to empty page if there's an error
+        products = paginator.page(1)
 
     context = {
         'products': products,
