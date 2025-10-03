@@ -211,13 +211,20 @@ def employee_dashboard_redirect(request):
 
 def employee_hub(request):
     """New separate employee hub page - completely independent"""
+    print(f"DEBUG: Employee hub accessed by user: {request.user}")
+    print(f"DEBUG: User is staff: {request.user.is_staff}")
+    
     if not is_employee(request.user):
+        print("DEBUG: User is not an employee, redirecting to index")
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
+    
+    print("DEBUG: User is employee, proceeding with hub")
     
     # Get basic statistics for the overview
     try:
         my_orders_count = Order.objects.filter(assigned_employee=request.user).count()
+        print(f"DEBUG: My orders count: {my_orders_count}")
     except Exception as e:
         print(f"Type mismatch in stats query: {e}")
         my_orders_count = 0
@@ -229,9 +236,12 @@ def employee_hub(request):
         'my_orders': my_orders_count,
     }
     
+    print(f"DEBUG: Stats: {stats}")
+    
     context = {
         'stats': stats,
     }
+    print("DEBUG: Rendering employee hub template")
     return render(request, 'accounts/employee_hub.html', context)
 
 
