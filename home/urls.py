@@ -1,4 +1,5 @@
 from django.urls import path
+# Demo comment: Health check endpoints are enabled for Railway deployment
 from home.views import *
 from home.health import health_check, readiness_check, liveness_check
 
