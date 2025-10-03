@@ -1,19 +1,21 @@
 from django.contrib import admin
-from django.urls import path
-from home.health import health_check, readiness_check, liveness_check
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # Health check endpoints (for Railway)
-    path('health/', health_check, name='health_check'),
-    path('ready/', readiness_check, name='readiness_check'),
-    path('live/', liveness_check, name='liveness_check'),
+    path('health/', include('home.urls')),
+    path('ready/', include('home.urls')),
+    path('live/', include('home.urls')),
     
     # Admin panel
     path('admin/', admin.site.urls),
     
-    # Simple home page
-    path('', health_check, name='home'),
+    # Home app
+    path('', include('home.urls')),
 ]
 
-
-# Removed static file handling for minimal deployment
+# Serve static and media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
