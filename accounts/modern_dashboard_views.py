@@ -58,8 +58,18 @@ def modern_order_dashboard(request):
         'cancelled': cancelled_orders,
     }
     
-    # Revenue data for chart (mock data for now - you can implement real revenue tracking)
-    revenue_data = [2000, 2500, 1800, 3200, 2800, 3275, 3000, 3500]
+    # Revenue data for chart (last 7 days)
+    from django.db.models import Sum
+    from datetime import timedelta
+    
+    revenue_data = []
+    for i in range(7):
+        date = current_date - timedelta(days=6-i)
+        daily_revenue = Order.objects.filter(
+            order_date__date=date,
+            status__in=['confirmed', 'processing', 'shipped', 'delivered']
+        ).aggregate(total=Sum('grand_total'))['total'] or 0
+        revenue_data.append(int(daily_revenue))
     
     # Delivery tracking orders
     delivery_orders = Order.objects.filter(
