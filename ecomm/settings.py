@@ -88,14 +88,6 @@ if config('DATABASE_URL', default=None):
             conn_health_checks=True,
         )
     }
-    # Additional database settings for Railway
-    DATABASES['default'].update({
-        'OPTIONS': {
-            'MAX_CONNS': 20,
-            'MIN_CONNS': 1,
-            'CONN_MAX_AGE': 600,
-        }
-    })
 else:
     # SQLite for development
     DATABASES = {
@@ -162,10 +154,6 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 if config('DATABASE_URL', default=None):
     # Connection pooling settings
     DATABASES['default']['CONN_MAX_AGE'] = 600
-    DATABASES['default']['OPTIONS'] = {
-        'MAX_CONNS': 20,
-        'MIN_CONNS': 1,
-    }
 
 # Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
