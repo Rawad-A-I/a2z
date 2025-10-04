@@ -6,6 +6,9 @@
 {% block start %}
 <div class="order-management-container">
 <div class="container-fluid py-4">
+    <!-- Back Button -->
+    {% include 'base/back_button.html' with back_url='employee_dashboard' back_text='Back to Dashboard' %}
+    
     <!-- Top Navigation Bar -->
     <div class="row mb-4">
         <div class="col-12">
@@ -54,7 +57,7 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark h4 mb-0">{{ total_orders|default:"4,440" }}</div>
+                            <div class="fw-bold text-dark h4 mb-0">{{ total_orders|default:"0" }}</div>
                             <div class="text-muted small">Total Orders</div>
                         </div>
                         <div class="text-end">
@@ -70,7 +73,7 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark h4 mb-0">{{ delivered_orders|default:"4,137" }}</div>
+                            <div class="fw-bold text-dark h4 mb-0">{{ delivered_orders|default:"0" }}</div>
                             <div class="text-muted small">Delivered Orders</div>
                         </div>
                         <div class="text-end">
@@ -86,7 +89,7 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark h4 mb-0">{{ cancelled_orders|default:"303" }}</div>
+                            <div class="fw-bold text-dark h4 mb-0">{{ cancelled_orders|default:"0" }}</div>
                             <div class="text-muted small">Cancelled Orders</div>
                         </div>
                         <div class="text-end">
@@ -122,12 +125,13 @@
                     <h6 class="text-muted mb-3">Delivery Status</h6>
                     
                     <!-- Order 1 -->
+                    {% if delivery_orders.0 %}
                     <div class="delivery-item mb-4">
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-primary bg-opacity-10 text-primary me-2">●</span>
-                            <span class="fw-medium">Order ID ORDO1784</span>
+                            <span class="fw-medium">Order ID {{ delivery_orders.0.order_id }}</span>
                         </div>
-                        <div class="text-muted small mb-2">Out for Delivery</div>
+                        <div class="text-muted small mb-2">{{ delivery_orders.0.get_status_display }}</div>
                         <div class="progress-container">
                             <div class="progress-steps">
                                 <div class="step completed">
@@ -151,12 +155,13 @@
                     </div>
 
                     <!-- Order 2 -->
+                    {% if delivery_orders.1 %}
                     <div class="delivery-item">
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-primary bg-opacity-10 text-primary me-2">●</span>
-                            <span class="fw-medium">Order ID ORDO1779</span>
+                            <span class="fw-medium">Order ID {{ delivery_orders.1.order_id }}</span>
                         </div>
-                        <div class="text-muted small mb-2">Dispatched</div>
+                        <div class="text-muted small mb-2">{{ delivery_orders.1.get_status_display }}</div>
                         <div class="progress-container">
                             <div class="progress-steps">
                                 <div class="step completed">
