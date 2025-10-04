@@ -59,9 +59,6 @@ def modern_order_dashboard(request):
     }
     
     # Revenue data for chart (last 7 days)
-    from django.db.models import Sum
-    from datetime import timedelta
-    
     revenue_data = []
     for i in range(7):
         date = current_date - timedelta(days=6-i)
