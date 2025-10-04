@@ -9,6 +9,7 @@ from accounts.analytics_views import *
 from accounts.address_views import *
 from accounts.address_management_views import *
 from accounts.admin_views import *
+from accounts.modern_dashboard_views import *
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -92,6 +93,7 @@ urlpatterns = [
     
     # Order Management URLs
     path('orders/dashboard/', order_management_dashboard, name='order_management_dashboard'),
+    path('orders/modern-dashboard/', modern_order_dashboard, name='modern_order_dashboard'),
     path('orders/list/', order_list, name='order_list'),
     path('orders/detail/<str:order_id>/', order_detail, name='order_detail'),
     path('orders/fulfillment/', fulfillment_center, name='fulfillment_center'),
