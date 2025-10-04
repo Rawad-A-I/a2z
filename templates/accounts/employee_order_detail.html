@@ -1,19 +1,17 @@
-{% extends 'base/employee_base.html' %}
+{% extends 'base/base.html' %}
 {% load static %}
 
 {% block title %}Order Details - {{ order.order_id }}{% endblock %}
 
-{% block content %}
+{% block start %}
 <div class="container mt-4">
+    <!-- Back Button -->
+    {% include 'base/back_button.html' with back_text='Back' %}
+    
     <div class="row">
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-receipt"></i> Order Details - {{ order.order_id }}</h2>
-                <div>
-                    <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Dashboard
-                    </a>
-                </div>
             </div>
             
             <!-- Order Status Alert -->
