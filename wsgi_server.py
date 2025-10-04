@@ -49,14 +49,19 @@ def main():
         print("Invalid port, using default 8000")
         port_int = 8000
     
-    # Start Gunicorn
+    # Start Gunicorn with better connection handling
     cmd = [
         'gunicorn',
         'ecomm.wsgi:application',
         f'--bind=0.0.0.0:{port_int}',
         '--workers=3',
         '--timeout=120',
-        '--keep-alive=2'
+        '--keep-alive=2',
+        '--max-requests=1000',
+        '--max-requests-jitter=100',
+        '--preload',
+        '--worker-class=sync',
+        '--worker-connections=1000'
     ]
     
     print(f"Running: {' '.join(cmd)}")

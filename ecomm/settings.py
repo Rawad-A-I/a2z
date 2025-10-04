@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.db_middleware.DatabaseConnectionMiddleware',
 ]
 
 ROOT_URLCONF = 'ecomm.urls'
@@ -79,10 +80,22 @@ WSGI_APPLICATION = 'ecomm.wsgi.application'
 
 # Database - PostgreSQL with Railway
 if config('DATABASE_URL', default=None):
-    # Railway/Heroku style DATABASE_URL
+    # Railway/Heroku style DATABASE_URL with connection pooling
     DATABASES = {
-        'default': dj_database_url.parse(config('DATABASE_URL'))
+        'default': dj_database_url.parse(
+            config('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
+    # Additional database settings for Railway
+    DATABASES['default'].update({
+        'OPTIONS': {
+            'MAX_CONNS': 20,
+            'MIN_CONNS': 1,
+            'CONN_MAX_AGE': 600,
+        }
+    })
 else:
     # SQLite for development
     DATABASES = {
@@ -124,8 +137,35 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_ROOT = BASE_DIR / 'mediafiles'
 MEDIA_URL = '/media/'
 
+# Media files serving for Railway
+if config('DATABASE_URL', default=None):
+    # Production settings
+    MEDIA_ROOT = BASE_DIR / 'mediafiles'
+    MEDIA_URL = '/media/'
+else:
+    # Development settings
+    MEDIA_ROOT = BASE_DIR / 'mediafiles'
+    MEDIA_URL = '/media/'
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Session configuration for Railway
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+SESSION_COOKIE_HTTPONLY = True
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Database connection settings for Railway
+if config('DATABASE_URL', default=None):
+    # Connection pooling settings
+    DATABASES['default']['CONN_MAX_AGE'] = 600
+    DATABASES['default']['OPTIONS'] = {
+        'MAX_CONNS': 20,
+        'MIN_CONNS': 1,
+    }
 
 # Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
