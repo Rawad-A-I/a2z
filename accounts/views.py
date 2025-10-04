@@ -275,6 +275,12 @@ def cart(request):
                 messages.success(request, 'Coupon applied successfully.')
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
+        # Check if user has verified their address with map
+        profile = getattr(request.user, 'profile', None)
+        if not profile or not profile.latitude or not profile.longitude:
+            messages.error(request, 'Please verify your address using the map before placing an order.')
+            return redirect('address_management')
+        
         # Create the order for COD
         order = create_order(cart_obj)
         cart_obj.is_paid = True  # Mark as paid for COD

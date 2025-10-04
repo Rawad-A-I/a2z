@@ -176,6 +176,25 @@
                 <br>
                 <small>Pay when your order is delivered to your doorstep.</small>
               </div>
+              
+              <!-- Address Verification Check -->
+              {% if not user.profile.latitude or not user.profile.longitude %}
+              <div class="alert alert-warning">
+                <i class="fa fa-map-marker-alt"></i>
+                <strong>Address Verification Required:</strong> Please verify your address using the map before placing an order.
+                <br>
+                <a href="{% url 'address_management' %}" class="btn btn-warning btn-sm mt-2">
+                  <i class="fa fa-map"></i> Verify Address
+                </a>
+              </div>
+              {% else %}
+              <div class="alert alert-success">
+                <i class="fa fa-check-circle"></i>
+                <strong>Address Verified:</strong> Your delivery address has been confirmed.
+                <br>
+                <small>Address: {{ user.profile.shipping_address|default:"Not set" }}</small>
+              </div>
+              {% endif %}
             </div>
             
             <!-- COD Payment Form -->

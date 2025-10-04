@@ -4,6 +4,9 @@
 {% block title %}Address Management{% endblock %}
 
 {% block start %}
+<!-- Back Button -->
+{% include 'base/back_button.html' with back_text='Back' %}
+
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
@@ -284,7 +287,7 @@ function locateUser() {
   }
 }
 
-// Geocode address using Nominatim
+// Geocode address using Nominatim with improved accuracy
 function geocodeAddress() {
   const address = document.getElementById('address').value + ' ' +
                  document.getElementById('city').value + ' ' +
@@ -295,6 +298,12 @@ function geocodeAddress() {
     alert('Please enter an address first.');
     return;
   }
+  
+  // Show loading indicator
+  const button = event.target;
+  const originalText = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+  button.disabled = true;
   
   // Use Nominatim API
   fetch('{% url "geocode_address" %}', {
@@ -314,22 +323,41 @@ function geocodeAddress() {
       document.getElementById('latitude').value = lat;
       document.getElementById('longitude').value = lng;
       
-      // Update map
-      map.setView([lat, lng], 15);
+      // Update map with better zoom level for accuracy
+      map.setView([lat, lng], 18);
       
       if (marker) {
         map.removeLayer(marker);
       }
       
       marker = L.marker([lat, lng]).addTo(map);
-      marker.bindPopup('Selected Address').openPopup();
+      marker.bindPopup('✓ Verified Address').openPopup();
+      
+      // Update form with geocoded address components for better accuracy
+      if (data.address_components) {
+        const addr = data.address_components;
+        if (addr.house_number && addr.road) {
+          document.getElementById('address').value = addr.house_number + ' ' + addr.road;
+        }
+        if (addr.city) document.getElementById('city').value = addr.city;
+        if (addr.state) document.getElementById('state').value = addr.state;
+        if (addr.postcode) document.getElementById('zip_code').value = addr.postcode;
+      }
+      
+      // Show success message
+      showNotification('Address verified successfully! You can now place orders.', 'success');
     } else {
-      alert('Geocoding failed: ' + data.error);
+      alert('Address not found. Please try a different address or be more specific.');
     }
   })
   .catch(error => {
     console.error('Error:', error);
-    alert('Error geocoding address.');
+    alert('Error geocoding address. Please try again.');
+  })
+  .finally(() => {
+    // Restore button
+    button.innerHTML = originalText;
+    button.disabled = false;
   });
 }
 
@@ -476,9 +504,47 @@ function getDeliveryEstimate() {
   });
 }
 
+// Notification system
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+  notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+  notification.innerHTML = `
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  document.body.appendChild(notification);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.parentNode.removeChild(notification);
+    }
+  }, 5000);
+}
+
+// Address verification status
+function checkAddressVerification() {
+  const lat = document.getElementById('latitude').value;
+  const lng = document.getElementById('longitude').value;
+  
+  if (lat && lng) {
+    showNotification('✓ Address verified! You can now place orders.', 'success');
+    return true;
+  } else {
+    showNotification('⚠ Please verify your address on the map before placing orders.', 'warning');
+    return false;
+  }
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
   initMap();
+  
+  // Check if address is already verified
+  {% if profile.latitude and profile.longitude %}
+    showNotification('✓ Your address is already verified!', 'success');
+  {% endif %}
 });
 </script>
 {% endblock %}
