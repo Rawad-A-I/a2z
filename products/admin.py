@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from .models import Category, Product, ColorVariant, SizeVariant, ProductImage, ProductReview, ProductVariant, StockMovement
 
 # Register your models here.
-
+#test
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['category_name', 'slug', 'created_at']
