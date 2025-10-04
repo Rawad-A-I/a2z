@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Category, Product, ColorVariant, SizeVariant, ProductImage, ProductReview, ProductVariant, StockMovement
 
 # Register your models here.
-
+#hi
 admin.site.register(Category)
 
 class ProductImageAdmin(admin.StackedInline):
