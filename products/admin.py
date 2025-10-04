@@ -73,6 +73,5 @@ class ProductVariantAdmin(admin.ModelAdmin):
 class StockMovementAdmin(admin.ModelAdmin):
     list_display = ['product', 'movement_type', 'quantity', 'created_at']
 
-admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductImage)
 admin.site.register(ProductReview)
