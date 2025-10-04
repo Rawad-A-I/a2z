@@ -39,7 +39,7 @@ def modern_order_dashboard(request):
     for order in recent_orders:
         # Get the first product from the order for display
         first_item = order.order_items.first()
-        product_name = first_item.product.name if first_item else "Product"
+        product_name = first_item.product.product_name if first_item else "Product"
         
         recent_orders_data.append({
             'product_name': product_name,
