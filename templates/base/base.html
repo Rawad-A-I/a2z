@@ -4,7 +4,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <title>{% block title %}Home | Django Ecommerce Site{% endblock %}</title>
 
@@ -19,6 +23,7 @@
     <!-- Custom Styles -->
     <link href="/media/css/ui.css" rel="stylesheet" type="text/css" />
     <link href="/media/css/responsive.css" rel="stylesheet" />
+    <link href="/media/css/mobile-responsive.css" rel="stylesheet" />
     <link href="/media/css/footer.css" rel="stylesheet" type="text/css" />
     <link href="/media/css/register.css" rel="stylesheet" type="text/css" />
     <link href="/media/css/contact.css" rel="stylesheet" type="text/css" />
@@ -42,8 +47,105 @@
   </head>
 
   <style>
+    /* Base responsive styles */
     a {
       text-decoration: none;
+    }
+    
+    /* Ensure proper box-sizing */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    
+    /* Body responsive */
+    body {
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* Container responsive */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    
+    /* Desktop optimizations */
+    @media (min-width: 1200px) {
+      .container {
+        max-width: 1140px;
+      }
+      
+      .row {
+        margin: 0 -15px;
+      }
+      
+      .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6,
+      .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+        padding: 0 15px;
+      }
+    }
+    
+    /* Tablet optimizations */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .container {
+        max-width: 100%;
+        padding: 0 20px;
+      }
+      
+      .card {
+        margin-bottom: 1.5rem;
+      }
+      
+      .btn-group {
+        flex-wrap: wrap;
+      }
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 767px) {
+      body {
+        font-size: 14px;
+      }
+      
+      .container {
+        padding: 0 10px;
+      }
+      
+      .card {
+        margin-bottom: 1rem;
+      }
+      
+      .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+      
+      .table-responsive {
+        border: none;
+      }
+      
+      .table-responsive table {
+        margin-bottom: 0;
+      }
+    }
+    
+    /* Extra small devices */
+    @media (max-width: 575px) {
+      .container {
+        padding: 0 5px;
+      }
+      
+      .card-body {
+        padding: 0.75rem;
+      }
+      
+      .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+      }
     }
     
     /* Clean card styling */
