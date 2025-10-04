@@ -1,0 +1,87 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Quick Edit Product{% endblock %}
+
+{% block start %}
+<!-- Back Button -->
+{% include 'base/back_button.html' with back_text='Back to Products' %}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-edit"></i> Quick Edit: {{ product.product_name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Product Name</label>
+                                <input type="text" class="form-control" name="product_name" 
+                                       value="{{ product.product_name }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" name="price" 
+                                           value="{{ product.price }}" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Stock Quantity</label>
+                                <input type="number" class="form-control" name="stock_quantity" 
+                                       value="{{ product.stock_quantity }}" min="0" required>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Low Stock Threshold</label>
+                                <input type="number" class="form-control" name="low_stock_threshold" 
+                                       value="{{ product.low_stock_threshold }}" min="0" required>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Status</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_in_stock" 
+                                           {% if product.is_in_stock %}checked{% endif %}>
+                                    <label class="form-check-label">In Stock</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="newest_product" 
+                                           {% if product.newest_product %}checked{% endif %}>
+                                    <label class="form-check-label">Newest Product</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="product_desription" rows="3">{{ product.product_desription }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'employee_product_management' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

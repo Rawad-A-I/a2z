@@ -17,7 +17,10 @@ urlpatterns = [
     
     # Employee product management URLs
     path('employee/manage/', employee_product_management, name='employee_product_management'),
+    path('employee/analytics/', product_analytics, name='product_analytics'),
     path('employee/add-product/', add_product, name='add_product'),
+    path('employee/quick-edit/<uuid:product_id>/', quick_edit_product, name='quick_edit_product'),
+    path('employee/bulk-actions/', bulk_product_actions, name='bulk_product_actions'),
     path('employee/barcode-management/<uuid:product_id>/', product_barcode_management, name='product_barcode_management'),
     path('employee/bulk-barcode/', bulk_barcode_upload, name='bulk_barcode_upload'),
     path('employee/barcode-search/', barcode_search, name='barcode_search'),

@@ -3,10 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from django.db.models import Q, F
+from django.db.models import Q, F, Count, Sum, Avg
+from django.utils import timezone
+from datetime import timedelta
 from .models import Product, Barcode, Category
 from .forms import BarcodeForm, ProductInsertionForm, BulkBarcodeForm
-from accounts.models import Order
+from accounts.models import Order, OrderItem
 
 
 def is_employee(user):
@@ -16,20 +18,21 @@ def is_employee(user):
 
 @login_required
 def employee_product_management(request):
-    """Employee product management dashboard with advanced features"""
+    """Enhanced employee product management dashboard with admin-like features"""
     if not is_employee(request.user):
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
     
-    # Get all products
-    products = Product.objects.all()
+    # Get all products with related data
+    products = Product.objects.select_related('category').prefetch_related('product_images', 'variants')
     
     # Advanced filtering
     search_query = request.GET.get('search')
     if search_query:
         products = products.filter(
             Q(product_name__icontains=search_query) |
-            Q(product_desription__icontains=search_query)
+            Q(product_desription__icontains=search_query) |
+            Q(category__category_name__icontains=search_query)
         )
     
     # Category filter
@@ -37,7 +40,7 @@ def employee_product_management(request):
     if category_filter:
         products = products.filter(category_id=category_filter)
     
-    # Stock filter
+    # Stock filter with enhanced options
     stock_filter = request.GET.get('stock')
     if stock_filter == 'low':
         products = products.filter(stock_quantity__lte=F('low_stock_threshold'))
@@ -45,10 +48,24 @@ def employee_product_management(request):
         products = products.filter(stock_quantity=0)
     elif stock_filter == 'in':
         products = products.filter(stock_quantity__gt=0)
+    elif stock_filter == 'newest':
+        products = products.filter(newest_product=True)
     
-    # Sorting
+    # Price range filter
+    price_min = request.GET.get('price_min')
+    price_max = request.GET.get('price_max')
+    if price_min:
+        products = products.filter(price__gte=price_min)
+    if price_max:
+        products = products.filter(price__lte=price_max)
+    
+    # Sorting options
     sort_by = request.GET.get('sort', '-created_at')
-    products = products.order_by(sort_by)
+    valid_sorts = ['product_name', '-product_name', 'price', '-price', 'stock_quantity', '-stock_quantity', 'created_at', '-created_at']
+    if sort_by in valid_sorts:
+        products = products.order_by(sort_by)
+    else:
+        products = products.order_by('-created_at')
     
     # Pagination
     paginator = Paginator(products, 25)
@@ -58,6 +75,15 @@ def employee_product_management(request):
     # Get categories for filter dropdown
     categories = Category.objects.all()
     
+    # Calculate statistics for dashboard
+    total_products = Product.objects.count()
+    low_stock_count = Product.objects.filter(stock_quantity__lte=F('low_stock_threshold')).count()
+    out_of_stock_count = Product.objects.filter(stock_quantity=0).count()
+    newest_products_count = Product.objects.filter(newest_product=True).count()
+    
+    # Get recent products for quick access
+    recent_products = Product.objects.select_related('category').order_by('-created_at')[:5]
+    
     context = {
         'products': products_page,
         'categories': categories,
@@ -65,8 +91,136 @@ def employee_product_management(request):
         'category_filter': category_filter,
         'stock_filter': stock_filter,
         'sort_by': sort_by,
+        'total_products': total_products,
+        'low_stock_count': low_stock_count,
+        'out_of_stock_count': out_of_stock_count,
+        'newest_products_count': newest_products_count,
+        'recent_products': recent_products,
     }
     return render(request, 'products/employee_product_management.html', context)
+
+
+@login_required
+def bulk_product_actions(request):
+    """Bulk actions for products - Employee only"""
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        product_ids = request.POST.getlist('product_ids')
+        
+        if not product_ids:
+            messages.warning(request, 'Please select products to perform bulk actions.')
+            return redirect('employee_product_management')
+        
+        products = Product.objects.filter(uid__in=product_ids)
+        
+        if action == 'update_stock':
+            stock_value = request.POST.get('stock_value')
+            if stock_value:
+                products.update(stock_quantity=int(stock_value))
+                messages.success(request, f'Updated stock for {len(products)} products.')
+        
+        elif action == 'update_price':
+            price_value = request.POST.get('price_value')
+            if price_value:
+                products.update(price=int(price_value))
+                messages.success(request, f'Updated price for {len(products)} products.')
+        
+        elif action == 'toggle_newest':
+            for product in products:
+                product.newest_product = not product.newest_product
+                product.save()
+            messages.success(request, f'Toggled newest status for {len(products)} products.')
+        
+        elif action == 'delete':
+            count = products.count()
+            products.delete()
+            messages.success(request, f'Deleted {count} products.')
+        
+        return redirect('employee_product_management')
+    
+    return redirect('employee_product_management')
+
+
+@login_required
+def quick_edit_product(request, product_id):
+    """Quick edit product - Employee only"""
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+    
+    product = get_object_or_404(Product, uid=product_id)
+    
+    if request.method == 'POST':
+        # Quick update of basic fields
+        product.product_name = request.POST.get('product_name', product.product_name)
+        product.price = int(request.POST.get('price', product.price))
+        product.stock_quantity = int(request.POST.get('stock_quantity', product.stock_quantity))
+        product.low_stock_threshold = int(request.POST.get('low_stock_threshold', product.low_stock_threshold))
+        product.is_in_stock = request.POST.get('is_in_stock') == 'on'
+        product.newest_product = request.POST.get('newest_product') == 'on'
+        
+        product.save()
+        messages.success(request, f'Product "{product.product_name}" updated successfully.')
+        return redirect('employee_product_management')
+    
+    return render(request, 'products/quick_edit_product.html', {'product': product})
+
+
+@login_required
+def product_analytics(request):
+    """Product analytics dashboard - Employee only"""
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+    
+    # Time periods
+    now = timezone.now()
+    last_30_days = now - timedelta(days=30)
+    last_7_days = now - timedelta(days=7)
+    
+    # Product performance metrics
+    top_selling_products = Product.objects.annotate(
+        total_sold=Sum('order_items__quantity', filter=Q(order_items__order__order_date__gte=last_30_days))
+    ).filter(total_sold__gt=0).order_by('-total_sold')[:10]
+    
+    low_stock_products = Product.objects.filter(
+        stock_quantity__lte=F('low_stock_threshold')
+    ).order_by('stock_quantity')[:10]
+    
+    # Category performance
+    category_stats = Category.objects.annotate(
+        product_count=Count('product'),
+        total_sales=Sum('product__order_items__quantity', filter=Q(product__order_items__order__order_date__gte=last_30_days))
+    ).order_by('-total_sales')
+    
+    # Recent activity
+    recent_orders = Order.objects.filter(
+        order_date__gte=last_7_days
+    ).select_related('user').order_by('-order_date')[:10]
+    
+    # Stock alerts
+    out_of_stock = Product.objects.filter(stock_quantity=0).count()
+    low_stock = Product.objects.filter(
+        stock_quantity__lte=F('low_stock_threshold'),
+        stock_quantity__gt=0
+    ).count()
+    
+    context = {
+        'top_selling_products': top_selling_products,
+        'low_stock_products': low_stock_products,
+        'category_stats': category_stats,
+        'recent_orders': recent_orders,
+        'out_of_stock': out_of_stock,
+        'low_stock': low_stock,
+        'last_30_days': last_30_days,
+        'last_7_days': last_7_days,
+    }
+    
+    return render(request, 'products/product_analytics.html', context)
 
 
 @login_required
