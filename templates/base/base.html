@@ -42,49 +42,39 @@
   </head>
 
   <style>
-    @property --angle {
-      syntax: "<angle>";
-      initial-value: 0deg;
-      inherits: false;
-    }
-
-    .card-body::after,
-    .card-body::before {
-      content: "";
-      position: absolute;
-      height: 100%;
-      width: 100%;
-      background-image: conic-gradient(
-        from var(--angle),
-        #ff4545,
-        #00ff99,
-        #006aff,
-        #ff0095,
-        #ff4545
-      );
-      top: 50%;
-      left: 50%;
-      translate: -50% -50%;
-      z-index: -1;
-      padding: 3px;
-      border-radius: 10px;
-      animation: 3s spin linear infinite;
-    }
-    .card-body::before {
-      filter: blur(1.5rem);
-      opacity: 0.5;
-    }
-    @keyframes spin {
-      from {
-        --angle: 0deg;
-      }
-      to {
-        --angle: 360deg;
-      }
-    }
-
     a {
       text-decoration: none;
+    }
+    
+    /* Clean card styling */
+    .card {
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .card-body {
+      position: relative;
+      background: #fff;
+      border-radius: 0.5rem;
+    }
+    
+    /* Order management specific styling */
+    .order-management-container {
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+    
+    .order-card {
+      background: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      transition: box-shadow 0.15s ease-in-out;
+    }
+    
+    .order-card:hover {
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     }
   </style>
   <body>
