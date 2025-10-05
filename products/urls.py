@@ -13,8 +13,13 @@ urlpatterns = [
     path('product-reviews/edit/<uuid:review_uid>/', edit_review, name='edit_review'),
     path('like-review/<review_uid>/', like_review, name='like_review'),
     path('dislike-review/<review_uid>/',dislike_review, name='dislike_review'),
-    path('<slug>/', get_product, name='get_product'),
-    path('<slug>/<review_uid>/delete/', delete_review, name='delete_review'),
+    
+    # Bar section URLs (must come before generic slug pattern)
+    path('bar/', bar_home, name='bar_home'),
+    path('bar/products/', bar_products, name='bar_products'),
+    path('bar/product/<slug>/', bar_product_detail, name='bar_product_detail'),
+    path('bar/categories/', bar_categories, name='bar_categories'),
+    path('bar/add-to-cart/<uuid:product_id>/', add_to_bar_cart, name='add_to_bar_cart'),
     
     # Employee product management URLs
     path('employee/manage/', employee_product_management, name='employee_product_management'),
@@ -27,10 +32,7 @@ urlpatterns = [
     path('employee/barcode-search/', barcode_search, name='barcode_search'),
     path('employee/delete-barcode/<uuid:barcode_id>/', delete_barcode, name='delete_barcode'),
     
-    # Bar section URLs
-    path('bar/', bar_home, name='bar_home'),
-    path('bar/products/', bar_products, name='bar_products'),
-    path('bar/product/<slug>/', bar_product_detail, name='bar_product_detail'),
-    path('bar/categories/', bar_categories, name='bar_categories'),
-    path('bar/add-to-cart/<uuid:product_id>/', add_to_bar_cart, name='add_to_bar_cart'),
+    # Generic product slug pattern (must be last)
+    path('<slug>/', get_product, name='get_product'),
+    path('<slug>/<review_uid>/delete/', delete_review, name='delete_review'),
 ]
