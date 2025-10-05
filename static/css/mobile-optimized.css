@@ -1,0 +1,161 @@
+/* Mobile Performance Optimizations */
+
+/* Reduce animations on mobile */
+@media (max-width: 768px) {
+  * {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Disable heavy animations */
+  .card {
+    animation: none !important;
+  }
+  
+  /* Optimize images */
+  img {
+    max-width: 100%;
+    height: auto;
+    loading: lazy;
+  }
+  
+  /* Simplify hover effects */
+  .btn:hover {
+    transform: none !important;
+  }
+  
+  /* Reduce shadow complexity */
+  .shadow-lg {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+  }
+  
+  /* Mobile-specific hero optimizations */
+  .hero-section {
+    padding: 1.5rem 0 !important;
+    min-height: auto !important;
+  }
+  
+  .hero-title {
+    font-size: 1.8rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+  
+  /* Optimize product grid for mobile */
+  .card-product-grid {
+    margin-bottom: 1rem !important;
+  }
+  
+  .card-product-grid .img-wrap {
+    height: 200px !important;
+    overflow: hidden;
+  }
+  
+  .card-product-grid .img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Mobile navigation optimizations */
+  .navbar {
+    padding: 0.5rem 0 !important;
+  }
+  
+  .navbar-brand {
+    font-size: 1.2rem !important;
+  }
+  
+  /* Mobile button optimizations */
+  .btn {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 1rem !important;
+  }
+  
+  .btn-lg {
+    font-size: 1rem !important;
+    padding: 0.75rem 1.5rem !important;
+  }
+  
+  /* Mobile form optimizations */
+  .form-control, .form-select {
+    font-size: 0.9rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  /* Mobile card optimizations */
+  .card {
+    border-radius: 0.5rem !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+  
+  .card-body {
+    padding: 1rem !important;
+  }
+  
+  /* Mobile text optimizations */
+  .display-4 {
+    font-size: 2rem !important;
+  }
+  
+  .display-5 {
+    font-size: 1.5rem !important;
+  }
+  
+  .lead {
+    font-size: 1rem !important;
+  }
+  
+  /* Mobile spacing optimizations */
+  .py-5 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .mt-4 {
+    margin-top: 1.5rem !important;
+  }
+}
+
+/* Ultra-mobile optimizations for very small screens */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  .row {
+    margin-left: -0.25rem !important;
+    margin-right: -0.25rem !important;
+  }
+  
+  .col-6 {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+  }
+  
+  .card-body {
+    padding: 0.75rem !important;
+  }
+  
+  .btn {
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.8rem !important;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem !important;
+  }
+}

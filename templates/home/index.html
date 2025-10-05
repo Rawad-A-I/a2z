@@ -34,7 +34,11 @@
           <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                alt="Premium Shopping" 
                class="img-fluid rounded shadow-lg" 
-               style="max-height: 500px; object-fit: cover;">
+               loading="eager"
+               style="max-height: 500px; object-fit: cover;"
+               srcset="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80 400w,
+                       https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80 800w"
+               sizes="(max-width: 768px) 400px, 800px">
         </div>
       </div>
     </div>
@@ -106,7 +110,10 @@
     <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
       <figure class="card card-product-grid">
         <div class="img-wrap">
-          <img src="/media/{{product.product_images.first.image}}" />
+          <img src="/media/{{product.product_images.first.image}}" 
+               loading="lazy" 
+               alt="{{ product.product_name }}"
+               style="width: 100%; height: 200px; object-fit: cover;" />
           {% if not product.is_in_stock %}
           <div class="badge badge-danger position-absolute" style="top: 10px; right: 10px;">
             Out of Stock

@@ -2,6 +2,7 @@ from django.db.models import Q
 from django.shortcuts import render
 from products.models import Product, Category
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django_user_agents.utils import get_user_agent
 
 # Create your views here.
 
@@ -52,6 +53,12 @@ def index(request):
         'selected_category': selected_category,
         'selected_sort': selected_sort,
     }
+    
+    # Detect mobile devices and serve optimized template
+    user_agent = get_user_agent(request)
+    if user_agent.is_mobile:
+        return render(request, 'home/mobile_index.html', context)
+    
     return render(request, 'home/index.html', context)
 
 
@@ -94,6 +101,12 @@ def products_only(request):
         'selected_category': selected_category,
         'selected_sort': selected_sort,
     }
+    
+    # Detect mobile devices and serve optimized template
+    user_agent = get_user_agent(request)
+    if user_agent.is_mobile:
+        return render(request, 'home/mobile_index.html', context)
+    
     return render(request, 'home/products_only.html', context)
 
 
