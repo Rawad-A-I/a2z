@@ -20,7 +20,7 @@ from products.models import Product, ProductReview, ProductComparison, ProductRe
 @login_required
 def wishlist(request):
     """Customer wishlist management."""
-    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('product')
+    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('product').order_by('-added_date')
     
     # Pagination
     paginator = Paginator(wishlist_items, 12)
