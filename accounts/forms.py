@@ -8,7 +8,29 @@ from home.models import ShippingAddress
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['profile_image', 'bio']
+        fields = ['profile_image', 'bio', 'phone_number']
+        widgets = {
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter phone number',
+                'required': True
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['phone_number'].required = True
+    
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number')
+        if not phone:
+            raise forms.ValidationError("Phone number is required.")
+        if phone:
+            # Remove all non-digit characters for validation
+            digits_only = ''.join(filter(str.isdigit, phone))
+            if len(digits_only) < 10:
+                raise forms.ValidationError("Phone number must be at least 10 digits.")
+        return phone
 
 
 class UserUpdateForm(forms.ModelForm):

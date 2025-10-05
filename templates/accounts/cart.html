@@ -187,12 +187,21 @@
                   <i class="fa fa-map"></i> Verify Address
                 </a>
               </div>
+              {% elif not user.profile.phone_number %}
+              <div class="alert alert-warning">
+                <i class="fa fa-phone"></i>
+                <strong>Phone Number Required:</strong> Please add your phone number to your profile before placing an order.
+                <br>
+                <a href="{% url 'profile' username=user.username %}" class="btn btn-warning btn-sm mt-2">
+                  <i class="fa fa-user"></i> Add Phone Number
+                </a>
+              </div>
               {% else %}
               <div class="alert alert-success">
                 <i class="fa fa-check-circle"></i>
-                <strong>Address Verified:</strong> Your delivery address has been confirmed.
+                <strong>Ready for Order:</strong> Your address is verified and phone number is provided.
                 <br>
-                <small>Address: {{ user.profile.shipping_address|default:"Not set" }}</small>
+                <small>Address: {{ user.profile.shipping_address|default:"Not set" }} | Phone: {{ user.profile.phone_number|default:"Not set" }}</small>
               </div>
               {% endif %}
             </div>
