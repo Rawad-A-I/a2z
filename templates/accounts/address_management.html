@@ -224,22 +224,28 @@
               
               <div class="text-center">
                 <div class="btn-group-vertical w-100 d-md-none">
-                  <button type="button" class="btn btn-locate mb-2" onclick="locateUser()">
-                    <i class="fas fa-crosshairs"></i> Use Current Location
+                  <button type="button" class="btn btn-locate mb-2" onclick="getPreciseLocation()">
+                    <i class="fas fa-crosshairs"></i> Use My Location
                   </button>
-                  <button type="button" class="btn btn-outline-primary mb-2" onclick="geocodeAddress()">
-                    <i class="fas fa-search"></i> Find on Map
+                  <button type="button" class="btn btn-outline-primary mb-2" onclick="openLocationPicker()">
+                    <i class="fas fa-map-marker-alt"></i> Pick on Map
+                  </button>
+                  <button type="button" class="btn btn-outline-info mb-2" onclick="geocodeAddress()">
+                    <i class="fas fa-search"></i> Search Address
                   </button>
                   <button type="submit" class="btn btn-success">
                     <i class="fas fa-save"></i> Save Address
                   </button>
                 </div>
                 <div class="d-none d-md-block">
-                  <button type="button" class="btn btn-locate" onclick="locateUser()">
-                    <i class="fas fa-crosshairs"></i> Use Current Location
+                  <button type="button" class="btn btn-locate" onclick="getPreciseLocation()">
+                    <i class="fas fa-crosshairs"></i> Use My Location
                   </button>
-                  <button type="button" class="btn btn-outline-primary ml-2" onclick="geocodeAddress()">
-                    <i class="fas fa-search"></i> Find on Map
+                  <button type="button" class="btn btn-outline-primary ml-2" onclick="openLocationPicker()">
+                    <i class="fas fa-map-marker-alt"></i> Pick on Map
+                  </button>
+                  <button type="button" class="btn btn-outline-info ml-2" onclick="geocodeAddress()">
+                    <i class="fas fa-search"></i> Search Address
                   </button>
                   <button type="submit" class="btn btn-success ml-2">
                     <i class="fas fa-save"></i> Save Address
@@ -253,6 +259,12 @@
           <div class="mt-4">
             <h5>Map View</h5>
             <div id="map" class="map-container"></div>
+            <div class="mt-2">
+              <small class="text-muted">
+                <i class="fas fa-info-circle"></i> 
+                Click on the map to set your exact location, or use the location buttons above.
+              </small>
+            </div>
           </div>
         </div>
       </div>
@@ -303,12 +315,73 @@
   </div>
 </div>
 
+<!-- Location Picker Modal -->
+<div class="modal fade" id="locationPickerModal" tabindex="-1" aria-labelledby="locationPickerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="locationPickerModalLabel">
+          <i class="fas fa-map-marker-alt"></i> Pick Your Location
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="locationPickerMap" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+        <div class="mt-3">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Instructions:</strong> Click on the map to select your exact location. 
+            The marker will show your selected position.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="confirmLocation()">
+          <i class="fas fa-check"></i> Use This Location
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Location Accuracy Modal -->
+<div class="modal fade" id="locationAccuracyModal" tabindex="-1" aria-labelledby="locationAccuracyModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="locationAccuracyModalLabel">
+          <i class="fas fa-crosshairs"></i> Location Accuracy
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <h6>Getting your precise location...</h6>
+          <p class="text-muted">This may take a few seconds for better accuracy.</p>
+          <div class="progress mb-3">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+          </div>
+          <div id="locationAccuracyInfo" class="small text-muted"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Leaflet JavaScript -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 let map;
 let marker;
+let locationPickerMap;
+let locationPickerMarker;
 let geocoder;
+let selectedLocation = null;
+let locationAccuracy = null;
 
 // Initialize OpenStreetMap with Leaflet
 function initMap() {
@@ -356,40 +429,168 @@ function initMap() {
   });
 }
 
-// Locate user's current position
-function locateUser() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function(position) {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
+// WhatsApp-style precise location detection
+function getPreciseLocation() {
+  if (!navigator.geolocation) {
+    showNotification('Geolocation is not supported by this browser.', 'error');
+    return;
+  }
+
+  // Show accuracy modal
+  const modal = new bootstrap.Modal(document.getElementById('locationAccuracyModal'));
+  modal.show();
+  
+  updateProgress(0, 'Requesting location permission...');
+  
+  const options = {
+    enableHighAccuracy: true,
+    timeout: 30000,
+    maximumAge: 0
+  };
+  
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      updateProgress(25, 'Location detected, improving accuracy...');
+      
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+      
+      locationAccuracy = accuracy;
+      
+      updateProgress(50, `Accuracy: ${Math.round(accuracy)} meters`);
+      
+      // Wait a moment for better accuracy
+      setTimeout(() => {
+        updateProgress(75, 'Finalizing location...');
         
+        // Use the precise location
         document.getElementById('latitude').value = lat;
         document.getElementById('longitude').value = lng;
         
-        // Update map
-        map.setView([lat, lng], 15);
+        // Update main map
+        map.setView([lat, lng], 18);
         
         if (marker) {
           map.removeLayer(marker);
         }
         
         marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup('Your Location').openPopup();
+        marker.bindPopup(`Your Location<br>Accuracy: ${Math.round(accuracy)}m`).openPopup();
+        
+        updateProgress(100, 'Location confirmed!');
         
         // Reverse geocode to get address
         reverseGeocode(lat, lng);
-      },
-      function(error) {
-        alert('Error getting location: ' + error.message);
+        
+        setTimeout(() => {
+          modal.hide();
+          showNotification(`Location detected with ${Math.round(accuracy)}m accuracy!`, 'success');
+        }, 1000);
+      }, 2000);
+    },
+    function(error) {
+      modal.hide();
+      let errorMessage = 'Error getting location: ';
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage += 'Location access denied. Please allow location access and try again.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage += 'Location information unavailable.';
+          break;
+        case error.TIMEOUT:
+          errorMessage += 'Location request timed out.';
+          break;
+        default:
+          errorMessage += error.message;
+          break;
       }
-    );
-  } else {
-    alert('Geolocation is not supported by this browser.');
+      showNotification(errorMessage, 'error');
+    },
+    options
+  );
+}
+
+// Update progress bar
+function updateProgress(percent, message) {
+  const progressBar = document.querySelector('#locationAccuracyModal .progress-bar');
+  const infoDiv = document.getElementById('locationAccuracyInfo');
+  
+  if (progressBar) {
+    progressBar.style.width = percent + '%';
+  }
+  
+  if (infoDiv) {
+    infoDiv.textContent = message;
   }
 }
 
-// Geocode address using Nominatim with improved accuracy for Lebanon
+// Open location picker modal
+function openLocationPicker() {
+  const modal = new bootstrap.Modal(document.getElementById('locationPickerModal'));
+  modal.show();
+  
+  // Initialize location picker map
+  setTimeout(() => {
+    if (!locationPickerMap) {
+      locationPickerMap = L.map('locationPickerMap').setView([33.8938, 35.5018], 13);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(locationPickerMap);
+      
+      // Add click listener
+      locationPickerMap.on('click', function(event) {
+        const lat = event.latlng.lat;
+        const lng = event.latlng.lng;
+        
+        selectedLocation = { lat, lng };
+        
+        if (locationPickerMarker) {
+          locationPickerMap.removeLayer(locationPickerMarker);
+        }
+        
+        locationPickerMarker = L.marker([lat, lng]).addTo(locationPickerMap);
+        locationPickerMarker.bindPopup('Selected Location').openPopup();
+      });
+    }
+  }, 300);
+}
+
+// Confirm selected location
+function confirmLocation() {
+  if (selectedLocation) {
+    const lat = selectedLocation.lat;
+    const lng = selectedLocation.lng;
+    
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+    
+    // Update main map
+    map.setView([lat, lng], 18);
+    
+    if (marker) {
+      map.removeLayer(marker);
+    }
+    
+    marker = L.marker([lat, lng]).addTo(map);
+    marker.bindPopup('Selected Location').openPopup();
+    
+    // Reverse geocode to get address
+    reverseGeocode(lat, lng);
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('locationPickerModal'));
+    modal.hide();
+    
+    showNotification('Location selected successfully!', 'success');
+  } else {
+    showNotification('Please click on the map to select a location first.', 'warning');
+  }
+}
+
+// Enhanced geocoding with multiple services for better accuracy
 function geocodeAddress() {
   const address = document.getElementById('address').value;
   const city = document.getElementById('city').value;
@@ -398,9 +599,15 @@ function geocodeAddress() {
   const country = document.getElementById('country').value;
   
   if (!address.trim()) {
-    alert('Please enter an address first.');
+    showNotification('Please enter an address first.', 'warning');
     return;
   }
+  
+  // Show loading indicator
+  const button = event.target;
+  const originalText = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+  button.disabled = true;
   
   // Build comprehensive address string
   let fullAddress = address;
@@ -419,29 +626,17 @@ function geocodeAddress() {
     fullAddress += ', United Kingdom';
   }
   
-  // Show loading indicator
-  const button = event.target;
-  const originalText = button.innerHTML;
-  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-  button.disabled = true;
-  
-  // Use Nominatim API with country bias for better accuracy
-  fetch('{% url "geocode_address" %}', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': '{{ csrf_token }}'
-    },
-    body: JSON.stringify({ 
-      address: fullAddress,
-      country: country
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const lat = data.latitude;
-      const lng = data.longitude;
+  // Try multiple geocoding services for better accuracy
+  Promise.all([
+    geocodeWithNominatim(fullAddress, country),
+    geocodeWithPhoton(fullAddress, country)
+  ]).then(results => {
+    // Use the most accurate result
+    const bestResult = results.find(r => r && r.accuracy < 100) || results[0];
+    
+    if (bestResult && bestResult.success) {
+      const lat = bestResult.latitude;
+      const lng = bestResult.longitude;
       
       document.getElementById('latitude').value = lat;
       document.getElementById('longitude').value = lng;
@@ -454,11 +649,11 @@ function geocodeAddress() {
       }
       
       marker = L.marker([lat, lng]).addTo(map);
-      marker.bindPopup('✓ Verified Address').openPopup();
+      marker.bindPopup(`✓ Verified Address<br>Accuracy: ${Math.round(bestResult.accuracy || 0)}m`).openPopup();
       
       // Update form with geocoded address components for better accuracy
-      if (data.address_components) {
-        const addr = data.address_components;
+      if (bestResult.address_components) {
+        const addr = bestResult.address_components;
         if (addr.house_number && addr.road) {
           document.getElementById('address').value = addr.house_number + ' ' + addr.road;
         }
@@ -467,21 +662,85 @@ function geocodeAddress() {
         if (addr.postcode) document.getElementById('zip_code').value = addr.postcode;
       }
       
-      // Show success message
-      showNotification('Address verified successfully! You can now place orders.', 'success');
+      showNotification(`Address found with ${Math.round(bestResult.accuracy || 0)}m accuracy!`, 'success');
     } else {
-      alert('Address not found. Please try a different address or be more specific.');
+      showNotification('Address not found. Please try a more specific address or use the map picker.', 'error');
     }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error geocoding address. Please try again.');
-  })
-  .finally(() => {
+  }).catch(error => {
+    console.error('Geocoding error:', error);
+    showNotification('Error searching for address. Please try again or use the map picker.', 'error');
+  }).finally(() => {
     // Restore button
     button.innerHTML = originalText;
     button.disabled = false;
   });
+}
+
+// Geocode with Nominatim
+function geocodeWithNominatim(address, country) {
+  return fetch('{% url "geocode_address" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ 
+      address: address,
+      country: country
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      return {
+        success: true,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        accuracy: data.accuracy || 50,
+        address_components: data.address_components
+      };
+    }
+    return null;
+  })
+  .catch(error => {
+    console.error('Nominatim error:', error);
+    return null;
+  });
+}
+
+// Geocode with Photon API (alternative service)
+function geocodeWithPhoton(address, country) {
+  const photonUrl = `https://photon.komoot.io/api?q=${encodeURIComponent(address)}&limit=1`;
+  
+  return fetch(photonUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        const coords = feature.geometry.coordinates;
+        const properties = feature.properties;
+        
+        return {
+          success: true,
+          latitude: coords[1],
+          longitude: coords[0],
+          accuracy: properties.accuracy || 100,
+          address_components: {
+            house_number: properties.housenumber || '',
+            road: properties.street || '',
+            city: properties.city || properties.town || '',
+            state: properties.state || '',
+            postcode: properties.postcode || '',
+            country: properties.country || ''
+          }
+        };
+      }
+      return null;
+    })
+    .catch(error => {
+      console.error('Photon error:', error);
+      return null;
+    });
 }
 
 // Reverse geocode coordinates to address using Nominatim
