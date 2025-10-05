@@ -395,6 +395,7 @@ let locationPickerMarker;
 let geocoder;
 let selectedLocation = null;
 let locationAccuracy = null;
+let lastKnownLocation = null;
 
 // Initialize OpenStreetMap with Leaflet
 function initMap() {
@@ -442,7 +443,7 @@ function initMap() {
   });
 }
 
-// Simple HTML5 Geolocation API - No external services needed!
+// Improved HTML5 Geolocation with stability and accuracy
 function getCurrentLocation() {
   if (!navigator.geolocation) {
     showNotification('Geolocation is not supported by this browser.', 'error');
@@ -455,24 +456,96 @@ function getCurrentLocation() {
   button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location...';
   button.disabled = true;
   
+  // Improved options for better stability
   const options = {
     enableHighAccuracy: true,
-    timeout: 30000,
-    maximumAge: 0
+    timeout: 15000, // Reduced timeout for faster response
+    maximumAge: 30000 // Allow cached location up to 30 seconds old
   };
   
-  navigator.geolocation.getCurrentPosition(
-    function(position) {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      const accuracy = position.coords.accuracy;
+  // Try to get the most accurate location
+  let locationAttempts = 0;
+  const maxAttempts = 2;
+  let bestLocation = null;
+  let bestAccuracy = Infinity;
+  
+  function attemptLocation() {
+    locationAttempts++;
+    
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+        
+        // Check for location stability (prevent large jumps)
+        if (lastKnownLocation) {
+          const distance = calculateDistance(
+            lastKnownLocation.lat, lastKnownLocation.lng,
+            lat, lng
+          );
+          
+          // If location jumped more than 100m, it might be inaccurate
+          if (distance > 100) {
+            console.log('Location jump detected:', distance, 'meters');
+            // Use the more accurate of the two locations
+            if (accuracy < lastKnownLocation.accuracy) {
+              bestLocation = { lat, lng, accuracy };
+              bestAccuracy = accuracy;
+            } else {
+              bestLocation = lastKnownLocation;
+              bestAccuracy = lastKnownLocation.accuracy;
+            }
+          } else {
+            // Keep the most accurate location
+            if (accuracy < bestAccuracy) {
+              bestLocation = { lat, lng, accuracy };
+              bestAccuracy = accuracy;
+            }
+          }
+        } else {
+          // First location reading
+          if (accuracy < bestAccuracy) {
+            bestLocation = { lat, lng, accuracy };
+            bestAccuracy = accuracy;
+          }
+        }
+        
+        // If we have good accuracy or tried enough times, proceed
+        if (accuracy < 20 || locationAttempts >= maxAttempts) {
+          finalizeLocation();
+        } else {
+          // Wait a moment and try again for better accuracy
+          setTimeout(attemptLocation, 1000);
+        }
+      },
+      function(error) {
+        if (locationAttempts >= maxAttempts) {
+          handleLocationError(error);
+        } else {
+          // Retry on error
+          setTimeout(attemptLocation, 1000);
+        }
+      },
+      options
+    );
+  }
+  
+  function finalizeLocation() {
+    if (bestLocation) {
+      const lat = bestLocation.lat;
+      const lng = bestLocation.lng;
+      const accuracy = bestLocation.accuracy;
       
       // Store coordinates
       document.getElementById('latitude').value = lat;
       document.getElementById('longitude').value = lng;
       
-      // Update map
-      map.setView([lat, lng], 18);
+      // Update last known location for stability
+      lastKnownLocation = { lat, lng, accuracy };
+      
+      // Update map with stable view
+      map.setView([lat, lng], 17); // Slightly lower zoom for stability
       
       if (marker) {
         map.removeLayer(marker);
@@ -485,33 +558,51 @@ function getCurrentLocation() {
       reverseGeocode(lat, lng);
       
       showNotification(`Location detected with ${Math.round(accuracy)}m accuracy!`, 'success');
-    },
-    function(error) {
-      let errorMessage = 'Error getting location: ';
-      switch(error.code) {
-        case error.PERMISSION_DENIED:
-          errorMessage += 'Location access denied. Please allow location access and try again.';
-          break;
-        case error.POSITION_UNAVAILABLE:
-          errorMessage += 'Location information unavailable.';
-          break;
-        case error.TIMEOUT:
-          errorMessage += 'Location request timed out.';
-          break;
-        default:
-          errorMessage += error.message;
-          break;
-      }
-      showNotification(errorMessage, 'error');
-    },
-    options
-  );
-  
-  // Restore button
-  setTimeout(() => {
+    } else {
+      showNotification('Unable to get accurate location. Please try the map picker.', 'error');
+    }
+    
+    // Restore button
     button.innerHTML = originalText;
     button.disabled = false;
-  }, 3000);
+  }
+  
+  function handleLocationError(error) {
+    let errorMessage = 'Error getting location: ';
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        errorMessage += 'Location access denied. Please allow location access and try again.';
+        break;
+      case error.POSITION_UNAVAILABLE:
+        errorMessage += 'Location information unavailable.';
+        break;
+      case error.TIMEOUT:
+        errorMessage += 'Location request timed out.';
+        break;
+      default:
+        errorMessage += error.message;
+        break;
+    }
+    showNotification(errorMessage, 'error');
+    
+    // Restore button
+    button.innerHTML = originalText;
+    button.disabled = false;
+  }
+  
+  attemptLocation();
+}
+
+// Calculate distance between two coordinates in meters
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000; // Earth's radius in meters
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
 }
 
 // Open location picker modal
