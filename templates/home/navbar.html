@@ -214,6 +214,11 @@
               <i class="fas fa-home d-lg-none me-2"></i>Home
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'bar_home' %}">
+              <i class="fas fa-wine-bottle d-lg-none me-2"></i>A2Z Bar
+            </a>
+          </li>
           {% if user.is_authenticated %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'wishlist' %}">

@@ -20,8 +20,8 @@ class ProductVariantInline(admin.StackedInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['product_name', 'category', 'price', 'stock_quantity', 'is_in_stock', 'created_at']
-    list_filter = ['category', 'is_in_stock', 'newest_product', 'created_at']
+    list_display = ['product_name', 'category', 'section', 'price', 'stock_quantity', 'is_in_stock', 'created_at']
+    list_filter = ['category', 'section', 'is_in_stock', 'newest_product', 'created_at']
     search_fields = ['product_name', 'product_desription']
     prepopulated_fields = {'slug': ('product_name',)}
     inlines = [ProductImageAdmin, ProductVariantInline]

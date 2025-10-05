@@ -101,6 +101,14 @@ class Product(BaseModel):
     is_bestseller = models.BooleanField(default=False)
     is_new_arrival = models.BooleanField(default=False)
     
+    # Section categorization (Mart or Bar)
+    SECTION_CHOICES = [
+        ('mart', 'Mart'),
+        ('bar', 'Bar'),
+        ('both', 'Both Mart & Bar'),
+    ]
+    section = models.CharField(max_length=10, choices=SECTION_CHOICES, default='mart', help_text="Which section this product belongs to")
+    
     # Product relationships (non-symmetrical for ecommerce)
     related_products = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="related_to")
     bundle_products = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="bundled_with")

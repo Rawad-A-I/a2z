@@ -1,6 +1,7 @@
 from django.urls import path
 from products.views import *
 from products.employee_views import *
+from products.bar_views import *
 
 urlpatterns = [
     path('', product_list, name='product_list'),
@@ -25,4 +26,11 @@ urlpatterns = [
     path('employee/bulk-barcode/', bulk_barcode_upload, name='bulk_barcode_upload'),
     path('employee/barcode-search/', barcode_search, name='barcode_search'),
     path('employee/delete-barcode/<uuid:barcode_id>/', delete_barcode, name='delete_barcode'),
+    
+    # Bar section URLs
+    path('bar/', bar_home, name='bar_home'),
+    path('bar/products/', bar_products, name='bar_products'),
+    path('bar/product/<slug>/', bar_product_detail, name='bar_product_detail'),
+    path('bar/categories/', bar_categories, name='bar_categories'),
+    path('bar/add-to-cart/<uuid:product_id>/', add_to_bar_cart, name='add_to_bar_cart'),
 ]
