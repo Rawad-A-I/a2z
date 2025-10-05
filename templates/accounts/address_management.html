@@ -263,7 +263,7 @@
           <div class="alert alert-success">
             <i class="fas fa-map-marker-alt"></i>
             <strong>Delivery Area:</strong><br>
-            <small>We deliver to all areas within Lebanon</small>
+            <small>We deliver to all areas within Beirut</small>
           </div>
         </div>
       </div>
@@ -405,7 +405,6 @@ function initMap() {
       document.getElementById('latitude').value = lngLat.lat;
       document.getElementById('longitude').value = lngLat.lng;
       reverseGeocode(lngLat.lat, lngLat.lng);
-      // Removed unnecessary notification for marker drag
     });
     
     // Reverse geocode to get address
@@ -551,7 +550,6 @@ function getCurrentLocation() {
         document.getElementById('latitude').value = lngLat.lat;
         document.getElementById('longitude').value = lngLat.lng;
         reverseGeocode(lngLat.lat, lngLat.lng);
-        // Removed unnecessary notification for marker drag
       });
       
       // Reverse geocode to get address
@@ -690,7 +688,6 @@ function confirmLocation() {
       document.getElementById('latitude').value = lngLat.lat;
       document.getElementById('longitude').value = lngLat.lng;
       reverseGeocode(lngLat.lat, lngLat.lng);
-      // Removed unnecessary notification for marker drag
     });
     
     // Reverse geocode to get address
@@ -794,7 +791,6 @@ function reverseGeocode(lat, lng) {
           }
         }
         
-        // Removed unnecessary notification for address found
       } else {
         // Fallback to Django backend
         fetch('{% url "reverse_geocode" %}', {
@@ -892,7 +888,6 @@ function searchAddress() {
   
   const searchUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&types=address${countryBias}&limit=1`;
   
-  // Removed unnecessary notification for search start
   
   fetch(searchUrl)
     .then(response => response.json())
