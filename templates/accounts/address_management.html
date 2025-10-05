@@ -7,8 +7,8 @@
 <!-- Back Button -->
 {% include 'base/back_button.html' with back_text='Back' %}
 
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Mapbox GL CSS -->
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
 <style>
   .map-container {
     height: 400px;
@@ -144,9 +144,14 @@
                 <div class="col-12 col-md-6">
                   <div class="form-group">
                     <label for="address">Street Address</label>
-                    <input type="text" class="form-control" id="address" name="address" 
-                           value="{{ profile.street_address|default:'' }}"
-                           placeholder="Enter street address" required>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="address" name="address" 
+                             value="{{ profile.street_address|default:'' }}"
+                             placeholder="Enter street address" required>
+                      <button type="button" class="btn btn-outline-primary" onclick="searchAddress()" title="Search for this address on the map">
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div class="col-12 col-md-6">
@@ -385,8 +390,8 @@
   </div>
 </div>
 
-<!-- Leaflet JavaScript -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Mapbox GL JS -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 <script>
 let map;
 let marker;
@@ -397,7 +402,10 @@ let selectedLocation = null;
 let locationAccuracy = null;
 let lastKnownLocation = null;
 
-// Initialize OpenStreetMap with Leaflet
+// Set your Mapbox access token here
+mapboxgl.accessToken = 'pk.eyJ1IjoiYTJ6bWFydCIsImEiOiJjbWdka2twOTUxZ25wMmxzaGo4YmxtZGJoIn0.lCB72pJ1agzDaWPSocmdsg';
+
+// Initialize Mapbox GL JS
 function initMap() {
   // Use user's coordinates if available, otherwise default to Beirut, Lebanon
   let centerLat = 33.8938;
@@ -408,35 +416,50 @@ function initMap() {
     centerLng = {{ profile.longitude }};
   {% endif %}
   
-  map = L.map('map').setView([centerLat, centerLng], 15);
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [centerLng, centerLat],
+    zoom: 15
+  });
   
-  // Add OpenStreetMap tiles
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+  // Add navigation controls
+  map.addControl(new mapboxgl.NavigationControl());
+  
+  // Add geolocate control
+  map.addControl(new mapboxgl.GeolocateControl({
+    positionOptions: {
+      enableHighAccuracy: true
+    },
+    trackUserLocation: true,
+    showUserHeading: true
+  }));
   
   // Add user's current location marker if coordinates exist
   {% if profile.latitude and profile.longitude %}
-    marker = L.marker([{{ profile.latitude }}, {{ profile.longitude }}])
-      .addTo(map)
-      .bindPopup('Your Current Address')
-      .openPopup();
+    marker = new mapboxgl.Marker()
+      .setLngLat([{{ profile.longitude }}, {{ profile.latitude }}])
+      .setPopup(new mapboxgl.Popup().setHTML('Your Current Address'))
+      .addTo(map);
+    marker.getPopup().addTo(map);
   {% endif %}
   
   // Add click listener to map
   map.on('click', function(event) {
-    const lat = event.latlng.lat;
-    const lng = event.latlng.lng;
+    const lng = event.lngLat.lng;
+    const lat = event.lngLat.lat;
     
     document.getElementById('latitude').value = lat;
     document.getElementById('longitude').value = lng;
     
     // Update marker
     if (marker) {
-      map.removeLayer(marker);
+      marker.remove();
     }
     
-    marker = L.marker([lat, lng]).addTo(map);
+    marker = new mapboxgl.Marker()
+      .setLngLat([lng, lat])
+      .addTo(map);
     
     // Reverse geocode to get address
     reverseGeocode(lat, lng);
@@ -545,14 +568,18 @@ function getCurrentLocation() {
       lastKnownLocation = { lat, lng, accuracy };
       
       // Update map with stable view
-      map.setView([lat, lng], 17); // Slightly lower zoom for stability
+      map.setCenter([lng, lat]);
+      map.setZoom(17); // Slightly lower zoom for stability
       
       if (marker) {
-        map.removeLayer(marker);
+        marker.remove();
       }
       
-      marker = L.marker([lat, lng]).addTo(map);
-      marker.bindPopup(`Your Location<br>Accuracy: ${Math.round(accuracy)}m`).openPopup();
+      marker = new mapboxgl.Marker()
+        .setLngLat([lng, lat])
+        .setPopup(new mapboxgl.Popup().setHTML(`Your Location<br>Accuracy: ${Math.round(accuracy)}m`))
+        .addTo(map);
+      marker.getPopup().addTo(map);
       
       // Reverse geocode to get address
       reverseGeocode(lat, lng);
@@ -613,25 +640,32 @@ function openLocationPicker() {
   // Initialize location picker map
   setTimeout(() => {
     if (!locationPickerMap) {
-      locationPickerMap = L.map('locationPickerMap').setView([33.8938, 35.5018], 13);
+      locationPickerMap = new mapboxgl.Map({
+        container: 'locationPickerMap',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [35.5018, 33.8938],
+        zoom: 13
+      });
       
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(locationPickerMap);
+      // Add navigation controls
+      locationPickerMap.addControl(new mapboxgl.NavigationControl());
       
       // Add click listener
       locationPickerMap.on('click', function(event) {
-        const lat = event.latlng.lat;
-        const lng = event.latlng.lng;
+        const lng = event.lngLat.lng;
+        const lat = event.lngLat.lat;
         
         selectedLocation = { lat, lng };
         
         if (locationPickerMarker) {
-          locationPickerMap.removeLayer(locationPickerMarker);
+          locationPickerMarker.remove();
         }
         
-        locationPickerMarker = L.marker([lat, lng]).addTo(locationPickerMap);
-        locationPickerMarker.bindPopup('Selected Location').openPopup();
+        locationPickerMarker = new mapboxgl.Marker()
+          .setLngLat([lng, lat])
+          .setPopup(new mapboxgl.Popup().setHTML('Selected Location'))
+          .addTo(locationPickerMap);
+        locationPickerMarker.getPopup().addTo(locationPickerMap);
       });
     }
   }, 300);
@@ -647,14 +681,18 @@ function confirmLocation() {
     document.getElementById('longitude').value = lng;
     
     // Update main map
-    map.setView([lat, lng], 18);
+    map.setCenter([lng, lat]);
+    map.setZoom(18);
     
     if (marker) {
-      map.removeLayer(marker);
+      marker.remove();
     }
     
-    marker = L.marker([lat, lng]).addTo(map);
-    marker.bindPopup('Selected Location').openPopup();
+    marker = new mapboxgl.Marker()
+      .setLngLat([lng, lat])
+      .setPopup(new mapboxgl.Popup().setHTML('Selected Location'))
+      .addTo(map);
+    marker.getPopup().addTo(map);
     
     // Reverse geocode to get address
     reverseGeocode(lat, lng);
@@ -669,38 +707,228 @@ function confirmLocation() {
   }
 }
 
-// Simple reverse geocode using Nominatim
+// Enhanced reverse geocode using Mapbox Geocoding API
 function reverseGeocode(lat, lng) {
-  fetch('{% url "reverse_geocode" %}', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': '{{ csrf_token }}'
-    },
-    body: JSON.stringify({ latitude: lat, longitude: lng })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const addressComponents = data.address_components;
-      
-      // Parse address components
-      let streetNumber = addressComponents.house_number || '';
-      let route = addressComponents.road || '';
-      let city = addressComponents.city || addressComponents.town || addressComponents.village || '';
-      let state = addressComponents.state || '';
-      let zipCode = addressComponents.postcode || '';
-      
-      // Update form fields
-      document.getElementById('address').value = (streetNumber + ' ' + route).trim();
-      document.getElementById('city').value = city;
-      document.getElementById('state').value = state;
-      document.getElementById('zip_code').value = zipCode;
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
+  // Use Mapbox Geocoding API for better accuracy
+  const mapboxGeocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}&types=address`;
+  
+  fetch(mapboxGeocodingUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        const context = feature.context || [];
+        
+        // Parse Mapbox geocoding response
+        let streetNumber = '';
+        let route = '';
+        let city = '';
+        let state = '';
+        let zipCode = '';
+        let country = '';
+        
+        // Extract address components from context
+        context.forEach(item => {
+          if (item.id.startsWith('address')) {
+            streetNumber = item.text;
+          } else if (item.id.startsWith('street')) {
+            route = item.text;
+          } else if (item.id.startsWith('place')) {
+            city = item.text;
+          } else if (item.id.startsWith('region')) {
+            state = item.text;
+          } else if (item.id.startsWith('postcode')) {
+            zipCode = item.text;
+          } else if (item.id.startsWith('country')) {
+            country = item.text;
+          }
+        });
+        
+        // Update form fields
+        document.getElementById('address').value = (streetNumber + ' ' + route).trim();
+        document.getElementById('city').value = city;
+        document.getElementById('state').value = state;
+        document.getElementById('zip_code').value = zipCode;
+        
+        // Update country if found
+        if (country) {
+          const countrySelect = document.getElementById('country');
+          if (countrySelect) {
+            // Map country names to country codes
+            const countryMap = {
+              'Lebanon': 'LB',
+              'United States': 'US',
+              'Canada': 'CA',
+              'United Kingdom': 'UK',
+              'France': 'FR',
+              'Germany': 'DE',
+              'Italy': 'IT',
+              'Spain': 'ES',
+              'Australia': 'AU',
+              'Japan': 'JP',
+              'China': 'CN',
+              'India': 'IN',
+              'Brazil': 'BR',
+              'Mexico': 'MX',
+              'Russia': 'RU',
+              'Saudi Arabia': 'SA',
+              'United Arab Emirates': 'AE',
+              'Egypt': 'EG',
+              'Jordan': 'JO',
+              'Syria': 'SY',
+              'Turkey': 'TR',
+              'Iran': 'IR',
+              'Iraq': 'IQ',
+              'Kuwait': 'KW',
+              'Qatar': 'QA',
+              'Bahrain': 'BH',
+              'Oman': 'OM',
+              'Yemen': 'YE',
+              'Palestine': 'PS',
+              'Israel': 'IL',
+              'Cyprus': 'CY',
+              'Greece': 'GR'
+            };
+            
+            const countryCode = countryMap[country] || 'LB';
+            countrySelect.value = countryCode;
+          }
+        }
+        
+        showNotification('Address found using Mapbox!', 'success');
+      } else {
+        // Fallback to Django backend
+        fetch('{% url "reverse_geocode" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({ latitude: lat, longitude: lng })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const addressComponents = data.address_components;
+            
+            // Parse address components
+            let streetNumber = addressComponents.house_number || '';
+            let route = addressComponents.road || '';
+            let city = addressComponents.city || addressComponents.town || addressComponents.village || '';
+            let state = addressComponents.state || '';
+            let zipCode = addressComponents.postcode || '';
+            
+            // Update form fields
+            document.getElementById('address').value = (streetNumber + ' ' + route).trim();
+            document.getElementById('city').value = city;
+            document.getElementById('state').value = state;
+            document.getElementById('zip_code').value = zipCode;
+          }
+        })
+        .catch(error => {
+          console.error('Fallback geocoding error:', error);
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Mapbox geocoding error:', error);
+      // Fallback to Django backend
+      fetch('{% url "reverse_geocode" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ latitude: lat, longitude: lng })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const addressComponents = data.address_components;
+          
+          // Parse address components
+          let streetNumber = addressComponents.house_number || '';
+          let route = addressComponents.road || '';
+          let city = addressComponents.city || addressComponents.town || addressComponents.village || '';
+          let state = addressComponents.state || '';
+          let zipCode = addressComponents.postcode || '';
+          
+          // Update form fields
+          document.getElementById('address').value = (streetNumber + ' ' + route).trim();
+          document.getElementById('city').value = city;
+          document.getElementById('state').value = state;
+          document.getElementById('zip_code').value = zipCode;
+        }
+      })
+      .catch(error => {
+        console.error('Fallback geocoding error:', error);
+      });
+    });
+}
+
+// Forward geocoding - search for addresses using Mapbox
+function searchAddress() {
+  const addressInput = document.getElementById('address').value;
+  const cityInput = document.getElementById('city').value;
+  const stateInput = document.getElementById('state').value;
+  const countryInput = document.getElementById('country').value;
+  
+  if (!addressInput.trim()) {
+    showNotification('Please enter an address to search.', 'warning');
+    return;
+  }
+  
+  // Build search query
+  let query = addressInput;
+  if (cityInput) query += `, ${cityInput}`;
+  if (stateInput) query += `, ${stateInput}`;
+  
+  // Add country bias
+  let countryBias = '';
+  if (countryInput === 'LB') {
+    countryBias = '&country=LB';
+  } else if (countryInput === 'US') {
+    countryBias = '&country=US';
+  }
+  
+  const searchUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&types=address${countryBias}&limit=1`;
+  
+  showNotification('Searching for address...', 'info');
+  
+  fetch(searchUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        const [lng, lat] = feature.center;
+        
+        // Update coordinates
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        
+        // Update map
+        map.setCenter([lng, lat]);
+        map.setZoom(18);
+        
+        if (marker) {
+          marker.remove();
+        }
+        
+        marker = new mapboxgl.Marker()
+          .setLngLat([lng, lat])
+          .setPopup(new mapboxgl.Popup().setHTML('Found Address'))
+          .addTo(map);
+        marker.getPopup().addTo(map);
+        
+        showNotification('Address found!', 'success');
+      } else {
+        showNotification('Address not found. Please try a different search term.', 'warning');
+      }
+    })
+    .catch(error => {
+      console.error('Address search error:', error);
+      showNotification('Error searching for address. Please try again.', 'error');
+    });
 }
 
 // Notification system
