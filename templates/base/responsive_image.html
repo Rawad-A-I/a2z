@@ -1,0 +1,78 @@
+{% comment %}
+Responsive Image Template
+Usage: {% include 'base/responsive_image.html' with image=product.image alt=product.name class="product-image" %}
+{% endcomment %}
+
+{% load static %}
+
+{% if image %}
+  <picture class="responsive-image-container {{ class|default:'' }}">
+    <!-- WebP format for modern browsers -->
+    <source 
+      srcset="
+        {{ image.url }}?w=320&h=240&f=webp 320w,
+        {{ image.url }}?w=640&h=480&f=webp 640w,
+        {{ image.url }}?w=1280&h=960&f=webp 1280w
+      "
+      sizes="
+        (max-width: 640px) 320px,
+        (max-width: 1024px) 640px,
+        1280px
+      "
+      type="image/webp"
+    >
+    
+    <!-- AVIF format for cutting-edge browsers -->
+    <source 
+      srcset="
+        {{ image.url }}?w=320&h=240&f=avif 320w,
+        {{ image.url }}?w=640&h=480&f=avif 640w,
+        {{ image.url }}?w=1280&h=960&f=avif 1280w
+      "
+      sizes="
+        (max-width: 640px) 320px,
+        (max-width: 1024px) 640px,
+        1280px
+      "
+      type="image/avif"
+    >
+    
+    <!-- Fallback for older browsers -->
+    <img 
+      src="{{ image.url }}?w=640&h=480"
+      srcset="
+        {{ image.url }}?w=320&h=240 320w,
+        {{ image.url }}?w=640&h=480 640w,
+        {{ image.url }}?w=1280&h=960 1280w
+      "
+      sizes="
+        (max-width: 640px) 320px,
+        (max-width: 1024px) 640px,
+        1280px
+      "
+      alt="{{ alt|default:'Product image' }}"
+      class="responsive-img {{ class|default:'' }}"
+      loading="{{ loading|default:'lazy' }}"
+      decoding="async"
+      width="{{ width|default:640 }}"
+      height="{{ height|default:480 }}"
+      {% if aspect_ratio %}style="aspect-ratio: {{ aspect_ratio }};"{% endif %}
+    >
+  </picture>
+{% else %}
+  <!-- Placeholder for missing images -->
+  <div class="image-placeholder {{ class|default:'' }}" 
+       style="
+         width: 100%; 
+         height: {{ height|default:240 }}px; 
+         background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         border-radius: 0.5rem;
+         color: #9ca3af;
+         font-size: 1.5rem;
+       ">
+    <i class="fas fa-image"></i>
+  </div>
+{% endif %}

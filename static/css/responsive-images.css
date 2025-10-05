@@ -1,0 +1,376 @@
+/* ========================================
+   RESPONSIVE IMAGES SYSTEM
+   ======================================== */
+
+/* ========================================
+   1. BASE IMAGE STYLES
+   ======================================== */
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--border-radius-lg, 0.5rem);
+  transition: transform var(--transition-base, 0.3s ease);
+}
+
+/* ========================================
+   2. RESPONSIVE IMAGE CONTAINERS
+   ======================================== */
+
+.image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius-lg, 0.5rem);
+  background-color: var(--color-gray-100, #f3f4f6);
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow, 0.5s ease);
+}
+
+.image-container:hover img {
+  transform: scale(1.05);
+}
+
+/* ========================================
+   3. ASPECT RATIO CONTAINERS
+   ======================================== */
+
+.aspect-ratio {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+}
+
+.aspect-ratio::before {
+  content: '';
+  display: block;
+  padding-top: 100%; /* 1:1 aspect ratio by default */
+}
+
+.aspect-ratio img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Aspect Ratio Variants */
+.aspect-ratio-1-1::before { padding-top: 100%; }      /* 1:1 */
+.aspect-ratio-4-3::before { padding-top: 75%; }        /* 4:3 */
+.aspect-ratio-16-9::before { padding-top: 56.25%; }    /* 16:9 */
+.aspect-ratio-3-2::before { padding-top: 66.67%; }    /* 3:2 */
+.aspect-ratio-2-1::before { padding-top: 50%; }        /* 2:1 */
+.aspect-ratio-21-9::before { padding-top: 42.86%; }    /* 21:9 */
+
+/* ========================================
+   4. PRODUCT IMAGE STYLES
+   ======================================== */
+
+.product-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: var(--border-radius-lg, 0.5rem);
+  transition: all var(--transition-base, 0.3s ease);
+}
+
+.product-image:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+}
+
+/* Product image grid */
+.product-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4, 1rem);
+}
+
+.product-image-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius-lg, 0.5rem);
+  background-color: var(--color-gray-100, #f3f4f6);
+}
+
+.product-image-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform var(--transition-slow, 0.5s ease);
+}
+
+.product-image-item:hover img {
+  transform: scale(1.1);
+}
+
+/* ========================================
+   5. HERO IMAGE STYLES
+   ======================================== */
+
+.hero-image {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  min-height: 400px;
+  max-height: 600px;
+  overflow: hidden;
+  border-radius: var(--border-radius-2xl, 1rem);
+}
+
+.hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+.hero-image-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-8, 2rem);
+  color: white;
+  z-index: 2;
+}
+
+/* ========================================
+   6. AVATAR IMAGE STYLES
+   ======================================== */
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-gray-200, #e5e7eb);
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+}
+
+.avatar-xl {
+  width: 96px;
+  height: 96px;
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-primary, #6366f1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-semibold, 600);
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+/* ========================================
+   7. LOADING STATES
+   ======================================== */
+
+.image-loading {
+  position: relative;
+  background-color: var(--color-gray-100, #f3f4f6);
+  overflow: hidden;
+}
+
+.image-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.image-skeleton {
+  background-color: var(--color-gray-200, #e5e7eb);
+  border-radius: var(--border-radius-lg, 0.5rem);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ========================================
+   8. RESPONSIVE BREAKPOINTS
+   ======================================== */
+
+/* Mobile (320px - 639px) */
+@media (max-width: 639px) {
+  .product-image {
+    height: 200px;
+  }
+  
+  .hero-image {
+    height: 40vh;
+    min-height: 250px;
+  }
+  
+  .product-image-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-3, 0.75rem);
+  }
+  
+  .product-image-item img {
+    height: 150px;
+  }
+}
+
+/* Small devices (640px - 767px) */
+@media (min-width: 640px) and (max-width: 767px) {
+  .product-image {
+    height: 240px;
+  }
+  
+  .hero-image {
+    height: 50vh;
+    min-height: 300px;
+  }
+  
+  .product-image-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}
+
+/* Medium devices (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .product-image {
+    height: 260px;
+  }
+  
+  .hero-image {
+    height: 55vh;
+    min-height: 350px;
+  }
+  
+  .product-image-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Large devices (1024px+) */
+@media (min-width: 1024px) {
+  .product-image {
+    height: 280px;
+  }
+  
+  .hero-image {
+    height: 60vh;
+    min-height: 400px;
+  }
+  
+  .product-image-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+/* ========================================
+   9. ACCESSIBILITY
+   ======================================== */
+
+/* Focus styles for interactive images */
+.image-interactive:focus {
+  outline: 2px solid var(--color-primary, #6366f1);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .image-container {
+    border: 2px solid var(--color-gray-400, #9ca3af);
+  }
+  
+  .avatar {
+    border-width: 3px;
+  }
+}
+
+/* ========================================
+   10. PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* Lazy loading styles */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
+}
+
+/* Reduce animations on mobile */
+@media (max-width: 768px) {
+  .product-image:hover,
+  .image-container:hover img,
+  .product-image-item:hover img {
+    transform: none;
+  }
+  
+  .image-loading::before {
+    animation: none;
+  }
+}
+
+/* ========================================
+   11. PRINT STYLES
+   ======================================== */
+
+@media print {
+  .hero-image {
+    height: auto;
+    min-height: 200px;
+  }
+  
+  .product-image {
+    height: auto;
+    max-height: 200px;
+  }
+  
+  .image-container {
+    break-inside: avoid;
+  }
+}
