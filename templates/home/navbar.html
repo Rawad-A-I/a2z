@@ -191,32 +191,11 @@
               </a>
             </div>
 
-            <!-- Profile Icon -->
+            <!-- Account Menu (3-dash icon) -->
             <div class="widget-header icontext">
-              {% if user.is_authenticated %}
-                {% if user.profile.profile_image %}
-                  <a href="{% url 'profile' username=user.username %}" 
-                  class="icon icon-sm rounded-circle border">
-                    <img
-                      src="{{ user.profile.profile_image.url }}"
-                      alt="Profile Image"
-                      class="rounded-circle"
-                      width="42"
-                      height="42"
-                    />
-                  </a>
-                {% else %}
-                  <a
-                    href="{% url 'profile' username=user.username %}"
-                    class="icon icon-sm rounded-circle border">
-                    <i class="fa fa-user"></i>
-                  </a>
-                {% endif %}
-              {% else %}
-                <a href="{% url 'login' %}" class="icon icon-sm rounded-circle border">
-                  <i class="fa fa-user"></i>
-                </a>
-              {% endif %}
+              <button class="icon icon-sm rounded-circle border account-menu-btn" onclick="toggleSidePanel()" style="border: 1px solid #dee2e6; background: white; padding: 8px; cursor: pointer;">
+                <i class="fas fa-bars"></i>
+              </button>
 
               <!-- Welcome Text and Logout Link -->
               <div class="text d-none d-lg-block">

@@ -143,6 +143,51 @@
         }
       `;
       document.head.appendChild(style);
+
+      // Side Panel functionality
+      function toggleSidePanel() {
+        const sidePanel = document.getElementById('sidePanel');
+        const overlay = document.getElementById('sidePanelOverlay');
+        
+        if (sidePanel.classList.contains('open')) {
+          sidePanel.classList.remove('open');
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        } else {
+          sidePanel.classList.add('open');
+          overlay.classList.add('show');
+          document.body.style.overflow = 'hidden';
+        }
+      }
+
+      // Close side panel when clicking outside
+      document.addEventListener('click', function(e) {
+        const sidePanel = document.getElementById('sidePanel');
+        const overlay = document.getElementById('sidePanelOverlay');
+        const menuBtn = document.querySelector('.account-menu-btn');
+        
+        if (sidePanel.classList.contains('open') && 
+            !sidePanel.contains(e.target) && 
+            !menuBtn.contains(e.target)) {
+          sidePanel.classList.remove('open');
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        }
+      });
+
+      // Close side panel on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          const sidePanel = document.getElementById('sidePanel');
+          const overlay = document.getElementById('sidePanelOverlay');
+          
+          if (sidePanel.classList.contains('open')) {
+            sidePanel.classList.remove('open');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+          }
+        }
+      });
     </script>
   </head>
 
@@ -589,13 +634,300 @@
         font-size: 2.5rem;
       }
       
+      .hero-subtitle {
+        font-size: 1.1rem;
+      }
+      
+      .hero-buttons {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .hero-buttons .btn {
+        width: 100%;
+        margin: 0;
+      }
+      
       .card-product-grid:hover {
         transform: translateY(-5px) scale(1.01);
       }
       
       .btn {
-        padding: 10px 20px;
+        padding: 12px 24px;
         font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      
+      .container {
+        padding: 0 10px;
+      }
+      
+      .row {
+        margin: 0 -5px;
+      }
+      
+      .col-lg-3, .col-md-4, .col-sm-6 {
+        padding: 0 5px;
+        margin-bottom: 15px;
+      }
+      
+      .filter-section .row {
+        margin: 0;
+      }
+      
+      .form-group {
+        margin-bottom: 15px;
+      }
+      
+      .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 12px 15px;
+      }
+      
+      .navbar-nav {
+        text-align: center;
+      }
+      
+      .nav-link {
+        padding: 15px 10px;
+        font-size: 1.1rem;
+      }
+      
+      .hero-section {
+        padding: 40px 0;
+      }
+      
+      .hero-image img {
+        max-height: 300px;
+        margin-top: 20px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+      
+      .btn {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+      }
+      
+      .card-product-grid {
+        margin-bottom: 20px;
+      }
+      
+      .info-wrap {
+        padding: 15px;
+      }
+      
+      .price {
+        font-size: 1.2rem;
+      }
+      
+      .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .page-link {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* Side Panel Styles */
+    .side-panel {
+      position: fixed;
+      top: 0;
+      right: -350px;
+      width: 350px;
+      height: 100vh;
+      background: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      z-index: 1050;
+      transition: right 0.3s ease;
+      overflow-y: auto;
+    }
+    
+    .side-panel.open {
+      right: 0;
+    }
+    
+    .side-panel-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1040;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .side-panel-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .side-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+    }
+    
+    .side-panel-header h5 {
+      margin: 0;
+      font-weight: 600;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+    
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .side-panel-content {
+      padding: 20px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    
+    .profile-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+    
+    .profile-placeholder {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-size: 20px;
+    }
+    
+    .user-details h6 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--dark-color);
+    }
+    
+    .user-details small {
+      color: #6c757d;
+    }
+    
+    .menu-items {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      color: var(--dark-color);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .menu-item:hover {
+      background: #f8f9fa;
+      color: var(--primary-color);
+      text-decoration: none;
+      transform: translateX(5px);
+    }
+    
+    .menu-item i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .menu-item.logout {
+      color: #dc3545;
+    }
+    
+    .menu-item.logout:hover {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .menu-item hr {
+      margin: 10px 0;
+      border: none;
+      border-top: 1px solid #eee;
+    }
+    
+    /* Mobile Side Panel */
+    @media (max-width: 768px) {
+      .side-panel {
+        width: 100%;
+        right: -100%;
+      }
+      
+      .side-panel.open {
+        right: 0;
+      }
+      
+      .side-panel-content {
+        padding: 15px;
+      }
+      
+      .menu-item {
+        padding: 15px;
+        font-size: 1.1rem;
+      }
+      
+      .user-info {
+        padding: 20px;
+      }
+      
+      .profile-img, .profile-placeholder {
+        width: 60px;
+        height: 60px;
       }
     }
   </style>
@@ -603,5 +935,69 @@
     {% include 'home/navbar.html' %}
     {% block start %} {% endblock %}
     {% include 'home/footer.html' %}
+    
+    <!-- Side Panel -->
+    <div id="sidePanel" class="side-panel">
+      <div class="side-panel-header">
+        <h5>Account Menu</h5>
+        <button class="close-btn" onclick="toggleSidePanel()">&times;</button>
+      </div>
+      <div class="side-panel-content">
+        {% if user.is_authenticated %}
+          <div class="user-info">
+            {% if user.profile.profile_image %}
+              <img src="{{ user.profile.profile_image.url }}" alt="Profile" class="profile-img">
+            {% else %}
+              <div class="profile-placeholder">
+                <i class="fas fa-user"></i>
+              </div>
+            {% endif %}
+            <div class="user-details">
+              <h6>{{ user.username }}</h6>
+              <small class="text-muted">{{ user.email }}</small>
+            </div>
+          </div>
+          
+          <div class="menu-items">
+            <a href="{% url 'profile' username=user.username %}" class="menu-item">
+              <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="{% url 'wishlist' %}" class="menu-item">
+              <i class="fas fa-heart"></i> Wishlist ({{ request.user.wishlist.count }})
+            </a>
+            <a href="{% url 'order_history' %}" class="menu-item">
+              <i class="fas fa-shopping-bag"></i> Your Orders
+            </a>
+            <a href="{% url 'product_reviews' %}" class="menu-item">
+              <i class="fas fa-star"></i> Your Reviews
+            </a>
+            <a href="{% url 'address_management' %}" class="menu-item">
+              <i class="fas fa-map-marker-alt"></i> Address Management
+            </a>
+            {% if request.user.is_staff %}
+            <a href="{% url 'employee_hub' %}" class="menu-item">
+              <i class="fas fa-briefcase"></i> Employee Hub
+            </a>
+            {% endif %}
+            <hr>
+            <a href="{% url 'logout' %}" class="menu-item logout">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </div>
+        {% else %}
+          <div class="menu-items">
+            <a href="{% url 'login' %}" class="menu-item">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+            <a href="{% url 'register' %}" class="menu-item">
+              <i class="fas fa-user-plus"></i> Register
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <!-- Side Panel Overlay -->
+    <div id="sidePanelOverlay" class="side-panel-overlay" onclick="toggleSidePanel()"></div>
   </body>
 </html>
