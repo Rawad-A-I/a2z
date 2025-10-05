@@ -64,6 +64,24 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
+                                <label for="{{ form.low_stock_threshold.id_for_label }}" class="form-label">Low Stock Threshold</label>
+                                {{ form.low_stock_threshold }}
+                                {% if form.low_stock_threshold.errors %}
+                                    <div class="text-danger">{{ form.low_stock_threshold.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.weight.id_for_label }}" class="form-label">Weight (kg)</label>
+                                {{ form.weight }}
+                                {% if form.weight.errors %}
+                                    <div class="text-danger">{{ form.weight.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.dimensions.id_for_label }}" class="form-label">Dimensions</label>
                                 {{ form.dimensions }}
                                 {% if form.dimensions.errors %}
@@ -72,17 +90,80 @@
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <!-- Empty column for layout balance -->
+                                <label for="{{ form.section.id_for_label }}" class="form-label">Section</label>
+                                {{ form.section }}
+                                {% if form.section.errors %}
+                                    <div class="text-danger">{{ form.section.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Marketing Flags -->
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Marketing Flags</label>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.is_in_stock }}
+                                            <label class="form-check-label" for="{{ form.is_in_stock.id_for_label }}">
+                                                In Stock
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.is_featured }}
+                                            <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                                Featured
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.is_bestseller }}
+                                            <label class="form-check-label" for="{{ form.is_bestseller.id_for_label }}">
+                                                Bestseller
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.is_new_arrival }}
+                                            <label class="form-check-label" for="{{ form.is_new_arrival.id_for_label }}">
+                                                New Arrival
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.meta_title.id_for_label }}" class="form-label">SEO Title</label>
+                                {{ form.meta_title }}
+                                {% if form.meta_title.errors %}
+                                    <div class="text-danger">{{ form.meta_title.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.keywords.id_for_label }}" class="form-label">Keywords</label>
+                                {{ form.keywords }}
+                                {% if form.keywords.errors %}
+                                    <div class="text-danger">{{ form.keywords.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <div class="form-check">
-                                {{ form.is_in_stock }}
-                                <label class="form-check-label" for="{{ form.is_in_stock.id_for_label }}">
-                                    Product is in stock
-                                </label>
-                            </div>
+                            <label for="{{ form.meta_description.id_for_label }}" class="form-label">SEO Description</label>
+                            {{ form.meta_description }}
+                            {% if form.meta_description.errors %}
+                                <div class="text-danger">{{ form.meta_description.errors }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="alert alert-info">
