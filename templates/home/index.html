@@ -1,16 +1,11 @@
 {% extends "base/base.html"%} 
 {% block start %}
-<!-- Header Section with Back Button and Browse -->
+<!-- Header Section with Back Button -->
 <div class="container mt-4 mb-4">
-  <div class="row align-items-center">
-    <div class="col-md-6">
+  <div class="row">
+    <div class="col-12">
       <a href="{% url 'redirect_homepage' %}" class="btn btn-outline-primary">
         <i class="fas fa-arrow-left"></i> Back to Platform
-      </a>
-    </div>
-    <div class="col-md-6 text-md-end">
-      <a href="{% url 'products_only' %}" class="btn btn-primary btn-lg">
-        <i class="fas fa-th-large"></i> Browse Categories
       </a>
     </div>
   </div>
