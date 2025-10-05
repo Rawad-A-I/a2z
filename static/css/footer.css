@@ -423,27 +423,6 @@
   color: #f73232 !important;
 }
 
-.header-banner {
-  background-color: #4757d2;
-  text-align: center;
-  color: #fff;
-}
-
-.slide-up {
-  -webkit-transition-duration: 0.5s;
-  transition-duration: 0.5s;
-  -webkit-transition-timing-function: ease-in;
-  transition-timing-function: ease-in;
-  max-height: 100px;
-  overflow: hidden;
-}
-
-.header-banner .content {
-  margin-right: 0;
-  padding-top: 0.3125rem;
-  padding-bottom: 0.15625rem;
-  height: 2.1875rem;
-}
 
 .scroll-top {
   width: 40px;
