@@ -255,19 +255,45 @@ def add_product(request):
         if form.is_valid():
             product = form.save()
             
-            # Generate barcode if none provided
-            if not product.barcodes.exists():
+            # Handle barcode creation
+            barcode_value = request.POST.get('barcode_value', '').strip()
+            barcode_type = request.POST.get('barcode_type', 'GENERATED')
+            is_primary = request.POST.get('is_primary') == 'on'
+            is_active = request.POST.get('is_active') == 'on'
+            barcode_notes = request.POST.get('barcode_notes', '')
+            
+            # Create barcode if provided or generate one
+            if barcode_value:
+                # Check if barcode already exists
+                if Barcode.objects.filter(barcode_value=barcode_value).exists():
+                    messages.error(request, f'Barcode {barcode_value} already exists. Please use a different barcode.')
+                    context = {
+                        'form': form,
+                        'categories': Category.objects.all(),
+                    }
+                    return render(request, 'products/add_product.html', context)
+                
+                Barcode.objects.create(
+                    product=product,
+                    barcode_value=barcode_value,
+                    barcode_type=barcode_type,
+                    is_primary=is_primary,
+                    is_active=is_active,
+                    notes=barcode_notes
+                )
+                messages.success(request, f'Product "{product.product_name}" created with barcode: {barcode_value}')
+            else:
+                # Auto-generate barcode
                 barcode_value = Barcode.generate_barcode()
                 Barcode.objects.create(
                     product=product,
                     barcode_value=barcode_value,
                     barcode_type='GENERATED',
                     is_primary=True,
+                    is_active=True,
                     notes='Auto-generated barcode'
                 )
                 messages.success(request, f'Product "{product.product_name}" created with auto-generated barcode: {barcode_value}')
-            else:
-                messages.success(request, f'Product "{product.product_name}" created successfully.')
             
             return redirect('employee_product_management')
     else:
