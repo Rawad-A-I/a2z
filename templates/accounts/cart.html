@@ -2,6 +2,13 @@
 {% block title %}Shopping Cart{% endblock %}
 {% block start %} {% load static %}
 
+<!-- Back Button -->
+<div class="container mt-3">
+  <button onclick="history.back()" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Back
+  </button>
+</div>
+
 <style>
   @media (max-width: 768px) {
     .table-shopping-cart {
