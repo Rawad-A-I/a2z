@@ -1,6 +1,106 @@
 {% load static %}
 
 <style>
+  /* Enhanced Cart Icon Styles */
+  .cart-icon-wrapper {
+    display: inline-block;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cart-icon-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  }
+
+  .cart-icon-wrapper:hover .cart-icon {
+    transform: scale(1.1);
+  }
+
+  .cart-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: transform 0.3s ease;
+  }
+
+  .cart-icon svg {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+    animation: pulse 2s infinite;
+    border: 2px solid white;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .cart-icon-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+
+  .cart-icon-wrapper:hover::before {
+    transform: translateX(100%);
+  }
+
+  /* Mobile responsive cart icon */
+  @media (max-width: 768px) {
+    .cart-icon-wrapper {
+      padding: 10px;
+    }
+    
+    .cart-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .cart-badge {
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+    }
+  }
+
   /* Mobile-first responsive styles */
   @media (max-width: 992px) {
     .widgets-wrap {
@@ -179,12 +279,17 @@
         <div class="col-lg-4 col-12">
           <div class="widgets-wrap d-flex justify-content-center justify-content-lg-end flex-wrap">
 
-            <!-- Cart Icon with badge -->
+            <!-- Enhanced Cart Icon with modern styling -->
             <div class="widget-header me-3">
-              <a href="{% url 'cart' %}" class="icon icon-sm rounded-circle border position-relative">
-                <i class="fa fa-shopping-cart"></i>
+              <a href="{% url 'cart' %}" class="cart-icon-wrapper position-relative">
+                <div class="cart-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z" fill="currentColor"/>
+                    <path d="M9 8V17H11V8H9ZM13 8V17H15V8H13Z" fill="currentColor"/>
+                  </svg>
+                </div>
                 {% if user.is_authenticated and request.user.profile.get_cart_count > 0 %}
-                  <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
+                  <span class="cart-badge">
                     {{request.user.profile.get_cart_count}}
                   </span>
                 {% endif %}
