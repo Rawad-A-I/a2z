@@ -13,7 +13,8 @@ urlpatterns = [
     path('', views.redirect_homepage, name='redirect_homepage'),
     
     # Platform-specific pages
-    path('a2z-mart/', views.index, name='index'),  # Main e-commerce site
+    path('a2z-mart/', views.index, name='index'),  # Main e-commerce site with hero
+    path('a2z-mart/products/', views.products_only, name='products_only'),  # Products only view
     path('a2z-bar/', lambda request: redirect('/products/bar/'), name='a2z_bar_redirect'),  # Redirect to new bar system
     path('rayan-brayan/', views.rayan_brayan, name='rayan_brayan'),  # Rayan O Brayan community
     

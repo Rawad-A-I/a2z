@@ -93,7 +93,7 @@
 <header class="section-header">
   <nav class="navbar navbar-dark navbar-expand-lg bg-dark">
     <div class="container">
-      <a class="navbar-brand d-lg-none" href="{% url 'index' %}">
+      <a class="navbar-brand d-lg-none" href="{% url 'products_only' %}">
         <img src="{% static 'images/logo.png' %}" alt="Logo" height="30">
       </a>
       <button
@@ -110,7 +110,7 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'index' %}">
+            <a class="nav-link" href="{% url 'products_only' %}">
               <i class="fas fa-home d-lg-none me-2"></i>Home
             </a>
           </li>
@@ -157,7 +157,7 @@
       <div class="row align-items-center">
         <div class="col-lg-2 col-4 d-none d-lg-block">
           <div class="brand-wrap">
-            <a href="{% url 'index' %}">
+            <a href="{% url 'products_only' %}">
               <img class="logo" src="{% static 'images/logo.png' %}" alt="Logo" />
             </a>
           </div>
