@@ -216,7 +216,17 @@
               <div class="row mb-3">
                 <div class="col-md-4">
                   <label for="id_phone_country_code" class="form-label">Country Code</label>
-                  {{ profile_form.phone_country_code }}
+                  {% if profile_form.phone_country_code %}
+                    {{ profile_form.phone_country_code }}
+                  {% else %}
+                    <select class="form-control" name="phone_country_code" id="id_phone_country_code" required>
+                      <option value="+961" selected>+961 (Lebanon)</option>
+                      <option value="+1">+1 (USA/Canada)</option>
+                      <option value="+44">+44 (UK)</option>
+                      <option value="+33">+33 (France)</option>
+                      <option value="+49">+49 (Germany)</option>
+                    </select>
+                  {% endif %}
                 </div>
                 <div class="col-md-8">
                   <label for="id_phone_number" class="form-label">Phone Number</label>

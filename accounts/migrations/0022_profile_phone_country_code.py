@@ -1,0 +1,18 @@
+# Generated manually for phone_country_code field
+
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('accounts', '0021_profile_city_profile_country_profile_latitude_and_more'),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name='profile',
+            name='phone_country_code',
+            field=models.CharField(blank=True, default='+961', max_length=5, null=True),
+        ),
+    ]

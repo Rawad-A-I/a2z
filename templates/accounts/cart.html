@@ -208,7 +208,7 @@
                 <i class="fa fa-check-circle"></i>
                 <strong>Ready for Order:</strong> Your address is verified and phone number is provided.
                 <br>
-                <small>Address: {{ user.profile.shipping_address|default:"Not set" }} | Phone: {{ user.profile.phone_country_code|default:"+961" }} {{ user.profile.phone_number|default:"Not set" }}</small>
+                <small>Address: {{ user.profile.shipping_address|default:"Not set" }} | Phone: {% if user.profile.phone_country_code %}{{ user.profile.phone_country_code }}{% else %}+961{% endif %} {{ user.profile.phone_number|default:"Not set" }}</small>
               </div>
               {% endif %}
             </div>
