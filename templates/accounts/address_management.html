@@ -277,9 +277,11 @@
                 <i class="fas fa-info-circle"></i>
                 <strong>Location Options:</strong>
                 <ul class="mb-0 mt-2">
-                  <li><strong>Use My Current Location:</strong> Uses your device's GPS for accurate location (5-20m accuracy)</li>
+                  <li><strong>Use My Current Location:</strong> Uses your device's GPS for accurate location (5-20m accuracy on mobile, 20-100m on desktop)</li>
                   <li><strong>Pick on Map:</strong> Manually select your exact location on the map</li>
+                  <li><strong>Search Address:</strong> Type your address and click the search icon for precise location</li>
                   <li><strong>Fill Address Form:</strong> Enter your address details manually</li>
+                  <li><strong>Desktop Users:</strong> GPS accuracy may be limited. Use address search for best results!</li>
                 </ul>
               </div>
             </div>
@@ -466,7 +468,13 @@ function initMap() {
   });
 }
 
-// Improved HTML5 Geolocation with stability and accuracy
+// Device detection for optimized location services
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+         (window.innerWidth <= 768);
+}
+
+// Improved HTML5 Geolocation with device-specific optimization
 function getCurrentLocation() {
   if (!navigator.geolocation) {
     showNotification('Geolocation is not supported by this browser.', 'error');
@@ -478,22 +486,29 @@ function getCurrentLocation() {
   const originalText = button.innerHTML;
   button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location...';
   button.disabled = true;
+
+  const isMobile = isMobileDevice();
   
-  // Improved options for better stability
+  // Device-specific options for optimal performance
   const options = {
     enableHighAccuracy: true,
-    timeout: 15000, // Reduced timeout for faster response
-    maximumAge: 30000 // Allow cached location up to 30 seconds old
+    timeout: isMobile ? 15000 : 25000, // Longer timeout for desktop
+    maximumAge: isMobile ? 30000 : 60000 // Longer cache for desktop
   };
   
   // Try to get the most accurate location
   let locationAttempts = 0;
-  const maxAttempts = 2;
+  const maxAttempts = isMobile ? 2 : 3; // More attempts for desktop
   let bestLocation = null;
   let bestAccuracy = Infinity;
   
   function attemptLocation() {
     locationAttempts++;
+    
+    // For desktop, try to get a fresh location if we have cached data
+    if (!isMobile && lastKnownLocation && locationAttempts === 1) {
+      options.maximumAge = 0; // Force fresh location on first attempt
+    }
     
     navigator.geolocation.getCurrentPosition(
       function(position) {
@@ -534,13 +549,17 @@ function getCurrentLocation() {
           }
         }
         
-        // If we have good accuracy or tried enough times, proceed
-        if (accuracy < 20 || locationAttempts >= maxAttempts) {
-          finalizeLocation();
-        } else {
-          // Wait a moment and try again for better accuracy
-          setTimeout(attemptLocation, 1000);
-        }
+          // Desktop-specific accuracy thresholds
+          const accuracyThreshold = isMobile ? 20 : 50; // More lenient for desktop
+          
+          // If we have good accuracy or tried enough times, proceed
+          if (accuracy < accuracyThreshold || locationAttempts >= maxAttempts) {
+            finalizeLocation();
+          } else {
+            // Wait longer for desktop to allow GPS to stabilize
+            const waitTime = isMobile ? 1000 : 2000;
+            setTimeout(attemptLocation, waitTime);
+          }
       },
       function(error) {
         if (locationAttempts >= maxAttempts) {
@@ -584,7 +603,12 @@ function getCurrentLocation() {
       // Reverse geocode to get address
       reverseGeocode(lat, lng);
       
-      showNotification(`Location detected with ${Math.round(accuracy)}m accuracy!`, 'success');
+      // Device-specific success messages
+      if (isMobile) {
+        showNotification(`Location detected with ${Math.round(accuracy)}m accuracy!`, 'success');
+      } else {
+        showNotification(`Desktop location detected with ${Math.round(accuracy)}m accuracy! For better accuracy, try the address search feature.`, 'success');
+      }
     } else {
       showNotification('Unable to get accurate location. Please try the map picker.', 'error');
     }
@@ -594,28 +618,34 @@ function getCurrentLocation() {
     button.disabled = false;
   }
   
-  function handleLocationError(error) {
-    let errorMessage = 'Error getting location: ';
-    switch(error.code) {
-      case error.PERMISSION_DENIED:
-        errorMessage += 'Location access denied. Please allow location access and try again.';
-        break;
-      case error.POSITION_UNAVAILABLE:
-        errorMessage += 'Location information unavailable.';
-        break;
-      case error.TIMEOUT:
-        errorMessage += 'Location request timed out.';
-        break;
-      default:
-        errorMessage += error.message;
-        break;
+    function handleLocationError(error) {
+      let errorMessage = 'Error getting location: ';
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage += 'Location access denied. Please allow location access and try again.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage += 'Location information unavailable.';
+          break;
+        case error.TIMEOUT:
+          errorMessage += 'Location request timed out.';
+          break;
+        default:
+          errorMessage += error.message;
+          break;
+      }
+      
+      // For desktop, suggest using address search as fallback
+      if (!isMobile) {
+        errorMessage += ' Try using the address search feature instead.';
+      }
+      
+      showNotification(errorMessage, 'error');
+
+      // Restore button
+      button.innerHTML = originalText;
+      button.disabled = false;
     }
-    showNotification(errorMessage, 'error');
-    
-    // Restore button
-    button.innerHTML = originalText;
-    button.disabled = false;
-  }
   
   attemptLocation();
 }
