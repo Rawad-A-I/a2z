@@ -33,7 +33,7 @@ class Profile(BaseModel):
     city = models.CharField(max_length=100, null=True, blank=True)
     state = models.CharField(max_length=100, null=True, blank=True)
     zip_code = models.CharField(max_length=20, null=True, blank=True)
-    country = models.CharField(max_length=100, default='US')
+    country = models.CharField(max_length=100, default='LB')
     
     def save(self, *args, **kwargs):
         # Check if the profile image is being updated and profile exists

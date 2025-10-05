@@ -55,6 +55,66 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,123,255,0.3);
   }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 10px;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .btn-group .btn {
+      width: 100%;
+    }
+    
+    .map-container {
+      height: 300px;
+    }
+    
+    .store-card {
+      padding: 10px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .address-form {
+      padding: 15px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .container {
+      padding: 0 5px;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .map-container {
+      height: 250px;
+    }
+    
+    .btn {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .form-control {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
 </style>
 
 <div class="container mt-4">
@@ -81,7 +141,7 @@
             <form method="POST" action="{% url 'update_shipping_address' %}">
               {% csrf_token %}
               <div class="row">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                   <div class="form-group">
                     <label for="address">Street Address</label>
                     <input type="text" class="form-control" id="address" name="address" 
@@ -89,7 +149,7 @@
                            placeholder="Enter street address" required>
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                   <div class="form-group">
                     <label for="city">City</label>
                     <input type="text" class="form-control" id="city" name="city" 
@@ -100,30 +160,59 @@
               </div>
               
               <div class="row">
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                   <div class="form-group">
-                    <label for="state">State</label>
+                    <label for="state">State/Governorate</label>
                     <input type="text" class="form-control" id="state" name="state" 
                            value="{{ profile.state|default:'' }}"
-                           placeholder="Enter state" required>
+                           placeholder="Enter state or governorate" required>
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                   <div class="form-group">
-                    <label for="zip_code">ZIP Code</label>
+                    <label for="zip_code">ZIP/Postal Code</label>
                     <input type="text" class="form-control" id="zip_code" name="zip_code" 
                            value="{{ profile.zip_code|default:'' }}"
-                           placeholder="Enter ZIP code" required>
+                           placeholder="Enter postal code" required>
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                   <div class="form-group">
                     <label for="country">Country</label>
                     <select class="form-control" id="country" name="country">
+                      <option value="LB" {% if profile.country == 'LB' %}selected{% endif %}>Lebanon</option>
                       <option value="US" {% if profile.country == 'US' %}selected{% endif %}>United States</option>
                       <option value="CA" {% if profile.country == 'CA' %}selected{% endif %}>Canada</option>
                       <option value="UK" {% if profile.country == 'UK' %}selected{% endif %}>United Kingdom</option>
+                      <option value="FR" {% if profile.country == 'FR' %}selected{% endif %}>France</option>
+                      <option value="DE" {% if profile.country == 'DE' %}selected{% endif %}>Germany</option>
+                      <option value="IT" {% if profile.country == 'IT' %}selected{% endif %}>Italy</option>
+                      <option value="ES" {% if profile.country == 'ES' %}selected{% endif %}>Spain</option>
                       <option value="AU" {% if profile.country == 'AU' %}selected{% endif %}>Australia</option>
+                      <option value="JP" {% if profile.country == 'JP' %}selected{% endif %}>Japan</option>
+                      <option value="CN" {% if profile.country == 'CN' %}selected{% endif %}>China</option>
+                      <option value="IN" {% if profile.country == 'IN' %}selected{% endif %}>India</option>
+                      <option value="BR" {% if profile.country == 'BR' %}selected{% endif %}>Brazil</option>
+                      <option value="MX" {% if profile.country == 'MX' %}selected{% endif %}>Mexico</option>
+                      <option value="RU" {% if profile.country == 'RU' %}selected{% endif %}>Russia</option>
+                      <option value="SA" {% if profile.country == 'SA' %}selected{% endif %}>Saudi Arabia</option>
+                      <option value="AE" {% if profile.country == 'AE' %}selected{% endif %}>United Arab Emirates</option>
+                      <option value="EG" {% if profile.country == 'EG' %}selected{% endif %}>Egypt</option>
+                      <option value="JO" {% if profile.country == 'JO' %}selected{% endif %}>Jordan</option>
+                      <option value="SY" {% if profile.country == 'SY' %}selected{% endif %}>Syria</option>
+                      <option value="TR" {% if profile.country == 'TR' %}selected{% endif %}>Turkey</option>
+                      <option value="IR" {% if profile.country == 'IR' %}selected{% endif %}>Iran</option>
+                      <option value="IQ" {% if profile.country == 'IQ' %}selected{% endif %}>Iraq</option>
+                      <option value="KW" {% if profile.country == 'KW' %}selected{% endif %}>Kuwait</option>
+                      <option value="QA" {% if profile.country == 'QA' %}selected{% endif %}>Qatar</option>
+                      <option value="BH" {% if profile.country == 'BH' %}selected{% endif %}>Bahrain</option>
+                      <option value="OM" {% if profile.country == 'OM' %}selected{% endif %}>Oman</option>
+                      <option value="YE" {% if profile.country == 'YE' %}selected{% endif %}>Yemen</option>
+                      <option value="PS" {% if profile.country == 'PS' %}selected{% endif %}>Palestine</option>
+                      <option value="IL" {% if profile.country == 'IL' %}selected{% endif %}>Israel</option>
+                      <option value="CY" {% if profile.country == 'CY' %}selected{% endif %}>Cyprus</option>
+                      <option value="GR" {% if profile.country == 'GR' %}selected{% endif %}>Greece</option>
+                      <option value="OTHER" {% if profile.country == 'OTHER' %}selected{% endif %}>Other</option>
                     </select>
                   </div>
                 </div>
@@ -134,15 +223,28 @@
               <input type="hidden" id="longitude" name="longitude">
               
               <div class="text-center">
-                <button type="button" class="btn btn-locate" onclick="locateUser()">
-                  <i class="fas fa-crosshairs"></i> Use Current Location
-                </button>
-                <button type="button" class="btn btn-outline-primary ml-2" onclick="geocodeAddress()">
-                  <i class="fas fa-search"></i> Find on Map
-                </button>
-                <button type="submit" class="btn btn-success ml-2">
-                  <i class="fas fa-save"></i> Save Address
-                </button>
+                <div class="btn-group-vertical w-100 d-md-none">
+                  <button type="button" class="btn btn-locate mb-2" onclick="locateUser()">
+                    <i class="fas fa-crosshairs"></i> Use Current Location
+                  </button>
+                  <button type="button" class="btn btn-outline-primary mb-2" onclick="geocodeAddress()">
+                    <i class="fas fa-search"></i> Find on Map
+                  </button>
+                  <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Save Address
+                  </button>
+                </div>
+                <div class="d-none d-md-block">
+                  <button type="button" class="btn btn-locate" onclick="locateUser()">
+                    <i class="fas fa-crosshairs"></i> Use Current Location
+                  </button>
+                  <button type="button" class="btn btn-outline-primary ml-2" onclick="geocodeAddress()">
+                    <i class="fas fa-search"></i> Find on Map
+                  </button>
+                  <button type="submit" class="btn btn-success ml-2">
+                    <i class="fas fa-save"></i> Save Address
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -210,9 +312,9 @@ let geocoder;
 
 // Initialize OpenStreetMap with Leaflet
 function initMap() {
-  // Use user's coordinates if available, otherwise default to NYC
-  let centerLat = 40.7128;
-  let centerLng = -74.0060;
+  // Use user's coordinates if available, otherwise default to Beirut, Lebanon
+  let centerLat = 33.8938;
+  let centerLng = 35.5018;
   
   {% if profile.latitude and profile.longitude %}
     centerLat = {{ profile.latitude }};
@@ -287,16 +389,34 @@ function locateUser() {
   }
 }
 
-// Geocode address using Nominatim with improved accuracy
+// Geocode address using Nominatim with improved accuracy for Lebanon
 function geocodeAddress() {
-  const address = document.getElementById('address').value + ' ' +
-                 document.getElementById('city').value + ' ' +
-                 document.getElementById('state').value + ' ' +
-                 document.getElementById('zip_code').value;
+  const address = document.getElementById('address').value;
+  const city = document.getElementById('city').value;
+  const state = document.getElementById('state').value;
+  const zipCode = document.getElementById('zip_code').value;
+  const country = document.getElementById('country').value;
   
   if (!address.trim()) {
     alert('Please enter an address first.');
     return;
+  }
+  
+  // Build comprehensive address string
+  let fullAddress = address;
+  if (city) fullAddress += ', ' + city;
+  if (state) fullAddress += ', ' + state;
+  if (zipCode) fullAddress += ' ' + zipCode;
+  
+  // Add country-specific formatting
+  if (country === 'LB') {
+    fullAddress += ', Lebanon';
+  } else if (country === 'US') {
+    fullAddress += ', United States';
+  } else if (country === 'CA') {
+    fullAddress += ', Canada';
+  } else if (country === 'UK') {
+    fullAddress += ', United Kingdom';
   }
   
   // Show loading indicator
@@ -305,14 +425,17 @@ function geocodeAddress() {
   button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
   button.disabled = true;
   
-  // Use Nominatim API
+  // Use Nominatim API with country bias for better accuracy
   fetch('{% url "geocode_address" %}', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'X-CSRFToken': '{{ csrf_token }}'
     },
-    body: JSON.stringify({ address: address })
+    body: JSON.stringify({ 
+      address: fullAddress,
+      country: country
+    })
   })
   .then(response => response.json())
   .then(data => {

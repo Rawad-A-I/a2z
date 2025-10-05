@@ -47,15 +47,84 @@
     margin-left: 1rem;
     margin-right: 1rem;
   }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .container-xl {
+      padding: 0 10px;
+    }
+    
+    .nav-borders {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .nav-borders .nav-link {
+      margin: 0.25rem 0;
+      padding: 0.75rem;
+      border-bottom: none;
+      border-left: 3px solid transparent;
+    }
+    
+    .nav-borders .nav-link.active {
+      border-left-color: #0061f2;
+      background-color: #f8f9fa;
+    }
+    
+    .card {
+      margin-bottom: 1rem;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .img-account-profile {
+      height: 8rem;
+    }
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .container-xl {
+      padding: 0 5px;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .img-account-profile {
+      height: 6rem;
+    }
+    
+    .btn {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+  }
 </style>
 
 <section class="section-content padding-bottom">
   <div class="container-xl px-4 mt-4">
     {% include "base/alert.html" %}
     <nav class="nav nav-borders">
-      <a class="nav-link active ms-0" href="{% url 'profile' username=user.username %}">Profile</a>
-      <a class="nav-link ms-0" href="{% url 'shipping-address' %}">Address</a>
-      <a class="nav-link ms-0" href="{% url 'change_password' %}">Security</a>
+      <a class="nav-link active ms-0" href="{% url 'profile' username=user.username %}">
+        <i class="fas fa-user d-md-none me-2"></i>Profile
+      </a>
+      <a class="nav-link ms-0" href="{% url 'address_management' %}">
+        <i class="fas fa-map-marker-alt d-md-none me-2"></i>Address
+      </a>
+      <a class="nav-link ms-0" href="{% url 'change_password' %}">
+        <i class="fas fa-lock d-md-none me-2"></i>Security
+      </a>
+      <a class="nav-link ms-0" href="{% url 'order_history' %}">
+        <i class="fas fa-shopping-bag d-md-none me-2"></i>Orders
+      </a>
     </nav>
     
     <hr class="mt-0 mb-4" />
@@ -83,6 +152,37 @@
                 JPG or PNG no larger than 5 MB
               </div>
             </form>
+          </div>
+        </div>
+        
+        <!-- Address Status Card -->
+        <div class="card mb-4 mb-xl-0">
+          <div class="card-header">
+            <i class="fas fa-map-marker-alt me-2"></i>Address Status
+          </div>
+          <div class="card-body">
+            {% if user.profile.latitude and user.profile.longitude %}
+              <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Address Verified</strong>
+                <p class="mb-0 small">Your address is verified and ready for orders.</p>
+              </div>
+              <div class="text-muted small">
+                <strong>Location:</strong><br>
+                {{ user.profile.street_address|default:"Not set" }}<br>
+                {{ user.profile.city|default:"Not set" }}, {{ user.profile.state|default:"Not set" }}<br>
+                {{ user.profile.country|default:"Not set" }}
+              </div>
+            {% else %}
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Address Not Verified</strong>
+                <p class="mb-0 small">Please verify your address to place orders.</p>
+              </div>
+            {% endif %}
+            <a href="{% url 'address_management' %}" class="btn btn-outline-primary btn-sm w-100 mt-2">
+              <i class="fas fa-edit me-1"></i>Manage Address
+            </a>
           </div>
         </div>
       </div>

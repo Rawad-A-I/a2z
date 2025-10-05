@@ -79,11 +79,12 @@ def update_shipping_address(request):
 
 @login_required
 def geocode_address(request):
-    """Geocode address using OpenStreetMap Nominatim."""
+    """Geocode address using OpenStreetMap Nominatim with improved Lebanon support."""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             address = data.get('address')
+            country = data.get('country', 'LB')
             
             if not address:
                 return JsonResponse({'error': 'Address is required'}, status=400)
@@ -97,8 +98,13 @@ def geocode_address(request):
                 'q': address,
                 'format': 'json',
                 'limit': 1,
-                'addressdetails': 1
+                'addressdetails': 1,
+                'countrycodes': country.lower() if country != 'OTHER' else None,
+                'bounded': 1 if country == 'LB' else 0  # Focus on Lebanon if selected
             }
+            
+            # Remove None values from params
+            params = {k: v for k, v in params.items() if v is not None}
             
             headers = {
                 'User-Agent': user_agent
@@ -114,15 +120,26 @@ def geocode_address(request):
                     'lng': float(result['lon'])
                 }
                 
+                # Parse address components for better accuracy
+                address_components = result.get('address', {})
+                parsed_components = {
+                    'house_number': address_components.get('house_number', ''),
+                    'road': address_components.get('road', ''),
+                    'city': address_components.get('city') or address_components.get('town') or address_components.get('village', ''),
+                    'state': address_components.get('state', ''),
+                    'postcode': address_components.get('postcode', ''),
+                    'country': address_components.get('country', '')
+                }
+                
                 return JsonResponse({
                     'success': True,
                     'latitude': location['lat'],
                     'longitude': location['lng'],
                     'formatted_address': result['display_name'],
-                    'address_components': result.get('address', {})
+                    'address_components': parsed_components
                 })
             else:
-                return JsonResponse({'error': 'Address not found'}, status=400)
+                return JsonResponse({'error': 'Address not found. Please try a more specific address.'}, status=400)
                 
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)

@@ -72,16 +72,36 @@ class AddressManagementForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Set default country
+        # Set default country to Lebanon
         if not self.instance.country:
-            self.fields['country'].initial = 'US'
+            self.fields['country'].initial = 'LB'
     
     def clean_zip_code(self):
         zip_code = self.cleaned_data.get('zip_code')
+        country = self.cleaned_data.get('country', 'LB')
+        
         if zip_code:
-            # Basic ZIP code validation for US
-            if len(zip_code) < 5:
-                raise forms.ValidationError("ZIP code must be at least 5 characters.")
+            # Country-specific validation
+            if country == 'LB':
+                # Lebanon postal codes are typically 4 digits
+                if len(zip_code) < 4:
+                    raise forms.ValidationError("Lebanon postal code must be at least 4 characters.")
+            elif country == 'US':
+                # US ZIP codes are 5 digits
+                if len(zip_code) < 5:
+                    raise forms.ValidationError("US ZIP code must be at least 5 characters.")
+            elif country == 'CA':
+                # Canadian postal codes are 6 characters (A1A 1A1 format)
+                if len(zip_code) < 6:
+                    raise forms.ValidationError("Canadian postal code must be at least 6 characters.")
+            elif country == 'UK':
+                # UK postal codes vary but typically 6-8 characters
+                if len(zip_code) < 5:
+                    raise forms.ValidationError("UK postal code must be at least 5 characters.")
+            else:
+                # General validation for other countries
+                if len(zip_code) < 3:
+                    raise forms.ValidationError("Postal code must be at least 3 characters.")
         return zip_code
     
     def clean_phone_number(self):
