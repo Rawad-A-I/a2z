@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import redirect
 from . import views
 from .health import health_check, readiness_check, liveness_check
 
@@ -13,7 +14,7 @@ urlpatterns = [
     
     # Platform-specific pages
     path('a2z-mart/', views.index, name='index'),  # Main e-commerce site
-    path('a2z-bar/', views.a2z_bar, name='a2z_bar'),  # A2Z Bar service
+    path('a2z-bar/', lambda request: redirect('/products/bar/'), name='a2z_bar_redirect'),  # Redirect to new bar system
     path('rayan-brayan/', views.rayan_brayan, name='rayan_brayan'),  # Rayan O Brayan community
     
     # Other pages
