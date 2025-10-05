@@ -14,14 +14,15 @@
             Shop Beer, Wine & Liquor
           </h1>
           <p class="hero-subtitle">
-            Then get it delivered in under 60 minutes. Boom, simple.
+            Premium drinks and beverages delivered to your doorstep.
           </p>
-          <div class="delivery-input">
-            <i class="fas fa-map-marker-alt text-danger"></i>
-            <input type="text" placeholder="Enter delivery address to shop" id="delivery-address">
-            <button class="delivery-btn" onclick="startShopping()">
-              <i class="fas fa-arrow-right"></i>
-            </button>
+          <div class="hero-buttons mt-4">
+            <a href="{% url 'bar_products' %}" class="btn btn-bar-primary btn-lg me-3">
+              <i class="fas fa-glass-cheers"></i> Browse Drinks
+            </a>
+            <a href="{% url 'bar_categories' %}" class="btn btn-bar-outline btn-lg">
+              <i class="fas fa-list"></i> Categories
+            </a>
           </div>
         </div>
       </div>
@@ -72,22 +73,4 @@
   </div>
 </section>
 
-<script>
-function startShopping() {
-  const address = document.getElementById('delivery-address').value;
-  if (address.trim()) {
-    // Store address in session or redirect to products with address
-    window.location.href = "{% url 'bar_products' %}?address=" + encodeURIComponent(address);
-  } else {
-    alert('Please enter a delivery address to continue shopping.');
-  }
-}
-
-// Allow Enter key to trigger shopping
-document.getElementById('delivery-address').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
-    startShopping();
-  }
-});
-</script>
 {% endblock %}
