@@ -155,13 +155,33 @@ def quick_edit_product(request, product_id):
     product = get_object_or_404(Product, uid=product_id)
     
     if request.method == 'POST':
-        # Quick update of basic fields
+        # Quick update of all fields
         product.product_name = request.POST.get('product_name', product.product_name)
         product.price = int(request.POST.get('price', product.price))
         product.stock_quantity = int(request.POST.get('stock_quantity', product.stock_quantity))
         product.low_stock_threshold = int(request.POST.get('low_stock_threshold', product.low_stock_threshold))
         product.is_in_stock = request.POST.get('is_in_stock') == 'on'
         product.newest_product = request.POST.get('newest_product') == 'on'
+        product.is_featured = request.POST.get('is_featured') == 'on'
+        product.is_bestseller = request.POST.get('is_bestseller') == 'on'
+        product.is_new_arrival = request.POST.get('is_new_arrival') == 'on'
+        
+        # Physical properties
+        weight = request.POST.get('weight')
+        if weight:
+            product.weight = float(weight)
+        product.dimensions = request.POST.get('dimensions', product.dimensions)
+        
+        # Section
+        product.section = request.POST.get('section', product.section)
+        
+        # SEO fields
+        product.meta_title = request.POST.get('meta_title', product.meta_title)
+        product.meta_description = request.POST.get('meta_description', product.meta_description)
+        product.keywords = request.POST.get('keywords', product.keywords)
+        
+        # Description
+        product.product_desription = request.POST.get('product_desription', product.product_desription)
         
         product.save()
         messages.success(request, f'Product "{product.product_name}" updated successfully.')

@@ -29,7 +29,10 @@ class ProductInsertionForm(forms.ModelForm):
         model = Product
         fields = [
             'product_name', 'category', 'price', 'product_desription',
-            'is_in_stock', 'stock_quantity', 'dimensions'
+            'is_in_stock', 'stock_quantity', 'low_stock_threshold',
+            'weight', 'dimensions', 'section', 'is_featured', 
+            'is_bestseller', 'is_new_arrival', 'meta_title', 
+            'meta_description', 'keywords'
         ]
         widgets = {
             'product_name': forms.TextInput(attrs={
@@ -53,9 +56,36 @@ class ProductInsertionForm(forms.ModelForm):
                 'min': '0',
                 'placeholder': '0'
             }),
+            'low_stock_threshold': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'placeholder': '10'
+            }),
+            'weight': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Weight in kg'
+            }),
             'dimensions': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'e.g., 10x5x3 cm'
+            }),
+            'section': forms.Select(attrs={'class': 'form-control'}),
+            'is_featured': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_bestseller': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_new_arrival': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'meta_title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'SEO title'
+            }),
+            'meta_description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'SEO description'
+            }),
+            'keywords': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Comma-separated keywords'
             })
         }
 
@@ -64,6 +94,7 @@ class ProductInsertionForm(forms.ModelForm):
         # Set default values
         self.fields['is_in_stock'].initial = True
         self.fields['stock_quantity'].initial = 0
+        self.fields['low_stock_threshold'].initial = 10
 
 
 class BulkBarcodeForm(forms.Form):
