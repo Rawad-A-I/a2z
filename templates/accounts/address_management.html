@@ -280,8 +280,9 @@
                   <li><strong>Use My Current Location:</strong> Uses your device's GPS for accurate location (5-20m accuracy on mobile, 20-100m on desktop)</li>
                   <li><strong>Pick on Map:</strong> Manually select your exact location on the map</li>
                   <li><strong>Search Address:</strong> Type your address and click the search icon for precise location</li>
+                  <li><strong>Drag Marker:</strong> All markers are draggable! Drag to fine-tune your exact position</li>
                   <li><strong>Fill Address Form:</strong> Enter your address details manually</li>
-                  <li><strong>Desktop Users:</strong> GPS accuracy may be limited. Use address search for best results!</li>
+                  <li><strong>Desktop Users:</strong> GPS accuracy may be limited. Use address search or drag the marker for best results!</li>
                 </ul>
               </div>
             </div>
@@ -459,9 +460,18 @@ function initMap() {
       marker.remove();
     }
     
-    marker = new mapboxgl.Marker()
+    marker = new mapboxgl.Marker({ draggable: true })
       .setLngLat([lng, lat])
       .addTo(map);
+    
+    // Add drag event listener for manual correction
+    marker.on('dragend', function() {
+      const lngLat = marker.getLngLat();
+      document.getElementById('latitude').value = lngLat.lat;
+      document.getElementById('longitude').value = lngLat.lng;
+      reverseGeocode(lngLat.lat, lngLat.lng);
+      showNotification('Location updated! You can drag the marker to fine-tune your position.', 'info');
+    });
     
     // Reverse geocode to get address
     reverseGeocode(lat, lng);
@@ -491,9 +501,9 @@ function getCurrentLocation() {
   
   // Device-specific options for optimal performance
   const options = {
-    enableHighAccuracy: true,
-    timeout: isMobile ? 15000 : 25000, // Longer timeout for desktop
-    maximumAge: isMobile ? 30000 : 60000 // Longer cache for desktop
+    enableHighAccuracy: true, // Force high accuracy GPS
+    timeout: isMobile ? 15000 : 30000, // Longer timeout for desktop
+    maximumAge: isMobile ? 30000 : 0 // Force fresh location on desktop
   };
   
   // Try to get the most accurate location
@@ -594,11 +604,20 @@ function getCurrentLocation() {
         marker.remove();
       }
       
-      marker = new mapboxgl.Marker()
+      marker = new mapboxgl.Marker({ draggable: true })
         .setLngLat([lng, lat])
-        .setPopup(new mapboxgl.Popup().setHTML(`Your Location<br>Accuracy: ${Math.round(accuracy)}m`))
+        .setPopup(new mapboxgl.Popup().setHTML(`Your Location<br>Accuracy: ${Math.round(accuracy)}m<br><small>Drag to adjust position</small>`))
         .addTo(map);
       marker.getPopup().addTo(map);
+      
+      // Add drag event listener for manual correction
+      marker.on('dragend', function() {
+        const lngLat = marker.getLngLat();
+        document.getElementById('latitude').value = lngLat.lat;
+        document.getElementById('longitude').value = lngLat.lng;
+        reverseGeocode(lngLat.lat, lngLat.lng);
+        showNotification('Location updated! You can drag the marker to fine-tune your position.', 'info');
+      });
       
       // Reverse geocode to get address
       reverseGeocode(lat, lng);
@@ -691,11 +710,17 @@ function openLocationPicker() {
           locationPickerMarker.remove();
         }
         
-        locationPickerMarker = new mapboxgl.Marker()
+        locationPickerMarker = new mapboxgl.Marker({ draggable: true })
           .setLngLat([lng, lat])
-          .setPopup(new mapboxgl.Popup().setHTML('Selected Location'))
+          .setPopup(new mapboxgl.Popup().setHTML('Selected Location<br><small>Drag to adjust</small>'))
           .addTo(locationPickerMap);
         locationPickerMarker.getPopup().addTo(locationPickerMap);
+        
+        // Add drag event listener
+        locationPickerMarker.on('dragend', function() {
+          const lngLat = locationPickerMarker.getLngLat();
+          selectedLocation = { lat: lngLat.lat, lng: lngLat.lng };
+        });
       });
     }
   }, 300);
@@ -718,11 +743,20 @@ function confirmLocation() {
       marker.remove();
     }
     
-    marker = new mapboxgl.Marker()
+    marker = new mapboxgl.Marker({ draggable: true })
       .setLngLat([lng, lat])
-      .setPopup(new mapboxgl.Popup().setHTML('Selected Location'))
+      .setPopup(new mapboxgl.Popup().setHTML('Selected Location<br><small>Drag to adjust</small>'))
       .addTo(map);
     marker.getPopup().addTo(map);
+    
+    // Add drag event listener for manual correction
+    marker.on('dragend', function() {
+      const lngLat = marker.getLngLat();
+      document.getElementById('latitude').value = lngLat.lat;
+      document.getElementById('longitude').value = lngLat.lng;
+      reverseGeocode(lngLat.lat, lngLat.lng);
+      showNotification('Location updated! You can drag the marker to fine-tune your position.', 'info');
+    });
     
     // Reverse geocode to get address
     reverseGeocode(lat, lng);
