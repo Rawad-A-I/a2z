@@ -19,21 +19,42 @@
     .header-main .search {
       width: 100%;
       margin: 0;
+      position: relative;
     }
     
     .header-main .search .input-group {
       width: 100%;
+      position: relative;
     }
     
     .header-main .search input {
       font-size: 16px; /* Prevents zoom on iOS */
       min-height: 44px;
       padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      border: 2px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+    
+    .header-main .search input:focus {
+      border-color: var(--color-primary-600);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      outline: none;
     }
     
     .header-main .search .btn {
       min-height: 44px;
       padding: 0.75rem 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      background: var(--color-primary-600);
+      border: 2px solid var(--color-primary-600);
+      transition: all 0.3s ease;
+    }
+    
+    .header-main .search .btn:hover {
+      background: var(--color-primary-700);
+      border-color: var(--color-primary-700);
+      transform: none;
     }
     
     /* Mobile navigation icons - horizontal layout */
@@ -130,7 +151,92 @@
       min-height: 48px;
     }
   }
+  
+  /* Mobile search enhancements */
+  @media (max-width: 768px) {
+    .header-main .search input {
+      font-size: 16px; /* Prevents zoom on iOS */
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem 0 0 0.5rem;
+    }
+    
+    .header-main .search .btn {
+      border-radius: 0 0.5rem 0.5rem 0;
+      padding: 0.75rem 1.25rem;
+    }
+    
+    /* Mobile search suggestions (if needed) */
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e9ecef;
+      border-top: none;
+      border-radius: 0 0 0.5rem 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .search-suggestion {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f8f9fa;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    
+    .search-suggestion:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .search-suggestion:last-child {
+      border-bottom: none;
+    }
+  }
 </style>
+
+<script>
+// Mobile search enhancements
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.querySelector('.search input[name="q"]');
+  const searchForm = document.querySelector('.search');
+  
+  if (searchInput && searchForm) {
+    // Focus search on mobile when search icon is tapped
+    const searchBtn = document.querySelector('.search .btn');
+    if (searchBtn) {
+      searchBtn.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+    }
+    
+    // Auto-submit on mobile after typing (with debounce)
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+      if (window.innerWidth <= 768 && this.value.length >= 2) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          searchForm.submit();
+        }, 1000); // Submit after 1 second of no typing
+      }
+    });
+    
+    // Clear search on escape
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        this.value = '';
+        this.blur();
+      }
+    });
+  }
+});
+</script>
 
 <header class="section-header">
   <nav class="navbar navbar-dark navbar-expand-lg bg-dark">
@@ -208,9 +314,10 @@
           <form method="GET" action="{% url 'product_search' %}" class="search">
             <div class="input-group w-100">
               <input type="text" class="form-control" name="q"
-              placeholder="Search products..." value="{{ query|default:"" }}"/>
+              placeholder="Search products..." value="{{ query|default:"" }}"
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
               <div class="input-group-append">
-                <button class="btn btn-primary" type="submit">
+                <button class="btn btn-primary" type="submit" aria-label="Search">
                   <i class="fa fa-search"></i>
                 </button>
               </div>
