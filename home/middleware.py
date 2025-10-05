@@ -9,4 +9,5 @@ class MobileDetectionMiddleware(MiddlewareMixin):
         request.is_mobile = user_agent.is_mobile
         request.is_tablet = user_agent.is_tablet
         request.is_pc = user_agent.is_pc
+        request.user_agent = user_agent
         return None

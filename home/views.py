@@ -6,7 +6,6 @@ from django_user_agents.utils import get_user_agent
 
 # Create your views here.
 
-
 def redirect_homepage(request):
     """Redirect homepage with 3 platform options"""
     return render(request, 'home/redirect_homepage.html')
@@ -55,8 +54,7 @@ def index(request):
     }
     
     # Detect mobile devices and serve optimized template
-    user_agent = get_user_agent(request)
-    if user_agent.is_mobile:
+    if hasattr(request, 'is_mobile') and request.is_mobile:
         return render(request, 'home/mobile_index.html', context)
     
     return render(request, 'home/index.html', context)
@@ -103,8 +101,7 @@ def products_only(request):
     }
     
     # Detect mobile devices and serve optimized template
-    user_agent = get_user_agent(request)
-    if user_agent.is_mobile:
+    if hasattr(request, 'is_mobile') and request.is_mobile:
         return render(request, 'home/mobile_index.html', context)
     
     return render(request, 'home/products_only.html', context)
