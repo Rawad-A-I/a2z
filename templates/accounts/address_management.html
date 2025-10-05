@@ -24,23 +24,6 @@
     margin-bottom: 20px;
   }
   
-  .store-card {
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 10px;
-    transition: all 0.3s ease;
-  }
-  
-  .store-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
-  }
-  
-  .store-distance {
-    color: #28a745;
-    font-weight: bold;
-  }
   
   .btn-locate {
     background: linear-gradient(45deg, #007bff, #0056b3);
@@ -83,10 +66,6 @@
       height: 300px;
     }
     
-    .store-card {
-      padding: 10px;
-      margin-bottom: 0.5rem;
-    }
     
     .address-form {
       padding: 15px;
@@ -181,17 +160,6 @@
                            placeholder="Enter postal code" required>
                   </div>
                 </div>
-                <div class="col-12 col-md-4">
-                  <div class="form-group">
-                    <label for="phone_number">Phone Number</label>
-                    <input type="tel" class="form-control" id="phone_number" name="phone_number" 
-                           value="{{ profile.phone_number|default:'' }}"
-                           placeholder="Enter phone number" required>
-                    <small class="form-text text-muted">
-                      <i class="fas fa-info-circle"></i> Phone number helps us locate you more accurately
-                    </small>
-                  </div>
-                </div>
               </div>
               
               <div class="row">
@@ -272,62 +240,31 @@
           <div class="mt-4">
             <h5>Map View</h5>
             <div id="map" class="map-container"></div>
-            <div class="mt-2">
-              <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i>
-                <strong>Location Options:</strong>
-                <ul class="mb-0 mt-2">
-                  <li><strong>Use My Current Location:</strong> GPS location (5-20m accuracy on mobile, 20-100m on desktop)</li>
-                  <li><strong>Pick on Map:</strong> Click anywhere on the map to select your location</li>
-                  <li><strong>Search Address:</strong> Type your address and click the search icon</li>
-                  <li><strong>Drag Marker:</strong> All markers are draggable for fine-tuning</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
     
     <div class="col-lg-4">
-      <!-- Nearby Stores -->
+      <!-- Delivery Information -->
       <div class="card">
         <div class="card-header">
-          <h5><i class="fas fa-store"></i> Nearby Stores</h5>
+          <h5><i class="fas fa-truck"></i> Delivery Information</h5>
         </div>
         <div class="card-body">
-          <button class="btn btn-primary btn-block mb-3" onclick="findNearbyStores()">
-            <i class="fas fa-search-location"></i> Find Nearby Stores
-          </button>
-          
-          <div id="nearby-stores">
-            {% for store in store_locations %}
-            <div class="store-card">
-              <h6>{{ store.name }}</h6>
-              <p class="text-muted mb-1">{{ store.address }}</p>
-              <p class="text-muted mb-1">{{ store.city }}, {{ store.state }} {{ store.zip_code }}</p>
-              <p class="text-muted mb-1">
-                <i class="fas fa-phone"></i> {{ store.phone }}
-              </p>
-              <p class="text-muted mb-0">
-                <i class="fas fa-envelope"></i> {{ store.email }}
-              </p>
-            </div>
-            {% endfor %}
+          <div class="alert alert-info">
+            <i class="fas fa-clock"></i>
+            <strong>Standard Delivery Time:</strong><br>
+            <span class="h5 text-primary">30-40 minutes</span>
+            <br>
+            <small class="text-muted">From order confirmation to your doorstep</small>
           </div>
-        </div>
-      </div>
-      
-      <!-- Delivery Estimate -->
-      <div class="card mt-3">
-        <div class="card-header">
-          <h5><i class="fas fa-truck"></i> Delivery Estimate</h5>
-        </div>
-        <div class="card-body">
-          <button class="btn btn-info btn-block" onclick="getDeliveryEstimate()">
-            <i class="fas fa-clock"></i> Get Delivery Time
-          </button>
-          <div id="delivery-estimate" class="mt-3"></div>
+          
+          <div class="alert alert-success">
+            <i class="fas fa-map-marker-alt"></i>
+            <strong>Delivery Area:</strong><br>
+            <small>We deliver to all areas within Lebanon</small>
+          </div>
         </div>
       </div>
     </div>
@@ -468,7 +405,7 @@ function initMap() {
       document.getElementById('latitude').value = lngLat.lat;
       document.getElementById('longitude').value = lngLat.lng;
       reverseGeocode(lngLat.lat, lngLat.lng);
-      showNotification('Location updated! You can drag the marker to fine-tune your position.', 'info');
+      // Removed unnecessary notification for marker drag
     });
     
     // Reverse geocode to get address
@@ -614,7 +551,7 @@ function getCurrentLocation() {
         document.getElementById('latitude').value = lngLat.lat;
         document.getElementById('longitude').value = lngLat.lng;
         reverseGeocode(lngLat.lat, lngLat.lng);
-        showNotification('Location updated! You can drag the marker to fine-tune your position.', 'info');
+        // Removed unnecessary notification for marker drag
       });
       
       // Reverse geocode to get address
@@ -753,7 +690,7 @@ function confirmLocation() {
       document.getElementById('latitude').value = lngLat.lat;
       document.getElementById('longitude').value = lngLat.lng;
       reverseGeocode(lngLat.lat, lngLat.lng);
-      showNotification('Location updated! You can drag the marker to fine-tune your position.', 'info');
+      // Removed unnecessary notification for marker drag
     });
     
     // Reverse geocode to get address
@@ -857,7 +794,7 @@ function reverseGeocode(lat, lng) {
           }
         }
         
-        showNotification('Address found using Mapbox!', 'success');
+        // Removed unnecessary notification for address found
       } else {
         // Fallback to Django backend
         fetch('{% url "reverse_geocode" %}', {
@@ -955,7 +892,7 @@ function searchAddress() {
   
   const searchUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&types=address${countryBias}&limit=1`;
   
-  showNotification('Searching for address...', 'info');
+  // Removed unnecessary notification for search start
   
   fetch(searchUrl)
     .then(response => response.json())
@@ -1004,22 +941,17 @@ function showNotification(message, type = 'info') {
   `;
   document.body.appendChild(notification);
   
-  // Auto remove after 5 seconds
+  // Auto remove after 3 seconds
   setTimeout(() => {
     if (notification.parentNode) {
       notification.parentNode.removeChild(notification);
     }
-  }, 5000);
+  }, 3000);
 }
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
   initMap();
-  
-  // Check if address is already verified
-  {% if profile.latitude and profile.longitude %}
-    showNotification('✓ Your address is already verified!', 'success');
-  {% endif %}
 });
 </script>
 {% endblock %}

@@ -177,6 +177,13 @@
                 <small>Pay when your order is delivered to your doorstep.</small>
               </div>
               
+              <div class="alert alert-success">
+                <i class="fa fa-clock"></i>
+                <strong>Delivery Time:</strong> 30-40 minutes
+                <br>
+                <small>From order confirmation to your doorstep</small>
+              </div>
+              
               <!-- Address Verification Check -->
               {% if not user.profile.latitude or not user.profile.longitude %}
               <div class="alert alert-warning">
@@ -201,7 +208,7 @@
                 <i class="fa fa-check-circle"></i>
                 <strong>Ready for Order:</strong> Your address is verified and phone number is provided.
                 <br>
-                <small>Address: {{ user.profile.shipping_address|default:"Not set" }} | Phone: {{ user.profile.phone_number|default:"Not set" }}</small>
+                <small>Address: {{ user.profile.shipping_address|default:"Not set" }} | Phone: {{ user.profile.phone_country_code|default:"+961" }} {{ user.profile.phone_number|default:"Not set" }}</small>
               </div>
               {% endif %}
             </div>

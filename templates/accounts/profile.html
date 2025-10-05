@@ -106,6 +106,22 @@
       padding: 0.5rem;
       font-size: 0.9rem;
     }
+    
+    /* Mobile phone number styling */
+    .row.mb-3 .col-md-4,
+    .row.mb-3 .col-md-8 {
+      margin-bottom: 1rem;
+    }
+    
+    #id_phone_number {
+      font-size: 16px; /* Prevents zoom on iOS */
+      padding: 12px;
+    }
+    
+    #id_phone_country_code {
+      font-size: 16px;
+      padding: 12px;
+    }
   }
 </style>
 
@@ -195,7 +211,33 @@
             <form method="POST" enctype="multipart/form-data">
               {% csrf_token %} 
               {{ user_form|crispy }} 
-              {{ profile_form|crispy }}
+              
+              <!-- Custom Phone Number Section -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="id_phone_country_code" class="form-label">Country Code</label>
+                  {{ profile_form.phone_country_code }}
+                </div>
+                <div class="col-md-8">
+                  <label for="id_phone_number" class="form-label">Phone Number</label>
+                  {{ profile_form.phone_number }}
+                  <div class="form-text">
+                    <i class="fas fa-mobile-alt"></i> Mobile-friendly numeric keyboard
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Other Profile Fields -->
+              <div class="mb-3">
+                <label for="id_profile_image" class="form-label">Profile Image</label>
+                {{ profile_form.profile_image }}
+              </div>
+              
+              <div class="mb-3">
+                <label for="id_bio" class="form-label">Bio</label>
+                {{ profile_form.bio }}
+              </div>
+              
               <button class="btn btn-primary" type="submit">
                 Update Profile
               </button>
