@@ -30,6 +30,116 @@
     border-bottom: 1px solid rgba(33, 40, 50, 0.125);
   }
   
+  /* Mobile Profile Optimizations */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    .img-account-profile {
+      height: 8rem;
+      width: 8rem;
+    }
+    
+    .card {
+      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+    }
+    
+    .card-header {
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    /* Mobile-friendly form */
+    .form-control,
+    .form-select {
+      min-height: 44px;
+      font-size: 1rem;
+    }
+    
+    .form-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Mobile-friendly buttons */
+    .btn {
+      min-height: 48px;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .btn i {
+      font-size: 1.1rem;
+      margin-right: 0.5rem;
+    }
+    
+    /* Mobile-friendly phone number section */
+    .row.mb-3 {
+      margin-bottom: 1rem !important;
+    }
+    
+    .col-md-4,
+    .col-md-8 {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Mobile-friendly profile image section */
+    .text-center {
+      margin-bottom: 1rem;
+    }
+    
+    .btn-outline-primary {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .container {
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+    }
+    
+    .img-account-profile {
+      height: 6rem;
+      width: 6rem;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .btn {
+      font-size: 0.9rem;
+      padding: 0.6rem 0.8rem;
+      min-height: 44px;
+    }
+    
+    .form-control,
+    .form-select {
+      min-height: 40px;
+      font-size: 0.9rem;
+    }
+  }
+  
+  /* Touch-friendly elements */
+  @media (hover: none) and (pointer: coarse) {
+    .btn {
+      min-height: 48px;
+      font-size: 1.1rem;
+    }
+  }
+  }
+  
   .nav-borders .nav-link.active {
     color: #0061f2;
     border-bottom-color: #0061f2;

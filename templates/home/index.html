@@ -1,49 +1,20 @@
 {% extends "base/base.html"%} 
 {% block start %}
-<!-- Back to Platform Button -->
-<div class="container mt-3">
-  <a href="{% url 'redirect_homepage' %}" class="btn btn-outline-primary">
-    <i class="fas fa-arrow-left"></i> Back to Platform
-  </a>
-</div>
-
-<!-- Modern Hero Section -->
-<section class="hero-section" style="position: relative; z-index: 1;">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-6">
-        <div class="hero-content fade-in-up">
-          <h1 class="hero-title">
-            Welcome to <span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">A2Z Mart</span>
-          </h1>
-          <p class="hero-subtitle">
-            Discover premium products with lightning-fast delivery. Your one-stop destination for quality and convenience.
-          </p>
-          <div class="hero-buttons mt-4">
-            <a href="#products" class="btn btn-primary btn-lg me-3">
-              <i class="fas fa-shopping-bag"></i> Shop Now
-            </a>
-            <a href="{% url 'products_only' %}" class="btn btn-outline-light btn-lg">
-              <i class="fas fa-th-large"></i> Browse Categories
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="hero-image text-center">
-          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-               alt="Premium Shopping" 
-               class="img-fluid rounded shadow-lg" 
-               loading="eager"
-               style="max-height: 500px; object-fit: cover;"
-               srcset="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80 400w,
-                       https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80 800w"
-               sizes="(max-width: 768px) 400px, 800px">
-        </div>
-      </div>
+<!-- Header Section with Back Button and Browse -->
+<div class="container mt-4 mb-4">
+  <div class="row align-items-center">
+    <div class="col-md-6">
+      <a href="{% url 'redirect_homepage' %}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left"></i> Back to Platform
+      </a>
+    </div>
+    <div class="col-md-6 text-md-end">
+      <a href="{% url 'products_only' %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-th-large"></i> Browse Categories
+      </a>
     </div>
   </div>
-</section>
+</div>
 
 <!-- Products Section -->
 <section id="products" class="py-5" style="background: white; margin-top: 0; min-height: 100vh; position: relative; z-index: 0;">

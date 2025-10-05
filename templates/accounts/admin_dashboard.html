@@ -4,6 +4,135 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block start %}
+<style>
+  /* Mobile Dashboard Optimizations */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    .card {
+      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .card-header {
+      padding: 0.75rem 1rem;
+    }
+    
+    .card-header h3 {
+      font-size: 1.25rem;
+      margin: 0;
+    }
+    
+    /* Mobile-friendly stats cards */
+    .col-lg-3 {
+      margin-bottom: 1rem;
+    }
+    
+    .card.bg-info,
+    .card.bg-success,
+    .card.bg-warning,
+    .card.bg-danger {
+      text-align: center;
+    }
+    
+    .card.bg-info h3,
+    .card.bg-success h3,
+    .card.bg-warning h3,
+    .card.bg-danger h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .card.bg-info p,
+    .card.bg-success p,
+    .card.bg-warning p,
+    .card.bg-danger p {
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    
+    /* Mobile-friendly quick actions */
+    .col-md-3 {
+      margin-bottom: 1rem;
+    }
+    
+    .btn {
+      min-height: 48px;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .btn i {
+      font-size: 1.1rem;
+    }
+    
+    /* Mobile-friendly table */
+    .table-responsive {
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .table th {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    /* Mobile-friendly badges */
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .container {
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .btn {
+      font-size: 0.9rem;
+      padding: 0.6rem 0.8rem;
+      min-height: 44px;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.5rem 0.25rem;
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Touch-friendly elements */
+  @media (hover: none) and (pointer: coarse) {
+    .btn {
+      min-height: 48px;
+      font-size: 1.1rem;
+    }
+  }
+</style>
+
 <div class="container mt-3 pt-3">
     <div class="row">
         <div class="col-12">

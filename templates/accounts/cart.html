@@ -3,6 +3,7 @@
 {% block start %} {% load static %}
 
 <style>
+  /* Mobile Cart Optimizations */
   @media (max-width: 768px) {
     .table-shopping-cart {
       font-size: 0.9rem;
@@ -38,6 +39,54 @@
     .mobile-order-last {
       order: 999;
     }
+    
+    /* Mobile-friendly buttons */
+    .btn {
+      min-height: 44px;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+    }
+    
+    .btn-sm {
+      min-height: 40px;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.75rem;
+    }
+    
+    /* Mobile-friendly form controls */
+    .form-control {
+      min-height: 44px;
+      font-size: 1rem;
+    }
+    
+    /* Mobile-friendly cards */
+    .card {
+      margin-bottom: 1rem;
+      border-radius: 0.5rem;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    /* Mobile-friendly tables */
+    .table-responsive {
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.75rem 0.5rem;
+      vertical-align: middle;
+    }
+    
+    /* Mobile-friendly alerts */
+    .alert {
+      font-size: 0.9rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+    }
   }
   
   @media (max-width: 576px) {
@@ -53,6 +102,34 @@
     .btn-sm {
       padding: 0.25rem 0.5rem;
       font-size: 0.75rem;
+    }
+    
+    /* Ultra-mobile optimizations */
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .btn {
+      font-size: 0.9rem;
+      padding: 0.6rem 0.8rem;
+    }
+  }
+  
+  /* Touch-friendly elements */
+  @media (hover: none) and (pointer: coarse) {
+    .btn {
+      min-height: 48px;
+      font-size: 1.1rem;
+    }
+    
+    .btn-sm {
+      min-height: 44px;
+      font-size: 1rem;
     }
   }
 </style>

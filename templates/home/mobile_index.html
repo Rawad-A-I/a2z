@@ -2,25 +2,21 @@
 {% block start %}
 <!-- Mobile-Optimized Home Page -->
 <div class="container-fluid p-0">
-  <!-- Mobile Hero Section -->
-  <section class="mobile-hero" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 1rem; text-align: center;">
-    <div class="container">
-      <h1 class="display-4 mb-3" style="font-size: 2rem; font-weight: 700;">
-        A2Z Mart
-      </h1>
-      <p class="lead mb-4" style="font-size: 1.1rem; opacity: 0.9;">
-        Premium products, lightning-fast delivery
-      </p>
-      <div class="d-grid gap-2 d-md-block">
-        <a href="#mobile-products" class="btn btn-light btn-lg">
-          <i class="fas fa-shopping-bag"></i> Shop Now
+  <!-- Mobile Header Section -->
+  <div class="container mt-3 mb-3">
+    <div class="row align-items-center">
+      <div class="col-6">
+        <a href="{% url 'redirect_homepage' %}" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-arrow-left"></i> Back
         </a>
-        <a href="{% url 'products_only' %}" class="btn btn-outline-light btn-lg">
+      </div>
+      <div class="col-6 text-end">
+        <a href="{% url 'products_only' %}" class="btn btn-primary">
           <i class="fas fa-th-large"></i> Browse
         </a>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- Mobile Products Section -->
   <section id="mobile-products" class="py-4" style="background: #f8f9fa;">
