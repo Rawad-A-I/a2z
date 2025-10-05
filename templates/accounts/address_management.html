@@ -238,34 +238,22 @@
               
               <div class="text-center">
                 <div class="btn-group-vertical w-100 d-md-none">
-                  <button type="button" class="btn btn-locate mb-2" onclick="getUltraPreciseLocation()">
-                    <i class="fas fa-crosshairs"></i> Ultra-Precise Location
-                  </button>
-                  <button type="button" class="btn btn-outline-warning mb-2" onclick="getPhoneBasedLocation()">
-                    <i class="fas fa-mobile-alt"></i> Phone-Based Location
+                  <button type="button" class="btn btn-locate mb-2" onclick="getCurrentLocation()">
+                    <i class="fas fa-crosshairs"></i> Use My Current Location
                   </button>
                   <button type="button" class="btn btn-outline-primary mb-2" onclick="openLocationPicker()">
                     <i class="fas fa-map-marker-alt"></i> Pick on Map
-                  </button>
-                  <button type="button" class="btn btn-outline-info mb-2" onclick="geocodeAddress()">
-                    <i class="fas fa-search"></i> Search Address
                   </button>
                   <button type="submit" class="btn btn-success">
                     <i class="fas fa-save"></i> Save Address
                   </button>
                 </div>
                 <div class="d-none d-md-block">
-                  <button type="button" class="btn btn-locate" onclick="getUltraPreciseLocation()">
-                    <i class="fas fa-crosshairs"></i> Ultra-Precise Location
-                  </button>
-                  <button type="button" class="btn btn-outline-warning ml-2" onclick="getPhoneBasedLocation()">
-                    <i class="fas fa-mobile-alt"></i> Phone-Based Location
+                  <button type="button" class="btn btn-locate" onclick="getCurrentLocation()">
+                    <i class="fas fa-crosshairs"></i> Use My Current Location
                   </button>
                   <button type="button" class="btn btn-outline-primary ml-2" onclick="openLocationPicker()">
                     <i class="fas fa-map-marker-alt"></i> Pick on Map
-                  </button>
-                  <button type="button" class="btn btn-outline-info ml-2" onclick="geocodeAddress()">
-                    <i class="fas fa-search"></i> Search Address
                   </button>
                   <button type="submit" class="btn btn-success ml-2">
                     <i class="fas fa-save"></i> Save Address
@@ -282,12 +270,11 @@
             <div class="mt-2">
               <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i>
-                <strong>Location Accuracy Tips:</strong>
+                <strong>Location Options:</strong>
                 <ul class="mb-0 mt-2">
-                  <li><strong>Ultra-Precise Location:</strong> Uses multiple GPS readings for best accuracy (5-10m)</li>
-                  <li><strong>Phone-Based Location:</strong> Uses your phone number + carrier network for enhanced accuracy</li>
+                  <li><strong>Use My Current Location:</strong> Uses your device's GPS for accurate location (5-20m accuracy)</li>
                   <li><strong>Pick on Map:</strong> Manually select your exact location on the map</li>
-                  <li><strong>Search Address:</strong> Find your address using multiple geocoding services</li>
+                  <li><strong>Fill Address Form:</strong> Enter your address details manually</li>
                 </ul>
               </div>
             </div>
@@ -455,193 +442,18 @@ function initMap() {
   });
 }
 
-// Ultra-precise location detection with multiple techniques
-function getUltraPreciseLocation() {
+// Simple HTML5 Geolocation API - No external services needed!
+function getCurrentLocation() {
   if (!navigator.geolocation) {
     showNotification('Geolocation is not supported by this browser.', 'error');
     return;
   }
 
-  // Show accuracy modal
-  const modal = new bootstrap.Modal(document.getElementById('locationAccuracyModal'));
-  modal.show();
-  
-  updateProgress(0, 'Initializing ultra-precise location...');
-  
-  const options = {
-    enableHighAccuracy: true,
-    timeout: 60000, // 60 seconds for better accuracy
-    maximumAge: 0
-  };
-  
-  // Try multiple location requests for better accuracy
-  let locationAttempts = 0;
-  const maxAttempts = 3;
-  let bestLocation = null;
-  let bestAccuracy = Infinity;
-  
-  function attemptLocation() {
-    locationAttempts++;
-    updateProgress((locationAttempts / maxAttempts) * 50, `Location attempt ${locationAttempts}/${maxAttempts}...`);
-    
-    navigator.geolocation.getCurrentPosition(
-      function(position) {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
-        
-        updateProgress(50 + (locationAttempts / maxAttempts) * 25, `Accuracy: ${Math.round(accuracy)}m (Attempt ${locationAttempts})`);
-        
-        // Keep the most accurate location
-        if (accuracy < bestAccuracy) {
-          bestLocation = { lat, lng, accuracy };
-          bestAccuracy = accuracy;
-        }
-        
-        // If we have good accuracy or tried enough times, proceed
-        if (accuracy < 10 || locationAttempts >= maxAttempts) {
-          finalizeLocation();
-        } else {
-          // Wait and try again
-          setTimeout(attemptLocation, 2000);
-        }
-      },
-      function(error) {
-        if (locationAttempts >= maxAttempts) {
-          modal.hide();
-          showNotification('Unable to get precise location. Please try phone-based location or map picker.', 'error');
-        } else {
-          setTimeout(attemptLocation, 1000);
-        }
-      },
-      options
-    );
-  }
-  
-  function finalizeLocation() {
-    updateProgress(75, 'Processing best location...');
-    
-    if (bestLocation) {
-      document.getElementById('latitude').value = bestLocation.lat;
-      document.getElementById('longitude').value = bestLocation.lng;
-      
-      // Update main map
-      map.setView([bestLocation.lat, bestLocation.lng], 19); // Higher zoom for precision
-      
-      if (marker) {
-        map.removeLayer(marker);
-      }
-      
-      marker = L.marker([bestLocation.lat, bestLocation.lng]).addTo(map);
-      marker.bindPopup(`Ultra-Precise Location<br>Accuracy: ${Math.round(bestLocation.accuracy)}m`).openPopup();
-      
-      updateProgress(100, 'Ultra-precise location confirmed!');
-      
-      // Reverse geocode to get address
-      reverseGeocode(bestLocation.lat, bestLocation.lng);
-      
-      setTimeout(() => {
-        modal.hide();
-        showNotification(`Ultra-precise location detected with ${Math.round(bestLocation.accuracy)}m accuracy!`, 'success');
-      }, 1000);
-    } else {
-      modal.hide();
-      showNotification('Unable to get precise location. Please try phone-based location.', 'error');
-    }
-  }
-  
-  attemptLocation();
-}
-
-// Phone-based location detection
-function getPhoneBasedLocation() {
-  const phoneNumber = document.getElementById('phone_number').value;
-  
-  if (!phoneNumber.trim()) {
-    showNotification('Please enter your phone number first for phone-based location.', 'warning');
-    return;
-  }
-  
-  // Show accuracy modal
-  const modal = new bootstrap.Modal(document.getElementById('locationAccuracyModal'));
-  modal.show();
-  
-  updateProgress(0, 'Analyzing phone number for location...');
-  
-  // Simulate phone-based location (in real implementation, this would use carrier APIs)
-  setTimeout(() => {
-    updateProgress(25, 'Contacting carrier network...');
-    
-    // Get user's current location as fallback
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        function(position) {
-          updateProgress(50, 'Cross-referencing with carrier data...');
-          
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          const accuracy = position.coords.accuracy;
-          
-          // Simulate carrier network improvement
-          setTimeout(() => {
-            updateProgress(75, 'Carrier network location found...');
-            
-            // Simulate improved accuracy from carrier data
-            const improvedAccuracy = Math.max(5, accuracy * 0.3); // Improve accuracy by 70%
-            
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lng;
-            
-            // Update main map
-            map.setView([lat, lng], 19);
-            
-            if (marker) {
-              map.removeLayer(marker);
-            }
-            
-            marker = L.marker([lat, lng]).addTo(map);
-            marker.bindPopup(`Phone-Based Location<br>Accuracy: ${Math.round(improvedAccuracy)}m<br>Phone: ${phoneNumber}`).openPopup();
-            
-            updateProgress(100, 'Phone-based location confirmed!');
-            
-            // Reverse geocode to get address
-            reverseGeocode(lat, lng);
-            
-            setTimeout(() => {
-              modal.hide();
-              showNotification(`Phone-based location detected with ${Math.round(improvedAccuracy)}m accuracy!`, 'success');
-            }, 1000);
-          }, 2000);
-        },
-        function(error) {
-          modal.hide();
-          showNotification('Unable to get phone-based location. Please try ultra-precise location.', 'error');
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 30000,
-          maximumAge: 0
-        }
-      );
-    } else {
-      modal.hide();
-      showNotification('Geolocation not supported. Please use map picker.', 'error');
-    }
-  }, 1000);
-}
-
-// WhatsApp-style precise location detection (legacy)
-function getPreciseLocation() {
-  if (!navigator.geolocation) {
-    showNotification('Geolocation is not supported by this browser.', 'error');
-    return;
-  }
-
-  // Show accuracy modal
-  const modal = new bootstrap.Modal(document.getElementById('locationAccuracyModal'));
-  modal.show();
-  
-  updateProgress(0, 'Requesting location permission...');
+  // Show loading indicator
+  const button = event.target;
+  const originalText = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location...';
+  button.disabled = true;
   
   const options = {
     enableHighAccuracy: true,
@@ -651,47 +463,30 @@ function getPreciseLocation() {
   
   navigator.geolocation.getCurrentPosition(
     function(position) {
-      updateProgress(25, 'Location detected, improving accuracy...');
-      
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
       const accuracy = position.coords.accuracy;
       
-      locationAccuracy = accuracy;
+      // Store coordinates
+      document.getElementById('latitude').value = lat;
+      document.getElementById('longitude').value = lng;
       
-      updateProgress(50, `Accuracy: ${Math.round(accuracy)} meters`);
+      // Update map
+      map.setView([lat, lng], 18);
       
-      // Wait a moment for better accuracy
-      setTimeout(() => {
-        updateProgress(75, 'Finalizing location...');
-        
-        // Use the precise location
-        document.getElementById('latitude').value = lat;
-        document.getElementById('longitude').value = lng;
-        
-        // Update main map
-        map.setView([lat, lng], 18);
-        
-        if (marker) {
-          map.removeLayer(marker);
-        }
-        
-        marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup(`Your Location<br>Accuracy: ${Math.round(accuracy)}m`).openPopup();
-        
-        updateProgress(100, 'Location confirmed!');
-        
-        // Reverse geocode to get address
-        reverseGeocode(lat, lng);
-        
-        setTimeout(() => {
-          modal.hide();
-          showNotification(`Location detected with ${Math.round(accuracy)}m accuracy!`, 'success');
-        }, 1000);
-      }, 2000);
+      if (marker) {
+        map.removeLayer(marker);
+      }
+      
+      marker = L.marker([lat, lng]).addTo(map);
+      marker.bindPopup(`Your Location<br>Accuracy: ${Math.round(accuracy)}m`).openPopup();
+      
+      // Reverse geocode to get address
+      reverseGeocode(lat, lng);
+      
+      showNotification(`Location detected with ${Math.round(accuracy)}m accuracy!`, 'success');
     },
     function(error) {
-      modal.hide();
       let errorMessage = 'Error getting location: ';
       switch(error.code) {
         case error.PERMISSION_DENIED:
@@ -711,20 +506,12 @@ function getPreciseLocation() {
     },
     options
   );
-}
-
-// Update progress bar
-function updateProgress(percent, message) {
-  const progressBar = document.querySelector('#locationAccuracyModal .progress-bar');
-  const infoDiv = document.getElementById('locationAccuracyInfo');
   
-  if (progressBar) {
-    progressBar.style.width = percent + '%';
-  }
-  
-  if (infoDiv) {
-    infoDiv.textContent = message;
-  }
+  // Restore button
+  setTimeout(() => {
+    button.innerHTML = originalText;
+    button.disabled = false;
+  }, 3000);
 }
 
 // Open location picker modal
@@ -791,186 +578,7 @@ function confirmLocation() {
   }
 }
 
-// Enhanced geocoding with multiple services for better accuracy
-function geocodeAddress() {
-  const address = document.getElementById('address').value;
-  const city = document.getElementById('city').value;
-  const state = document.getElementById('state').value;
-  const zipCode = document.getElementById('zip_code').value;
-  const country = document.getElementById('country').value;
-  
-  if (!address.trim()) {
-    showNotification('Please enter an address first.', 'warning');
-    return;
-  }
-  
-  // Show loading indicator
-  const button = event.target;
-  const originalText = button.innerHTML;
-  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-  button.disabled = true;
-  
-  // Build comprehensive address string
-  let fullAddress = address;
-  if (city) fullAddress += ', ' + city;
-  if (state) fullAddress += ', ' + state;
-  if (zipCode) fullAddress += ' ' + zipCode;
-  
-  // Add country-specific formatting
-  if (country === 'LB') {
-    fullAddress += ', Lebanon';
-  } else if (country === 'US') {
-    fullAddress += ', United States';
-  } else if (country === 'CA') {
-    fullAddress += ', Canada';
-  } else if (country === 'UK') {
-    fullAddress += ', United Kingdom';
-  }
-  
-  // Try multiple geocoding services for better accuracy
-  Promise.all([
-    geocodeWithNominatim(fullAddress, country),
-    geocodeWithPhoton(fullAddress, country),
-    geocodeWithMapbox(fullAddress, country)
-  ]).then(results => {
-    // Filter out null results and find the most accurate
-    const validResults = results.filter(r => r && r.success);
-    const bestResult = validResults.find(r => r.accuracy < 50) || 
-                      validResults.find(r => r.accuracy < 100) || 
-                      validResults[0];
-    
-    if (bestResult && bestResult.success) {
-      const lat = bestResult.latitude;
-      const lng = bestResult.longitude;
-      
-      document.getElementById('latitude').value = lat;
-      document.getElementById('longitude').value = lng;
-      
-      // Update map with better zoom level for accuracy
-      map.setView([lat, lng], 18);
-      
-      if (marker) {
-        map.removeLayer(marker);
-      }
-      
-      marker = L.marker([lat, lng]).addTo(map);
-      marker.bindPopup(`✓ Verified Address<br>Accuracy: ${Math.round(bestResult.accuracy || 0)}m`).openPopup();
-      
-      // Update form with geocoded address components for better accuracy
-      if (bestResult.address_components) {
-        const addr = bestResult.address_components;
-        if (addr.house_number && addr.road) {
-          document.getElementById('address').value = addr.house_number + ' ' + addr.road;
-        }
-        if (addr.city) document.getElementById('city').value = addr.city;
-        if (addr.state) document.getElementById('state').value = addr.state;
-        if (addr.postcode) document.getElementById('zip_code').value = addr.postcode;
-      }
-      
-      showNotification(`Address found with ${Math.round(bestResult.accuracy || 0)}m accuracy!`, 'success');
-    } else {
-      showNotification('Address not found. Please try a more specific address or use the map picker.', 'error');
-    }
-  }).catch(error => {
-    console.error('Geocoding error:', error);
-    showNotification('Error searching for address. Please try again or use the map picker.', 'error');
-  }).finally(() => {
-    // Restore button
-    button.innerHTML = originalText;
-    button.disabled = false;
-  });
-}
-
-// Geocode with Nominatim
-function geocodeWithNominatim(address, country) {
-  return fetch('{% url "geocode_address" %}', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': '{{ csrf_token }}'
-    },
-    body: JSON.stringify({ 
-      address: address,
-      country: country
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      return {
-        success: true,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        accuracy: data.accuracy || 50,
-        address_components: data.address_components
-      };
-    }
-    return null;
-  })
-  .catch(error => {
-    console.error('Nominatim error:', error);
-    return null;
-  });
-}
-
-// Geocode with Photon API (alternative service)
-function geocodeWithPhoton(address, country) {
-  const photonUrl = `https://photon.komoot.io/api?q=${encodeURIComponent(address)}&limit=1`;
-  
-  return fetch(photonUrl)
-    .then(response => response.json())
-    .then(data => {
-      if (data.features && data.features.length > 0) {
-        const feature = data.features[0];
-        const coords = feature.geometry.coordinates;
-        const properties = feature.properties;
-        
-        return {
-          success: true,
-          latitude: coords[1],
-          longitude: coords[0],
-          accuracy: properties.accuracy || 100,
-          address_components: {
-            house_number: properties.housenumber || '',
-            road: properties.street || '',
-            city: properties.city || properties.town || '',
-            state: properties.state || '',
-            postcode: properties.postcode || '',
-            country: properties.country || ''
-          }
-        };
-      }
-      return null;
-    })
-    .catch(error => {
-      console.error('Photon error:', error);
-      return null;
-    });
-}
-
-// Geocode with Mapbox API (high accuracy service)
-function geocodeWithMapbox(address, country) {
-  // Note: In production, you would need a Mapbox API key
-  // For now, we'll simulate it with a fallback
-  return new Promise((resolve) => {
-    // Simulate Mapbox geocoding with improved accuracy
-    setTimeout(() => {
-      // Use Photon as fallback since we don't have Mapbox API key
-      geocodeWithPhoton(address, country)
-        .then(result => {
-          if (result) {
-            // Simulate Mapbox's typically better accuracy
-            result.accuracy = Math.max(5, result.accuracy * 0.5); // Improve accuracy by 50%
-            result.service = 'Mapbox';
-          }
-          resolve(result);
-        })
-        .catch(() => resolve(null));
-    }, 1000);
-  });
-}
-
-// Reverse geocode coordinates to address using Nominatim
+// Simple reverse geocode using Nominatim
 function reverseGeocode(lat, lng) {
   fetch('{% url "reverse_geocode" %}', {
     method: 'POST',
@@ -1004,115 +612,6 @@ function reverseGeocode(lat, lng) {
   });
 }
 
-// Find nearby stores
-function findNearbyStores() {
-  const lat = document.getElementById('latitude').value;
-  const lng = document.getElementById('longitude').value;
-  
-  if (!lat || !lng) {
-    alert('Please set your location first.');
-    return;
-  }
-  
-  fetch('{% url "find_nearby_stores" %}', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': '{{ csrf_token }}'
-    },
-    body: JSON.stringify({
-      latitude: parseFloat(lat),
-      longitude: parseFloat(lng),
-      radius: 10
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      displayNearbyStores(data.stores);
-    } else {
-      alert('Error finding nearby stores: ' + data.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error finding nearby stores.');
-  });
-}
-
-// Display nearby stores
-function displayNearbyStores(stores) {
-  const container = document.getElementById('nearby-stores');
-  container.innerHTML = '';
-  
-  if (stores.length === 0) {
-    container.innerHTML = '<p class="text-muted">No stores found nearby.</p>';
-    return;
-  }
-  
-  stores.forEach(store => {
-    const storeDiv = document.createElement('div');
-    storeDiv.className = 'store-card';
-    storeDiv.innerHTML = `
-      <h6>${store.name}</h6>
-      <p class="text-muted mb-1">${store.address}</p>
-      <p class="text-muted mb-1">${store.city}, ${store.state} ${store.zip_code}</p>
-      <p class="text-muted mb-1">
-        <i class="fas fa-phone"></i> ${store.phone}
-      </p>
-      <p class="text-muted mb-1">
-        <i class="fas fa-envelope"></i> ${store.email}
-      </p>
-      <p class="store-distance">
-        <i class="fas fa-map-marker-alt"></i> ${store.distance} km away
-      </p>
-    `;
-    container.appendChild(storeDiv);
-  });
-}
-
-// Get delivery estimate
-function getDeliveryEstimate() {
-  const lat = document.getElementById('latitude').value;
-  const lng = document.getElementById('longitude').value;
-  
-  if (!lat || !lng) {
-    alert('Please set your location first.');
-    return;
-  }
-  
-  fetch('{% url "delivery_estimate" %}', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': '{{ csrf_token }}'
-    },
-    body: JSON.stringify({
-      latitude: parseFloat(lat),
-      longitude: parseFloat(lng)
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const estimateDiv = document.getElementById('delivery-estimate');
-      estimateDiv.innerHTML = `
-        <div class="alert alert-info">
-          <h6><i class="fas fa-truck"></i> Delivery Estimate</h6>
-          <p class="mb-1"><strong>Estimated delivery:</strong> ${data.delivery_days} business days</p>
-          <p class="mb-0"><strong>Nearest store:</strong> ${data.nearest_store.name} (${data.nearest_store.distance} km away)</p>
-        </div>
-      `;
-    } else {
-      alert('Error getting delivery estimate: ' + data.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error getting delivery estimate.');
-  });
-}
-
 // Notification system
 function showNotification(message, type = 'info') {
   const notification = document.createElement('div');
@@ -1130,20 +629,6 @@ function showNotification(message, type = 'info') {
       notification.parentNode.removeChild(notification);
     }
   }, 5000);
-}
-
-// Address verification status
-function checkAddressVerification() {
-  const lat = document.getElementById('latitude').value;
-  const lng = document.getElementById('longitude').value;
-  
-  if (lat && lng) {
-    showNotification('✓ Address verified! You can now place orders.', 'success');
-    return true;
-  } else {
-    showNotification('⚠ Please verify your address on the map before placing orders.', 'warning');
-    return false;
-  }
 }
 
 // Initialize when page loads
