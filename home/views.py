@@ -138,6 +138,11 @@ def privacy_policy(request):
     return render(request, 'home/privacy_policy.html')
 
 
+def demo_design_system(request):
+    """Demo page showcasing the new design system"""
+    return render(request, 'demo_design_system.html')
+
+
 def a2z_bar(request):
     """A2Z Bar - Coming soon page"""
     return render(request, 'home/a2z_bar.html')
