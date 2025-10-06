@@ -51,7 +51,7 @@ def index(request):
         'categories': categories,
         'selected_category': selected_category,
         'selected_sort': selected_sort,
-        'show_search_bar': True,  # Show search bar on product pages
+        'show_search_bar': False,  # Hide search bar on home page
     }
     
     # Detect mobile devices and serve optimized template

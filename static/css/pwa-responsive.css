@@ -358,6 +358,119 @@ body {
   }
 }
 
+/* Back to Home Overlay Button */
+.back-to-home-overlay {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1050;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.back-to-home-overlay .btn {
+  border-radius: 20px;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.back-to-home-overlay .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* PWA Install Button */
+.pwa-install-button {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1050;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+}
+
+.pwa-install-button.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pwa-install-button .install-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.pwa-install-button .install-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+}
+
+.pwa-install-button .install-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.pwa-install-button .install-btn i {
+  font-size: 1rem;
+}
+
+.pwa-install-button .install-btn span {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Adjust positioning when both buttons are present */
+.back-to-home-overlay + .pwa-install-button {
+  top: 4rem;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .pwa-install-button {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  
+  .pwa-install-button .install-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 20px;
+  }
+  
+  .pwa-install-button .install-btn span {
+    display: none;
+  }
+  
+  .pwa-install-button .install-btn i {
+    font-size: 1.1rem;
+  }
+  
+  /* Adjust when back button is present */
+  .back-to-home-overlay + .pwa-install-button {
+    top: 3.5rem;
+  }
+}
+
 /* Mobile Bottom Navigation */
 .mobile-bottom-nav {
   position: fixed;
@@ -374,6 +487,7 @@ body {
 @media (max-width: 767px) {
   .mobile-bottom-nav {
     display: flex;
+    justify-content: space-around;
   }
   
   /* Add bottom padding to body when mobile nav is present */

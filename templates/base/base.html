@@ -259,41 +259,103 @@
         });
       }
 
-      // PWA Install Prompt
+      // PWA Install Prompt with Installation Detection
       let deferredPrompt;
+      let isInstalled = false;
+
+      // Check if app is already installed
+      function checkIfInstalled() {
+        // Check if running in standalone mode (installed)
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+          isInstalled = true;
+          return true;
+        }
+        
+        // Check if app is bookmarked (iOS)
+        if (window.navigator.standalone === true) {
+          isInstalled = true;
+          return true;
+        }
+        
+        return false;
+      }
+
+      // Show install prompt
+      function showInstallPrompt() {
+        if (isInstalled || !deferredPrompt) return;
+        
+        const installButton = document.getElementById('pwa-install-button');
+        if (installButton) {
+          installButton.style.display = 'block';
+          installButton.classList.add('show');
+        }
+      }
+
+      // Hide install prompt
+      function hideInstallPrompt() {
+        const installButton = document.getElementById('pwa-install-button');
+        if (installButton) {
+          installButton.classList.remove('show');
+          setTimeout(() => {
+            installButton.style.display = 'none';
+          }, 300);
+        }
+      }
+
+      // Install app
+      function installApp() {
+        if (!deferredPrompt) return;
+        
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+            hideInstallPrompt();
+            isInstalled = true;
+          } else {
+            console.log('User dismissed the install prompt');
+          }
+          deferredPrompt = null;
+        });
+      }
+
+      // Event listeners
       window.addEventListener('beforeinstallprompt', function(e) {
         console.log('PWA install prompt triggered');
         e.preventDefault();
         deferredPrompt = e;
         
-        // Show install button if available
-        const installButton = document.getElementById('install-button');
-        if (installButton) {
-          installButton.style.display = 'block';
-          installButton.addEventListener('click', function() {
-            if (deferredPrompt) {
-              deferredPrompt.prompt();
-              deferredPrompt.userChoice.then(function(choiceResult) {
-                if (choiceResult.outcome === 'accepted') {
-                  console.log('User accepted the install prompt');
-                } else {
-                  console.log('User dismissed the install prompt');
-                }
-                deferredPrompt = null;
-              });
-            }
-          });
+        // Check if already installed
+        if (!checkIfInstalled()) {
+          // Show install button after a delay
+          setTimeout(showInstallPrompt, 2000);
         }
       });
 
-      // PWA Install Success
+      // Listen for successful installation
       window.addEventListener('appinstalled', function(evt) {
         console.log('PWA was installed successfully');
-        const installButton = document.getElementById('install-button');
-        if (installButton) {
-          installButton.style.display = 'none';
+        isInstalled = true;
+        hideInstallPrompt();
+        deferredPrompt = null;
+      });
+
+      // Check installation status on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        if (checkIfInstalled()) {
+          console.log('PWA is already installed');
+          return;
+        }
+        
+        // Check for install prompt availability
+        if (deferredPrompt) {
+          setTimeout(showInstallPrompt, 2000);
         }
       });
+
+      // Make installApp function globally available
+      window.installApp = installApp;
     </script>
   </head>
 
@@ -1133,10 +1195,13 @@
   </style>
   <body>
     <!-- PWA Install Button -->
-    <button id="install-button" class="install-button" style="display: none;">
-      <i class="fas fa-download"></i> Install App
-    </button>
-    
+    <div id="pwa-install-button" class="pwa-install-button" style="display: none;">
+      <button onclick="installApp()" class="install-btn">
+        <i class="fas fa-download"></i>
+        <span>Install App</span>
+      </button>
+    </div>
+
     {% include 'home/navbar.html' %}
     {% block start %} {% endblock %}
     {% include 'home/footer.html' %}
@@ -1146,6 +1211,10 @@
       <a href="{% url 'products_only' %}" class="mobile-nav-item">
         <i class="fas fa-home"></i>
         <span>Home</span>
+      </a>
+      <a href="{% url 'products_only' %}" class="mobile-nav-item">
+        <i class="fas fa-th-large"></i>
+        <span>Products</span>
       </a>
       <a href="{% url 'cart' %}" class="mobile-nav-item">
         <i class="fas fa-shopping-cart"></i>

@@ -1,157 +1,136 @@
 {% extends "base/base.html"%} 
 {% block start %}
-<!-- Header Section with Back Button -->
-<div class="container mt-4 mb-4">
-  <div class="row">
-    <div class="col-12">
-      <a href="{% url 'redirect_homepage' %}" class="btn btn-outline">
-        <i class="fas fa-arrow-left"></i> Back to Platform
-      </a>
-    </div>
-  </div>
+<!-- Back to Mart Home Overlay Button -->
+<div class="back-to-home-overlay">
+  <a href="{% url 'redirect_homepage' %}" class="btn btn-outline btn-sm">
+    <i class="fas fa-arrow-left"></i> Back to Mart Home
+  </a>
 </div>
 
-<!-- Products Section -->
-<section id="products" class="py-5" style="background: white; margin-top: 0; min-height: 100vh; position: relative; z-index: 0;">
-  <div class="container mt-3 pt-3">
-  {% include 'base/alert.html' %}
-  <!-- Filter Section -->
-  <div class="mb-6">
-    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="form-group">
-        <label for="category" class="form-label">Category:</label>
-        <select id="category" name="category" class="form-control" onchange="this.form.submit()">
-          <option value="">All Categories</option>
-          {% for category in categories %}
-          <option value="{{ category.category_name }}" {% if selected_category == category.category_name %} selected {% endif %}>
-            {{ category.category_name }}
-          </option>
-          {% endfor %}
-        </select>
+<!-- Special Offers & New Items Section -->
+<section class="hero-section py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <h1 class="display-4 fw-bold mb-4">Welcome to A2Z Mart</h1>
+        <p class="lead mb-4">Discover amazing deals, special offers, and the latest products!</p>
+        <div class="d-flex gap-3">
+          <a href="{% url 'products_only' %}" class="btn btn-light btn-lg">
+            <i class="fas fa-shopping-bag me-2"></i>Shop Now
+          </a>
+          <a href="{% url 'product_search' %}" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-search me-2"></i>Search Products
+          </a>
+        </div>
       </div>
-      
-      <!-- Sort Section -->
-      <div class="form-group">
-        <label for="sort" class="form-label">Sort by:</label>
-        <select id="sort" name="sort" class="form-control" onchange="this.form.submit()">
-          <option value="">Select</option>
-          <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
-          <option value="priceAsc" {% if selected_sort == 'priceAsc' %}selected{% endif %}>Price: Low-High</option>
-          <option value="priceDesc" {% if selected_sort == 'priceDesc' %}selected{% endif %}>Price: High-Low</option>
-        </select>
+      <div class="col-lg-6 text-center">
+        <div class="hero-image">
+          <i class="fas fa-store fa-10x opacity-75"></i>
+        </div>
       </div>
-      
-      <!-- Search Section -->
-      <div class="form-group">
-        <label for="search" class="form-label">Search:</label>
-        <input type="text" id="search" name="q" class="form-control" placeholder="Search products..." value="{{ query|default:'' }}">
-      </div>
-    </form>
+    </div>
   </div>
+</section>
 
-  <!-- Product List - Responsive Grid -->
-  <div class="responsive-product-grid">
-    {% for product in products %}
-    <div class="product-card-mobile" data-product-id="{{ product.id }}">
-      <div class="product-image-container">
-        <a href="{% url 'get_product' product.slug %}" class="product-image-link">
-          {% if product.product_images.first %}
-            <img src="/media/{{product.product_images.first.image}}" 
-                 class="product-image-mobile"
-                 loading="lazy" 
-                 alt="{{ product.product_name }}"
-                 width="280" height="280" />
-          {% else %}
-            <div class="product-image-placeholder">
-              <i class="fas fa-image"></i>
+<!-- Special Offers Section -->
+<section class="special-offers py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h2 class="text-center mb-5">
+          <i class="fas fa-star text-warning me-2"></i>Special Offers
+        </h2>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="offer-card text-center p-4 border rounded shadow-sm">
+          <div class="offer-icon mb-3">
+            <i class="fas fa-percentage fa-3x text-primary"></i>
+          </div>
+          <h4>Flash Sale</h4>
+          <p class="text-muted">Up to 50% off on selected items</p>
+          <a href="{% url 'products_only' %}?sort=priceAsc" class="btn btn-primary">Shop Sale</a>
+        </div>
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        <div class="offer-card text-center p-4 border rounded shadow-sm">
+          <div class="offer-icon mb-3">
+            <i class="fas fa-gift fa-3x text-success"></i>
+          </div>
+          <h4>New Arrivals</h4>
+          <p class="text-muted">Fresh products just added</p>
+          <a href="{% url 'products_only' %}?sort=newest" class="btn btn-success">View New</a>
+        </div>
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        <div class="offer-card text-center p-4 border rounded shadow-sm">
+          <div class="offer-icon mb-3">
+            <i class="fas fa-shipping-fast fa-3x text-info"></i>
+          </div>
+          <h4>Free Shipping</h4>
+          <p class="text-muted">On orders over $50</p>
+          <a href="{% url 'products_only' %}" class="btn btn-info">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Categories -->
+<section class="featured-categories py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h2 class="text-center mb-5">
+          <i class="fas fa-th-large text-primary me-2"></i>Shop by Category
+        </h2>
+      </div>
+    </div>
+    
+    <div class="row">
+      {% for category in categories|slice:":6" %}
+      <div class="col-md-4 col-lg-2 mb-4">
+        <a href="{% url 'products_only' %}?category={{ category.category_name }}" class="category-card text-decoration-none">
+          <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body d-flex flex-column justify-content-center">
+              <div class="category-icon mb-3">
+                <i class="fas fa-{{ category.icon|default:'tag' }} fa-2x text-primary"></i>
+              </div>
+              <h6 class="card-title">{{ category.category_name }}</h6>
             </div>
-          {% endif %}
+          </div>
         </a>
-        
-        <!-- Product Badges -->
-        <div class="product-badges">
-          {% if not product.is_in_stock %}
-            <span class="badge badge-out-of-stock">Out of Stock</span>
-          {% elif product.stock_quantity > 0 and product.is_low_stock %}
-            <span class="badge badge-warning">Low Stock</span>
-          {% endif %}
-        </div>
       </div>
-      
-      <div class="product-info-mobile">
-        <h3 class="product-title-mobile">
-          <a href="{% url 'get_product' product.slug %}" class="product-title-link">
-            {{ product.product_name|truncatechars:50 }}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Browse All Products Section -->
+<section class="browse-products py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center">
+        <h2 class="mb-4">
+          <i class="fas fa-shopping-bag text-primary me-2"></i>Browse All Products
+        </h2>
+        <p class="lead text-muted mb-4">Explore our complete catalog with advanced search and filtering</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+          <a href="{% url 'products_only' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-th-large me-2"></i>View All Products
           </a>
-        </h3>
-        
-        <div class="product-category">
-          <span class="category-badge">{{ product.category.category_name }}</span>
-        </div>
-        
-        <div class="product-price-container">
-          <span class="product-price-mobile">${{ product.price }}</span>
-        </div>
-        
-        <div class="product-actions">
-          <a href="{% url 'get_product' product.slug %}" class="btn btn-outline">
-            <i class="fas fa-eye"></i>
-            <span>View Details</span>
+          <a href="{% url 'product_search' %}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-search me-2"></i>Advanced Search
           </a>
-          
-          {% if product.is_in_stock %}
-            <a href="{% url 'add_to_cart' product.uid %}" class="btn btn-primary">
-              <i class="fas fa-shopping-cart"></i>
-              <span>Add to Cart</span>
-            </a>
-          {% else %}
-            <button class="btn btn-secondary" disabled>
-              <i class="fas fa-times"></i>
-              <span>Out of Stock</span>
-            </button>
-          {% endif %}
         </div>
       </div>
     </div>
-    {% endfor %}
   </div>
-
-  <!-- Pagination Section -->
-  <nav aria-label="Page navigation example">
-    <ul class="pagination justify-content-center mb-4">
-      {% if products.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
-          <span aria-hidden="true">&laquo; Previous</span>
-        </a>
-      </li>
-      {% else %}
-      <li class="page-item disabled">
-        <a class="page-link">Previous</a>
-      </li>
-      {% endif %}
-
-      {% for num in products.paginator.page_range %}
-      <li class="page-item {% if products.number == num %}active{% endif %}">
-        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-      </li>
-      {% endfor %}
-
-      {% if products.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
-          <span aria-hidden="true">Next &raquo;</span>
-        </a>
-      </li>
-      {% else %}
-      <li class="page-item disabled">
-        <a class="page-link">Next</a>
-      </li>
-      {% endif %}
-    </ul>
-  </nav>
-  
-</div>
+</section>
 
 {% endblock %}
 

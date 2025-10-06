@@ -1,10 +1,22 @@
 {% extends "base/base.html"%} 
 {% block start %}
-<!-- Back to Mart Home Button -->
-<div class="container mt-3">
-  <a href="{% url 'index' %}" class="btn btn-outline-primary">
+<!-- Back to Mart Home Overlay Button -->
+<div class="back-to-home-overlay">
+  <a href="{% url 'index' %}" class="btn btn-outline btn-sm">
     <i class="fas fa-arrow-left"></i> Back to Mart Home
   </a>
+</div>
+
+<!-- Products Header -->
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="display-5 fw-bold text-center mb-4">
+        <i class="fas fa-shopping-bag text-primary me-2"></i>All Products
+      </h1>
+      <p class="lead text-center text-muted mb-4">Browse our complete catalog with advanced search and filtering</p>
+    </div>
+  </div>
 </div>
 
 <!-- Products Section Only -->
@@ -38,32 +50,69 @@
 </style>
 <div class="container mt-3 pt-3">
   {% include 'base/alert.html' %}
-  <!-- Filter Section -->
-  <div class="filter-section mb-3">
-    <form method="GET" class="row">
-      <div class="form-group col-lg-6 col-md-6 col-sm-12">
-        <label for="category">Category:</label>
-        <select id="category" name="category" class="form-control" onchange="this.form.submit()">
-          <option value="">All</option>
-          {% for category in categories %}
-          <option value="{{ category.category_name }}" {% if selected_category == category.category_name %} selected {% endif %}>
-            {{ category.category_name }}
-          </option>
-          {% endfor %}
-        </select>
+  <!-- Advanced Filter Section -->
+  <div class="filter-section mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+          <i class="fas fa-filter me-2"></i>Advanced Filters
+        </h5>
       </div>
-      
-      <!-- Sort Section -->
-      <div class="form-group col-lg-6 col-md-6 col-sm-12">
-        <label for="sort">Sort by:</label>
-        <select id="sort" name="sort" class="form-control" onchange="this.form.submit()">
-          <option value="">Select</option>
-          <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
-          <option value="priceAsc" {% if selected_sort == 'priceAsc' %}selected{% endif %}>Price: Low-High</option>
-          <option value="priceDesc" {% if selected_sort == 'priceDesc' %}selected{% endif %}>Price: High-Low</option>
-        </select>
+      <div class="card-body">
+        <form method="GET" class="row g-3">
+          <div class="col-lg-3 col-md-6">
+            <label for="category" class="form-label fw-bold">Category</label>
+            <select id="category" name="category" class="form-select" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              {% for category in categories %}
+              <option value="{{ category.category_name }}" {% if selected_category == category.category_name %} selected {% endif %}>
+                {{ category.category_name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-lg-3 col-md-6">
+            <label for="sort" class="form-label fw-bold">Sort By</label>
+            <select id="sort" name="sort" class="form-select" onchange="this.form.submit()">
+              <option value="">Default</option>
+              <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest First</option>
+              <option value="priceAsc" {% if selected_sort == 'priceAsc' %}selected{% endif %}>Price: Low to High</option>
+              <option value="priceDesc" {% if selected_sort == 'priceDesc' %}selected{% endif %}>Price: High to Low</option>
+              <option value="nameAsc" {% if selected_sort == 'nameAsc' %}selected{% endif %}>Name: A to Z</option>
+              <option value="nameDesc" {% if selected_sort == 'nameDesc' %}selected{% endif %}>Name: Z to A</option>
+            </select>
+          </div>
+          
+          <div class="col-lg-3 col-md-6">
+            <label for="price_min" class="form-label fw-bold">Min Price</label>
+            <input type="number" id="price_min" name="price_min" class="form-control" placeholder="0" min="0" step="0.01">
+          </div>
+          
+          <div class="col-lg-3 col-md-6">
+            <label for="price_max" class="form-label fw-bold">Max Price</label>
+            <input type="number" id="price_max" name="price_max" class="form-control" placeholder="1000" min="0" step="0.01">
+          </div>
+          
+          <div class="col-12">
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-1"></i>Apply Filters
+              </button>
+              <a href="{% url 'products_only' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Clear All
+              </a>
+              <div class="ms-auto">
+                <small class="text-muted">
+                  <i class="fas fa-info-circle me-1"></i>
+                  Showing {{ products|length }} of {{ products.paginator.count }} products
+                </small>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 
   <!-- Product List -->
