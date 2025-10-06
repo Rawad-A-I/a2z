@@ -2,7 +2,7 @@
 Template tags for cart functionality.
 """
 from django import template
-from ..cart_utils import get_cart_count
+from ..cart_utils import get_or_create_cart
 
 register = template.Library()
 
@@ -13,4 +13,5 @@ def get_cart_count(context):
     Get the total number of items in the cart for both anonymous and authenticated users.
     """
     request = context['request']
-    return get_cart_count(request)
+    cart = get_or_create_cart(request)
+    return sum(item.quantity for item in cart.cart_items.all())
