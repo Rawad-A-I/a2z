@@ -1,18 +1,18 @@
 {% extends "base/base.html"%} 
 {% block start %}
 <!-- Back to Mart Home Fixed Button -->
-<div class="back-to-home-fixed">
-  <a href="{% url 'redirect_homepage' %}" class="btn btn-outline btn-sm">
-    <i class="fas fa-arrow-left"></i> Back to Mart Home
+<div class="back-to-home-fixed" style="background: #ff0000 !important; border: 3px solid #00ff00 !important;">
+  <a href="{% url 'redirect_homepage' %}" class="btn btn-outline btn-sm" style="color: white !important; font-weight: bold !important;">
+    <i class="fas fa-arrow-left"></i> Back to Mart Home - UPDATED
   </a>
 </div>
 
 <!-- Special Offers & New Items Section -->
-<section class="hero-section py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+<section class="hero-section py-5" style="background: linear-gradient(135deg, #ff0000 0%, #00ff00 100%); color: white; border: 5px solid yellow !important;">
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-6">
-        <h1 class="display-4 fw-bold mb-4">Welcome to A2Z Mart</h1>
+        <h1 class="display-4 fw-bold mb-4">Welcome to A2Z Mart - UPDATED 2025-01-08</h1>
         <p class="lead mb-4">Discover amazing deals, special offers, and the latest products!</p>
         <div class="d-flex gap-3">
           <a href="{% url 'products_only' %}" class="btn btn-light btn-lg">
