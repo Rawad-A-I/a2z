@@ -166,7 +166,7 @@
                       {% endif %}
                     </td>
                     <td>{{ item.quantity }}</td>
-                    <td>₹{{ item.product_price }}</td>
+                    <td>${{ item.product_price }}</td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -227,18 +227,18 @@
             <div class="payment-summary">
               <div class="summary-item">
                 <span class="label">Subtotal:</span>
-                <span class="value">₹{{ order.order_total_price }}</span>
+                <span class="value">${{ order.order_total_price }}</span>
               </div>
               {% if order.coupon %}
               <div class="summary-item">
                 <span class="label">Coupon Discount:</span>
-                <span class="value text-success">-₹{{ order.coupon.discount_amount }}</span>
+                <span class="value text-success">-${{ order.coupon.discount_amount }}</span>
               </div>
               {% endif %}
               <hr>
               <div class="summary-item total">
                 <span class="label">Total:</span>
-                <span class="value">₹{{ order.grand_total }}</span>
+                <span class="value">${{ order.grand_total }}</span>
               </div>
             </div>
           </div>

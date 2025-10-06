@@ -115,7 +115,7 @@
                                             </td>
                                             <td>{{ item.size_variant.size_name|default:"N/A" }}</td>
                                             <td>{{ item.quantity }}</td>
-                                            <td>₹{{ item.product_price }}</td>
+                                            <td>${{ item.product_price }}</td>
                                             <td>
                                                 {% if not item.product.is_in_stock %}
                                                 <span class="badge bg-danger">Out of Stock</span>
@@ -206,18 +206,18 @@
                                 <h6>Order Summary</h6>
                                 <div class="d-flex justify-content-between">
                                     <span>Subtotal:</span>
-                                    <span>₹{{ order.order_total_price }}</span>
+                                    <span>${{ order.order_total_price }}</span>
                                 </div>
                                 {% if order.coupon %}
                                 <div class="d-flex justify-content-between text-success">
                                     <span>Discount ({{ order.coupon.coupon_code }}):</span>
-                                    <span>-₹{{ order.coupon.discount_amount }}</span>
+                                    <span>-${{ order.coupon.discount_amount }}</span>
                                 </div>
                                 {% endif %}
                                 <hr>
                                 <div class="d-flex justify-content-between fw-bold">
                                     <span>Total:</span>
-                                    <span>₹{{ order.grand_total }}</span>
+                                    <span>${{ order.grand_total }}</span>
                                 </div>
                             </div>
                         </div>

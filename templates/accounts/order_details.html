@@ -86,7 +86,7 @@
                     <span class="fw-medium">{{ item.quantity }}</span>
                   </td>
                   <td class="py-3 text-end">
-                    <span class="fw-bold">₹{{ item.product_price }}</span>
+                    <span class="fw-bold">${{ item.product_price }}</span>
                   </td>
                 </tr>
                 {% endfor %}
@@ -291,16 +291,16 @@
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <span class="text-muted">Item(s) Subtotal:</span>
-            <span class="fw-bold">₹{{ order.order_total_price }}</span>
+            <span class="fw-bold">${{ order.order_total_price }}</span>
           </div>
           <div class="d-flex justify-content-between align-items-center mb-3">
             <span class="text-muted">Coupon Applied:</span>
-            <span class="fw-bold text-success">-₹{{ order.coupon.discount_amount|default:"0" }}</span>
+            <span class="fw-bold text-success">-${{ order.coupon.discount_amount|default:"0" }}</span>
           </div>
           <hr>
           <div class="d-flex justify-content-between align-items-center">
             <span class="fw-bold">Grand Total:</span>
-            <span class="fw-bold text-primary h5 mb-0">₹{{ order.grand_total }}</span>
+            <span class="fw-bold text-primary h5 mb-0">${{ order.grand_total }}</span>
           </div>
         </div>
       </div>
