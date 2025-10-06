@@ -51,6 +51,7 @@ def index(request):
         'categories': categories,
         'selected_category': selected_category,
         'selected_sort': selected_sort,
+        'show_search_bar': True,  # Show search bar on product pages
     }
     
     # Detect mobile devices and serve optimized template
@@ -98,6 +99,7 @@ def products_only(request):
         'categories': categories,
         'selected_category': selected_category,
         'selected_sort': selected_sort,
+        'show_search_bar': True,  # Show search bar on product pages
     }
     
     # Detect mobile devices and serve optimized template
@@ -155,7 +157,8 @@ def product_search(request):
         'products': products,
         'categories': categories,
         'selected_category': category_filter,
-        'selected_sort': sort_by
+        'selected_sort': sort_by,
+        'show_search_bar': True,  # Show search bar on search results page
     }
     return render(request, 'home/search.html', context)
 

@@ -90,7 +90,8 @@ def bar_products(request):
         'current_category': category_slug,
         'search_query': search_query,
         'sort_by': sort_by,
-        'section': 'bar'
+        'section': 'bar',
+        'show_search_bar': True,  # Show search bar on bar products page
     }
     
     return render(request, 'products/bar_products.html', context)

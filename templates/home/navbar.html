@@ -461,7 +461,8 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
         
-        <!-- Search Bar - Full width on mobile, centered on desktop -->
+        <!-- Search Bar - Only show on product-related pages -->
+        {% if show_search_bar %}
         <div class="col-lg-6 col-12 mt-3 mt-lg-0">
           <form method="GET" action="{% url 'product_search' %}" class="search">
             <div class="input-group w-100">
@@ -476,6 +477,12 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
           </form>
         </div>
+        {% else %}
+        <!-- Spacer for layout when search is hidden -->
+        <div class="col-lg-6 col-12 mt-3 mt-lg-0 d-none d-lg-block">
+          <!-- Empty space for layout balance -->
+        </div>
+        {% endif %}
 
         <!-- Desktop Navigation Icons (hidden on mobile) -->
         <div class="col-lg-4 col-12 d-none d-lg-block">
