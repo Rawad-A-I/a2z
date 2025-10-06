@@ -50,7 +50,12 @@ class Profile(BaseModel):
         super(Profile, self).save(*args, **kwargs)
 
     def get_cart_count(self):
-        return CartItem.objects.filter(cart__is_paid=False, cart__user=self.user).count()
+        """Get cart count for authenticated users"""
+        try:
+            cart = Cart.objects.get(user=self.user, is_paid=False)
+            return sum(item.quantity for item in cart.cart_items.all())
+        except Cart.DoesNotExist:
+            return 0
 
 
 class CustomerLoyalty(BaseModel):
@@ -133,8 +138,12 @@ class Coupon(BaseModel):
 
 class Cart(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart", null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True, help_text="Session key for anonymous users")
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
     is_paid = models.BooleanField(default=False)
+    
+    class Meta:
+        unique_together = [['user', 'is_paid'], ['session_key', 'is_paid']]
 
     def get_cart_total(self):
         cart_items = self.cart_items.all()

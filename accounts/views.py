@@ -182,7 +182,6 @@ def resend_verification_email(request):
     return redirect('login')
 
 
-@login_required
 def add_to_cart(request, uid):
     try:
         variant = request.GET.get('size')
@@ -214,7 +213,8 @@ def add_to_cart(request, uid):
             messages.error(request, 'Not enough stock available. Only {} items left.'.format(product.stock_quantity))
             return redirect(request.META.get('HTTP_REFERER'))
         
-        cart, _ = Cart.objects.get_or_create(user=request.user, is_paid=False)
+        from .cart_utils import get_or_create_cart
+        cart = get_or_create_cart(request)
         
         # Handle size variant if product has sizes
         size_variant = None
@@ -245,18 +245,24 @@ def add_to_cart(request, uid):
     return redirect(reverse('cart'))
 
 
-@login_required
 def cart(request):
-    cart_obj = None
-    user = request.user
-
+    from .cart_utils import get_or_create_cart
+    
     try:
-        cart_obj = Cart.objects.get(is_paid=False, user=user)
-    except Cart.DoesNotExist:
-        messages.warning(request, "Your cart is empty. Please add a product to cart.")
-        return redirect('index')
+        cart_obj = get_or_create_cart(request)
+        if not cart_obj.cart_items.exists():
+            messages.warning(request, "Your cart is empty. Please add a product to cart.")
+            return redirect('products_only')
+    except Exception as e:
+        messages.error(request, "Error loading cart. Please try again.")
+        return redirect('products_only')
 
     if request.method == 'POST':
+        # Check if user is authenticated for checkout
+        if not request.user.is_authenticated:
+            messages.warning(request, 'Please log in to proceed with checkout.')
+            return redirect('login')
+        
         # Apply coupon if any
         coupon = request.POST.get('coupon')
         if coupon:
@@ -541,14 +547,18 @@ def delete_account(request):
         return redirect('index')
 
 
-@login_required
 def checkout(request):
     """
     Checkout view - creates an order from the cart and redirects to order details.
     """
+    # Check if user is authenticated
+    if not request.user.is_authenticated:
+        messages.warning(request, 'Please log in to proceed with checkout.')
+        return redirect('login')
+    
     try:
-        # Get the user's cart
-        cart = Cart.objects.get(user=request.user, is_paid=False)
+        from .cart_utils import get_or_create_cart
+        cart = get_or_create_cart(request)
         
         # Check if cart has items
         if not cart.cart_items.exists():
@@ -565,9 +575,6 @@ def checkout(request):
         messages.success(request, f"Order created successfully! Order ID: {order.order_id}")
         return redirect('order_details', order_id=order.order_id)
         
-    except Cart.DoesNotExist:
-        messages.warning(request, "You don't have any items in your cart.")
-        return redirect('cart')
     except Exception as e:
         messages.error(request, f"Error creating order: {str(e)}")
         return redirect('cart')
