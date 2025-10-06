@@ -372,6 +372,12 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Left positioning for home page */
+.back-to-home-left {
+  left: 1rem;
+  right: auto;
+}
+
 .back-to-home-overlay .btn {
   border-radius: 20px;
   font-size: 0.875rem;
@@ -442,6 +448,12 @@ body {
 /* Adjust positioning when both buttons are present */
 .back-to-home-overlay + .pwa-install-button {
   top: 4rem;
+}
+
+/* Adjust PWA install button when back button is on the left */
+.back-to-home-left + .pwa-install-button {
+  top: 1rem;
+  right: 1rem;
 }
 
 /* Mobile adjustments */
