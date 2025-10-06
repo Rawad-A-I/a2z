@@ -4,18 +4,35 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- PWA Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- PWA Theme Colors -->
+    <meta name="theme-color" content="#667eea" />
+    <meta name="msapplication-TileColor" content="#667eea" />
+    <meta name="msapplication-navbutton-color" content="#667eea" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'manifest.webmanifest' %}" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" />
+    <link rel="apple-touch-icon" href="{% static 'images/icon-192x192.png' %}" />
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'images/icon-192x192.png' %}" />
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'images/icon-512x512.png' %}" />
 
     <title>{% block title %}Home | Django Ecommerce Site{% endblock %}</title>
 
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" />
-
     <!-- Critical CSS - Load immediately -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    
+    <!-- PWA Responsive CSS - Load immediately -->
+    <link href="{% static 'css/pwa-responsive.css' %}" rel="stylesheet" />
     
     <!-- Design System - Load immediately -->
     <link href="{% static 'css/design-system.css' %}" rel="stylesheet" />
@@ -213,6 +230,68 @@
             overlay.classList.remove('show');
             document.body.style.overflow = '';
           }
+        }
+      });
+
+      // PWA Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('{% static "service-worker.js" %}')
+            .then(function(registration) {
+              console.log('Service Worker registered successfully:', registration.scope);
+              
+              // Handle updates
+              registration.addEventListener('updatefound', function() {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', function() {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New content is available, prompt user to refresh
+                    if (confirm('New version available! Refresh to update?')) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
+            })
+            .catch(function(error) {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+
+      // PWA Install Prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        console.log('PWA install prompt triggered');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install button if available
+        const installButton = document.getElementById('install-button');
+        if (installButton) {
+          installButton.style.display = 'block';
+          installButton.addEventListener('click', function() {
+            if (deferredPrompt) {
+              deferredPrompt.prompt();
+              deferredPrompt.userChoice.then(function(choiceResult) {
+                if (choiceResult.outcome === 'accepted') {
+                  console.log('User accepted the install prompt');
+                } else {
+                  console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+              });
+            }
+          });
+        }
+      });
+
+      // PWA Install Success
+      window.addEventListener('appinstalled', function(evt) {
+        console.log('PWA was installed successfully');
+        const installButton = document.getElementById('install-button');
+        if (installButton) {
+          installButton.style.display = 'none';
         }
       });
     </script>
@@ -1053,9 +1132,37 @@
     }
   </style>
   <body>
+    <!-- PWA Install Button -->
+    <button id="install-button" class="install-button" style="display: none;">
+      <i class="fas fa-download"></i> Install App
+    </button>
+    
     {% include 'home/navbar.html' %}
     {% block start %} {% endblock %}
     {% include 'home/footer.html' %}
+    
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+      <a href="{% url 'redirect_homepage' %}" class="mobile-nav-item">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="{% url 'cart' %}" class="mobile-nav-item">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Cart</span>
+      </a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'profile' username=user.username %}" class="mobile-nav-item">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+      {% else %}
+        <a href="{% url 'login' %}" class="mobile-nav-item">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Login</span>
+        </a>
+      {% endif %}
+    </nav>
     
     <!-- Side Panel -->
     <div id="sidePanel" class="side-panel">
