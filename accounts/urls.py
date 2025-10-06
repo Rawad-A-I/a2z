@@ -10,6 +10,7 @@ from accounts.address_views import *
 from accounts.address_management_views import *
 from accounts.admin_views import *
 from accounts.modern_dashboard_views import *
+from accounts.business_form_views import business_form, submit_business_form, get_business_data, business_form_admin
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -167,4 +168,10 @@ urlpatterns = [
     path('admin/reports/', system_reports, name='system_reports'),
     path('admin/backup/', backup_restore, name='backup_restore'),
     path('admin/logs/', system_logs, name='system_logs'),
+    
+    # Business Form URLs
+    path('business-form/', business_form, name='business_form'),
+    path('business-form/submit/', submit_business_form, name='submit_business_form'),
+    path('business-form/data/', get_business_data, name='get_business_data'),
+    path('business-form/admin/', business_form_admin, name='business_form_admin'),
 ]

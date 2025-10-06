@@ -1,0 +1,268 @@
+BUSINESS WEBSITE CUSTOMIZATION INFORMATION
+============================================
+
+Please provide the following information to customize your e-commerce website for your business needs.
+
+COMPANY INFORMATION
+===================
+
+1. Company Name:
+   _________________________________
+
+2. Business Type:
+   ☐ Retail Store
+   ☐ Online Store  
+   ☐ Wholesale
+   ☐ Service Business
+   ☐ Other: _________________________
+
+3. Industry/Sector:
+   _________________________________
+
+4. Target Market:
+   ☐ Individual consumers (B2C)
+   ☐ Other businesses (B2B)
+   ☐ Both B2C and B2B
+
+CONTACT INFORMATION
+===================
+
+5. Business Address:
+   _________________________________
+   _________________________________
+
+6. Phone Number:
+   _________________________________
+
+7. Email Address:
+   _________________________________
+
+8. Business Hours:
+   _________________________________
+
+BRANDING & VISUAL IDENTITY
+==========================
+
+9. Company Logo:
+   ☐ Yes, I have a logo (please attach)
+   ☐ No, I need help creating one
+
+10. Brand Colors:
+    Primary Color: _________________________
+    Secondary Color: _______________________
+
+11. Design Style Preference:
+    ☐ Modern and Clean
+    ☐ Classic and Traditional
+    ☐ Bold and Colorful
+    ☐ Minimalist
+    ☐ Other: _____________________________
+
+PRODUCT INFORMATION
+==================
+
+12. Main Products:
+    _________________________________
+    _________________________________
+
+13. Product Categories:
+    _________________________________
+    _________________________________
+
+14. Number of Products:
+    ☐ Less than 50
+    ☐ 50-200
+    ☐ 200-500
+    ☐ 500-1000
+    ☐ More than 1000
+
+15. Product Images:
+    ☐ I have high-quality product photos
+    ☐ I need help with product photography
+    ☐ I have some photos but need more
+
+SHIPPING & DELIVERY
+==================
+
+16. Delivery Areas:
+    ☐ Local area only
+    ☐ National (within country)
+    ☐ International
+    ☐ Pickup only
+
+17. Shipping Methods:
+    ☐ Standard shipping
+    ☐ Express shipping
+    ☐ Same-day delivery
+    ☐ Pickup in store
+    ☐ Other: ___________________________
+
+18. Free Shipping:
+    ☐ Yes, minimum order: $_____________
+    ☐ No free shipping
+    ☐ Not sure yet
+
+PAYMENT METHODS
+=============
+
+19. Accepted Payment Types:
+    ☐ Credit/Debit Cards
+    ☐ PayPal
+    ☐ Bank Transfer
+    ☐ Cash on Delivery
+    ☐ Mobile Payments
+    ☐ Other: ___________________________
+
+20. Currency:
+    ☐ Lebanese Lira (LBP)
+    ☐ US Dollar (USD)
+    ☐ Euro (EUR)
+    ☐ Other: ___________________________
+
+21. Tax Information:
+    Tax Rate: ___________%
+    Tax ID: _________________________________
+
+CUSTOMER SERVICE
+================
+
+22. Support Hours:
+    _________________________________
+
+23. Contact Methods:
+    ☐ Phone
+    ☐ Email
+    ☐ WhatsApp
+    ☐ Live Chat
+    ☐ Social Media
+    ☐ Other: ___________________________
+
+24. Return Policy:
+    _________________________________
+    _________________________________
+
+25. Refund Policy:
+    _________________________________
+    _________________________________
+
+LANGUAGE & LOCALIZATION
+=======================
+
+26. Primary Language:
+    ☐ English
+    ☐ Arabic
+    ☐ French
+    ☐ Other: ___________________________
+
+27. Additional Languages Needed:
+    ☐ English
+    ☐ Arabic
+    ☐ French
+    ☐ Other: ___________________________
+
+MARKETING & PROMOTIONS
+======================
+
+28. Special Offers:
+    _________________________________
+    _________________________________
+
+29. Social Media:
+    Facebook: _________________________
+    Instagram: _______________________
+    Twitter: _________________________
+    LinkedIn: ________________________
+
+30. Newsletter Content:
+    ☐ Product updates
+    ☐ Special offers
+    ☐ Company news
+    ☐ Industry tips
+    ☐ Other: ___________________________
+
+TECHNICAL REQUIREMENTS
+======================
+
+31. User Accounts:
+    ☐ Customer registration required
+    ☐ Guest checkout allowed
+    ☐ Both options needed
+
+32. Inventory Management:
+    ☐ Real-time stock updates
+    ☐ Manual updates
+    ☐ Not sure
+
+33. Order Management:
+    ☐ Email notifications
+    ☐ SMS notifications
+    ☐ Admin dashboard
+    ☐ Customer tracking
+
+34. Analytics & Reporting:
+    ☐ Sales reports
+    ☐ Customer analytics
+    ☐ Inventory reports
+    ☐ Marketing metrics
+
+SPECIAL REQUIREMENTS
+===================
+
+35. Additional Features Needed:
+    _________________________________
+    _________________________________
+
+36. Integration Requirements:
+    ☐ Accounting software
+    ☐ CRM system
+    ☐ Email marketing
+    ☐ Social media
+    ☐ Other: ___________________________
+
+37. Compliance Requirements:
+    _________________________________
+    _________________________________
+
+ADDITIONAL INFORMATION
+======================
+
+38. Anything else you'd like us to know:
+    _________________________________
+    _________________________________
+    _________________________________
+
+39. Preferred Timeline:
+    ☐ ASAP
+    ☐ Within 1 month
+    ☐ Within 3 months
+    ☐ Flexible
+
+40. Budget Range:
+    ☐ Under $500
+    ☐ $500-$1000
+    ☐ $1000-$2500
+    ☐ $2500+
+    ☐ To be discussed
+
+CONTACT PREFERENCES
+==================
+
+41. Best way to reach you:
+    ☐ Email
+    ☐ Phone
+    ☐ WhatsApp
+    ☐ In-person meeting
+
+42. Preferred meeting time:
+    _________________________________
+
+43. Any questions for us:
+    _________________________________
+    _________________________________
+
+============================================
+Thank you for providing this information!
+We'll use it to create a customized website
+that perfectly fits your business needs.
+============================================
+

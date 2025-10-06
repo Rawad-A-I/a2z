@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Customization Form - A2Z Mart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        
+        .form-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .form-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .form-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .form-body {
+            padding: 2rem;
+        }
+        
+        .section-header {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            margin: 2rem 0 1rem 0;
+            border-left: 4px solid #667eea;
+            border-radius: 0 10px 10px 0;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .form-check {
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-check-input {
+            margin-right: 0.5rem;
+        }
+        
+        .form-check-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 2rem;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-download {
+            background: #28a745;
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+        
+        .btn-download:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        
+        .file-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        
+        .file-upload.dragover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            margin-top: 1rem;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            margin-top: 1rem;
+        }
+        
+        .form-control[type="file"] {
+            display: none;
+        }
+        
+        .file-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .file-info.show {
+            display: block;
+        }
+        
+        .file-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            margin-right: 1rem;
+        }
+        
+        .file-details {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .file-size {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .remove-file {
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .remove-file:hover {
+            color: #c82333;
+        }
+        
+        @media (max-width: 768px) {
+            .form-container {
+                margin: 1rem;
+                border-radius: 15px;
+            }
+            
+            .form-header {
+                padding: 1.5rem;
+            }
+            
+            .form-header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-body {
+                padding: 1.5rem;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1><i class="fas fa-store"></i> Business Customization Form</h1>
+                <p>Help us customize your e-commerce website for your business needs</p>
+            </div>
+            
+            <div class="form-body">
+                <form id="businessForm" enctype="multipart/form-data">
+                    <!-- Company Information -->
+                    <div class="section-header">
+                        <i class="fas fa-building"></i> Company Information
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Company Name</label>
+                                <input type="text" class="form-control" name="company_name" placeholder="Enter company name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Business Type</label>
+                                <select class="form-select" name="business_type">
+                                    <option value="">Select business type</option>
+                                    <option value="retail">Retail Store</option>
+                                    <option value="online">Online Store</option>
+                                    <option value="wholesale">Wholesale</option>
+                                    <option value="service">Service Business</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Industry/Sector</label>
+                                <input type="text" class="form-control" name="industry" placeholder="e.g., Fashion, Electronics, Food">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Target Market</label>
+                                <select class="form-select" name="target_market">
+                                    <option value="">Select target market</option>
+                                    <option value="b2c">Individual consumers (B2C)</option>
+                                    <option value="b2b">Other businesses (B2B)</option>
+                                    <option value="both">Both B2C and B2B</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="section-header">
+                        <i class="fas fa-phone"></i> Contact Information
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Business Address</label>
+                                <textarea class="form-control" name="address" rows="3" placeholder="Enter business address"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" name="phone" placeholder="Enter phone number">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" name="email" placeholder="Enter email address">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Business Hours</label>
+                                <input type="text" class="form-control" name="business_hours" placeholder="e.g., Mon-Fri 9AM-6PM">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Branding & Visual Identity -->
+                    <div class="section-header">
+                        <i class="fas fa-palette"></i> Branding & Visual Identity
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Company Logo</label>
+                        <div class="file-upload" onclick="document.getElementById('logo').click()">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <p class="mb-2">Click to upload logo or drag and drop</p>
+                            <p class="text-muted small">PNG, JPG, SVG up to 10MB</p>
+                        </div>
+                        <input type="file" id="logo" name="logo" accept="image/*" style="display: none;">
+                        <div class="file-info" id="logo-info"></div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Primary Brand Color</label>
+                                <input type="color" class="form-control" name="primary_color" value="#667eea">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Secondary Brand Color</label>
+                                <input type="color" class="form-control" name="secondary_color" value="#764ba2">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Design Style Preference</label>
+                        <div class="checkbox-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="design_style" value="modern" id="style_modern">
+                                <label class="form-check-label" for="style_modern">Modern and Clean</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="design_style" value="classic" id="style_classic">
+                                <label class="form-check-label" for="style_classic">Classic and Traditional</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="design_style" value="bold" id="style_bold">
+                                <label class="form-check-label" for="style_bold">Bold and Colorful</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="design_style" value="minimalist" id="style_minimalist">
+                                <label class="form-check-label" for="style_minimalist">Minimalist</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Information -->
+                    <div class="section-header">
+                        <i class="fas fa-box"></i> Product Information
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Main Products</label>
+                        <textarea class="form-control" name="main_products" rows="3" placeholder="Describe your main products or services"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Product Categories</label>
+                        <input type="text" class="form-control" name="product_categories" placeholder="e.g., Electronics, Clothing, Home & Garden">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Number of Products</label>
+                                <select class="form-select" name="product_count">
+                                    <option value="">Select range</option>
+                                    <option value="less_50">Less than 50</option>
+                                    <option value="50_200">50-200</option>
+                                    <option value="200_500">200-500</option>
+                                    <option value="500_1000">500-1000</option>
+                                    <option value="more_1000">More than 1000</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Product Images</label>
+                                <select class="form-select" name="product_images">
+                                    <option value="">Select option</option>
+                                    <option value="have_photos">I have high-quality product photos</option>
+                                    <option value="need_help">I need help with product photography</option>
+                                    <option value="some_photos">I have some photos but need more</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Shipping & Delivery -->
+                    <div class="section-header">
+                        <i class="fas fa-shipping-fast"></i> Shipping & Delivery
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Delivery Areas</label>
+                                <div class="checkbox-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="delivery_areas" value="local" id="delivery_local">
+                                        <label class="form-check-label" for="delivery_local">Local area only</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="delivery_areas" value="national" id="delivery_national">
+                                        <label class="form-check-label" for="delivery_national">National (within country)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="delivery_areas" value="international" id="delivery_international">
+                                        <label class="form-check-label" for="delivery_international">International</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="delivery_areas" value="pickup" id="delivery_pickup">
+                                        <label class="form-check-label" for="delivery_pickup">Pickup only</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Shipping Methods</label>
+                                <div class="checkbox-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="shipping_methods" value="standard" id="shipping_standard">
+                                        <label class="form-check-label" for="shipping_standard">Standard shipping</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="shipping_methods" value="express" id="shipping_express">
+                                        <label class="form-check-label" for="shipping_express">Express shipping</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="shipping_methods" value="same_day" id="shipping_same_day">
+                                        <label class="form-check-label" for="shipping_same_day">Same-day delivery</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="shipping_methods" value="pickup" id="shipping_pickup">
+                                        <label class="form-check-label" for="shipping_pickup">Pickup in store</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Free Shipping</label>
+                                <select class="form-select" name="free_shipping">
+                                    <option value="">Select option</option>
+                                    <option value="yes">Yes, minimum order amount</option>
+                                    <option value="no">No free shipping</option>
+                                    <option value="not_sure">Not sure yet</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Minimum Order for Free Shipping</label>
+                                <input type="number" class="form-control" name="free_shipping_minimum" placeholder="Enter amount" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Methods -->
+                    <div class="section-header">
+                        <i class="fas fa-credit-card"></i> Payment Methods
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Accepted Payment Types</label>
+                        <div class="checkbox-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="payment_types" value="cards" id="payment_cards">
+                                <label class="form-check-label" for="payment_cards">Credit/Debit Cards</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="payment_types" value="paypal" id="payment_paypal">
+                                <label class="form-check-label" for="payment_paypal">PayPal</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="payment_types" value="bank_transfer" id="payment_bank">
+                                <label class="form-check-label" for="payment_bank">Bank Transfer</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="payment_types" value="cod" id="payment_cod">
+                                <label class="form-check-label" for="payment_cod">Cash on Delivery</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="payment_types" value="mobile" id="payment_mobile">
+                                <label class="form-check-label" for="payment_mobile">Mobile Payments</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Currency</label>
+                                <select class="form-select" name="currency">
+                                    <option value="">Select currency</option>
+                                    <option value="LBP">Lebanese Lira (LBP)</option>
+                                    <option value="USD">US Dollar (USD)</option>
+                                    <option value="EUR">Euro (EUR)</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Tax Rate (%)</label>
+                                <input type="number" class="form-control" name="tax_rate" placeholder="Enter tax rate" step="0.01" min="0" max="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Service -->
+                    <div class="section-header">
+                        <i class="fas fa-headset"></i> Customer Service
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Support Hours</label>
+                                <input type="text" class="form-control" name="support_hours" placeholder="e.g., Mon-Fri 9AM-6PM">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Contact Methods</label>
+                                <div class="checkbox-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="contact_methods" value="phone" id="contact_phone">
+                                        <label class="form-check-label" for="contact_phone">Phone</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="contact_methods" value="email" id="contact_email">
+                                        <label class="form-check-label" for="contact_email">Email</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="contact_methods" value="whatsapp" id="contact_whatsapp">
+                                        <label class="form-check-label" for="contact_whatsapp">WhatsApp</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="contact_methods" value="live_chat" id="contact_live_chat">
+                                        <label class="form-check-label" for="contact_live_chat">Live Chat</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Return Policy</label>
+                                <textarea class="form-control" name="return_policy" rows="3" placeholder="Describe your return policy"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Refund Policy</label>
+                                <textarea class="form-control" name="refund_policy" rows="3" placeholder="Describe your refund policy"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Language & Localization -->
+                    <div class="section-header">
+                        <i class="fas fa-language"></i> Language & Localization
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Primary Language</label>
+                                <select class="form-select" name="primary_language">
+                                    <option value="">Select language</option>
+                                    <option value="en">English</option>
+                                    <option value="ar">Arabic</option>
+                                    <option value="fr">French</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Additional Languages</label>
+                                <div class="checkbox-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="additional_languages" value="en" id="lang_en">
+                                        <label class="form-check-label" for="lang_en">English</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="additional_languages" value="ar" id="lang_ar">
+                                        <label class="form-check-label" for="lang_ar">Arabic</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="additional_languages" value="fr" id="lang_fr">
+                                        <label class="form-check-label" for="lang_fr">French</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Marketing & Promotions -->
+                    <div class="section-header">
+                        <i class="fas fa-bullhorn"></i> Marketing & Promotions
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Special Offers</label>
+                        <textarea class="form-control" name="special_offers" rows="3" placeholder="Describe any special offers or promotions"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Facebook Page</label>
+                                <input type="url" class="form-control" name="facebook" placeholder="https://facebook.com/yourpage">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Instagram</label>
+                                <input type="url" class="form-control" name="instagram" placeholder="https://instagram.com/yourpage">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Twitter</label>
+                                <input type="url" class="form-control" name="twitter" placeholder="https://twitter.com/yourpage">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">LinkedIn</label>
+                                <input type="url" class="form-control" name="linkedin" placeholder="https://linkedin.com/company/yourcompany">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Technical Requirements -->
+                    <div class="section-header">
+                        <i class="fas fa-cogs"></i> Technical Requirements
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">User Accounts</label>
+                                <select class="form-select" name="user_accounts">
+                                    <option value="">Select option</option>
+                                    <option value="required">Customer registration required</option>
+                                    <option value="guest">Guest checkout allowed</option>
+                                    <option value="both">Both options needed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Inventory Management</label>
+                                <select class="form-select" name="inventory_management">
+                                    <option value="">Select option</option>
+                                    <option value="realtime">Real-time stock updates</option>
+                                    <option value="manual">Manual updates</option>
+                                    <option value="not_sure">Not sure</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Order Management</label>
+                        <div class="checkbox-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="order_management" value="email_notifications" id="order_email">
+                                <label class="form-check-label" for="order_email">Email notifications</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="order_management" value="sms_notifications" id="order_sms">
+                                <label class="form-check-label" for="order_sms">SMS notifications</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="order_management" value="admin_dashboard" id="order_admin">
+                                <label class="form-check-label" for="order_admin">Admin dashboard</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="order_management" value="customer_tracking" id="order_tracking">
+                                <label class="form-check-label" for="order_tracking">Customer tracking</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Special Requirements -->
+                    <div class="section-header">
+                        <i class="fas fa-star"></i> Special Requirements
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Additional Features Needed</label>
+                        <textarea class="form-control" name="additional_features" rows="3" placeholder="Describe any additional features you need"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Integration Requirements</label>
+                        <div class="checkbox-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="integrations" value="accounting" id="int_accounting">
+                                <label class="form-check-label" for="int_accounting">Accounting software</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="integrations" value="crm" id="int_crm">
+                                <label class="form-check-label" for="int_crm">CRM system</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="integrations" value="email_marketing" id="int_email">
+                                <label class="form-check-label" for="int_email">Email marketing</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="integrations" value="social_media" id="int_social">
+                                <label class="form-check-label" for="int_social">Social media</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Information -->
+                    <div class="section-header">
+                        <i class="fas fa-info-circle"></i> Additional Information
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Anything else you'd like us to know</label>
+                        <textarea class="form-control" name="additional_info" rows="4" placeholder="Any additional information, special requirements, or questions"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Preferred Timeline</label>
+                                <select class="form-select" name="timeline">
+                                    <option value="">Select timeline</option>
+                                    <option value="asap">ASAP</option>
+                                    <option value="1_month">Within 1 month</option>
+                                    <option value="3_months">Within 3 months</option>
+                                    <option value="flexible">Flexible</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Budget Range</label>
+                                <select class="form-select" name="budget">
+                                    <option value="">Select budget range</option>
+                                    <option value="under_500">Under $500</option>
+                                    <option value="500_1000">$500-$1000</option>
+                                    <option value="1000_2500">$1000-$2500</option>
+                                    <option value="2500_plus">$2500+</option>
+                                    <option value="discuss">To be discussed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Best way to reach you</label>
+                                <select class="form-select" name="contact_preference">
+                                    <option value="">Select preference</option>
+                                    <option value="email">Email</option>
+                                    <option value="phone">Phone</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="meeting">In-person meeting</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Preferred meeting time</label>
+                                <input type="text" class="form-control" name="meeting_time" placeholder="e.g., Weekdays 2-4 PM">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Any questions for us</label>
+                        <textarea class="form-control" name="questions" rows="3" placeholder="Any questions about our services or the customization process"></textarea>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-submit">
+                            <i class="fas fa-paper-plane"></i> Submit Business Information
+                        </button>
+                        <button type="button" class="btn btn-download" onclick="downloadData()">
+                            <i class="fas fa-download"></i> Download Data
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Progress Bar -->
+                <div class="progress" id="progressBar" style="display: none;">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                
+                <!-- Success/Error Messages -->
+                <div id="messageContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // File upload handling
+        document.getElementById('logo').addEventListener('change', function(e) {
+            handleFileUpload(e.target.files[0], 'logo-info');
+        });
+        
+        function handleFileUpload(file, infoId) {
+            if (file) {
+                const infoDiv = document.getElementById(infoId);
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    infoDiv.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <img src="${e.target.result}" class="file-preview" alt="Preview">
+                            <div class="file-details">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                            </div>
+                            <i class="fas fa-times remove-file" onclick="removeFile('${infoId}')"></i>
+                        </div>
+                    `;
+                    infoDiv.classList.add('show');
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function removeFile(infoId) {
+            document.getElementById(infoId).classList.remove('show');
+            document.getElementById('logo').value = '';
+        }
+        
+        // Form submission
+        document.getElementById('businessForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Show progress
+            showProgress();
+            
+            // Submit to Django endpoint
+            fetch('/accounts/business-form/submit/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideProgress();
+                if (data.status === 'success') {
+                    showMessage('success', data.message);
+                    
+                    // Store data locally for download
+                    const formDataObj = {};
+                    for (let [key, value] of formData.entries()) {
+                        if (formDataObj[key]) {
+                            if (Array.isArray(formDataObj[key])) {
+                                formDataObj[key].push(value);
+                            } else {
+                                formDataObj[key] = [formDataObj[key], value];
+                            }
+                        } else {
+                            formDataObj[key] = value;
+                        }
+                    }
+                    localStorage.setItem('businessFormData', JSON.stringify(formDataObj));
+                    
+                    // Store images if any
+                    const logoFile = document.getElementById('logo').files[0];
+                    if (logoFile) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const imageData = {
+                                name: logoFile.name,
+                                type: logoFile.type,
+                                size: logoFile.size,
+                                data: e.target.result
+                            };
+                            localStorage.setItem('businessFormLogo', JSON.stringify(imageData));
+                        };
+                        reader.readAsDataURL(logoFile);
+                    }
+                } else {
+                    showMessage('error', data.message);
+                }
+            })
+            .catch(error => {
+                hideProgress();
+                showMessage('error', 'Error submitting form: ' + error.message);
+            });
+        });
+        
+        // Get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        function showProgress() {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.display = 'block';
+            
+            let width = 0;
+            const interval = setInterval(() => {
+                width += 10;
+                progressBar.querySelector('.progress-bar').style.width = width + '%';
+                
+                if (width >= 100) {
+                    clearInterval(interval);
+                }
+            }, 100);
+        }
+        
+        function hideProgress() {
+            document.getElementById('progressBar').style.display = 'none';
+        }
+        
+        function showMessage(type, message) {
+            const container = document.getElementById('messageContainer');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            
+            container.innerHTML = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+        
+        function downloadData() {
+            const data = localStorage.getItem('businessFormData');
+            const logoData = localStorage.getItem('businessFormLogo');
+            
+            if (!data) {
+                showMessage('error', 'No data to download. Please submit the form first.');
+                return;
+            }
+            
+            const formData = JSON.parse(data);
+            let downloadContent = 'BUSINESS CUSTOMIZATION FORM DATA\n';
+            downloadContent += '=====================================\n\n';
+            
+            // Add form data
+            for (const [key, value] of Object.entries(formData)) {
+                if (value && value !== '') {
+                    const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    downloadContent += `${label}: ${Array.isArray(value) ? value.join(', ') : value}\n`;
+                }
+            }
+            
+            // Add logo info if available
+            if (logoData) {
+                const logo = JSON.parse(logoData);
+                downloadContent += `\nLogo: ${logo.name} (${logo.type}, ${(logo.size / 1024 / 1024).toFixed(2)} MB)\n`;
+            }
+            
+            downloadContent += `\nGenerated on: ${new Date().toLocaleString()}\n`;
+            
+            // Create and download file
+            const blob = new Blob([downloadContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `business_form_data_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('success', 'Data downloaded successfully!');
+        }
+        
+        // Drag and drop for file upload
+        const fileUpload = document.querySelector('.file-upload');
+        
+        fileUpload.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        fileUpload.addEventListener('dragleave', function(e) {
+            this.classList.remove('dragover');
+        });
+        
+        fileUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('logo').files = files;
+                handleFileUpload(files[0], 'logo-info');
+            }
+        });
+    </script>
+</body>
+</html>
