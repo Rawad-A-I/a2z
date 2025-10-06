@@ -378,6 +378,57 @@ body {
   right: auto;
 }
 
+/* Fixed back button for home page */
+.back-to-home-fixed {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1050;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.back-to-home-fixed .btn {
+  border-radius: 20px;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.back-to-home-fixed .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Hero section fixes */
+.hero-section {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  z-index: -1;
+}
+
+/* Ensure proper stacking context */
+section {
+  position: relative;
+  z-index: auto;
+}
+
 .back-to-home-overlay .btn {
   border-radius: 20px;
   font-size: 0.875rem;
@@ -480,6 +531,19 @@ body {
   /* Adjust when back button is present */
   .back-to-home-overlay + .pwa-install-button {
     top: 3.5rem;
+  }
+  
+  /* Mobile hero section fixes */
+  .hero-section {
+    position: relative;
+    z-index: 1;
+    min-height: auto;
+    padding: 2rem 0 !important;
+  }
+  
+  .back-to-home-fixed {
+    top: 0.5rem;
+    left: 0.5rem;
   }
 }
 
