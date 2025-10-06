@@ -81,6 +81,41 @@ def get_product(request, slug):
     return render(request, 'product/product.html', context=context)
 
 
+# Add Review view
+@login_required
+def add_review(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    
+    if request.method == 'POST':
+        stars = request.POST.get('stars')
+        content = request.POST.get('review')
+        
+        if stars and content:
+            # Check if user already reviewed this product
+            existing_review = ProductReview.objects.filter(
+                product=product, user=request.user
+            ).first()
+            
+            if existing_review:
+                # Update existing review
+                existing_review.stars = stars
+                existing_review.content = content
+                existing_review.save()
+                messages.success(request, 'Your review has been updated successfully.')
+            else:
+                # Create new review
+                ProductReview.objects.create(
+                    product=product,
+                    user=request.user,
+                    stars=stars,
+                    content=content
+                )
+                messages.success(request, 'Your review has been added successfully.')
+        else:
+            messages.error(request, 'Please fill in all fields.')
+    
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', f'/products/{slug}/'))
+
 # Product Review view
 @login_required
 def product_reviews(request):

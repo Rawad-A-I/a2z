@@ -13,6 +13,7 @@ urlpatterns = [
     path('product-reviews/edit/<uuid:review_uid>/', edit_review, name='edit_review'),
     path('like-review/<review_uid>/', like_review, name='like_review'),
     path('dislike-review/<review_uid>/',dislike_review, name='dislike_review'),
+    path('add-review/<slug>/', add_review, name='add_review'),
     
     # Bar section URLs (must come before generic slug pattern)
     path('bar/', bar_home, name='bar_home'),

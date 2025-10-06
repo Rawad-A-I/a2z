@@ -48,7 +48,9 @@ urlpatterns = [
     path('cart/', cart, name="cart"),
     path('add-to-cart/<uid>/', add_to_cart, name="add_to_cart"),
     path('update_cart_item/', update_cart_item, name='update_cart_item'),
+    path('update_cart/<int:cart_item_id>/', update_cart_item, name='update_cart'),  # Alias for template compatibility
     path('remove-cart/<uid>/', remove_cart, name="remove_cart"),
+    path('remove_from_cart/<int:cart_item_id>/', remove_cart, name='remove_from_cart'),  # Alias for template compatibility
     path('remove-coupon/<cart_id>/', remove_coupon, name="remove_coupon"),
 
     # Order history and details urls

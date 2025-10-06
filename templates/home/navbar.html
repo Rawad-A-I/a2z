@@ -216,14 +216,16 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
     
-    // Auto-submit on mobile after typing (with debounce)
+    // Enhanced search experience (no auto-submit)
     let searchTimeout;
     searchInput.addEventListener('input', function() {
-      if (window.innerWidth <= 768 && this.value.length >= 2) {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-          searchForm.submit();
-        }, 1000); // Submit after 1 second of no typing
+      // Clear any existing timeout
+      clearTimeout(searchTimeout);
+      
+      // Show search suggestions if needed (future enhancement)
+      if (this.value.length >= 2) {
+        // Could add search suggestions here
+        console.log('Searching for:', this.value);
       }
     });
     

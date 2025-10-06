@@ -109,15 +109,54 @@ def products_only(request):
 
 def product_search(request):
     query = request.GET.get('q', '')
+    category_filter = request.GET.get('category', '')
+    sort_by = request.GET.get('sort', '')
 
     if query:
-        # Search for products that contain the query string in their product_name field
-        products = Product.objects.filter(Q(product_name__icontains=query) | Q(
-            product_name__istartswith=query))
+        # Enhanced search - search in multiple fields
+        products = Product.objects.filter(
+            Q(product_name__icontains=query) |
+            Q(product_desription__icontains=query) |
+            Q(category__category_name__icontains=query) |
+            Q(keywords__icontains=query)
+        ).distinct()
+        
+        # Apply category filter if provided
+        if category_filter:
+            products = products.filter(category__category_name=category_filter)
+            
+        # Apply sorting
+        if sort_by == 'price_asc':
+            products = products.order_by('price')
+        elif sort_by == 'price_desc':
+            products = products.order_by('-price')
+        elif sort_by == 'name_asc':
+            products = products.order_by('product_name')
+        elif sort_by == 'name_desc':
+            products = products.order_by('-product_name')
+        elif sort_by == 'newest':
+            products = products.filter(newest_product=True).order_by('-created_at')
+        else:
+            # Default: relevance (products with query in name first)
+            products = products.extra(
+                select={
+                    'relevance': "CASE WHEN product_name ILIKE %s THEN 1 ELSE 2 END"
+                },
+                select_params=[f'%{query}%']
+            ).order_by('relevance', 'product_name')
     else:
         products = Product.objects.none()
 
-    context = {'query': query, 'products': products}
+    # Get categories for filter dropdown
+    categories = Category.objects.all().order_by('category_name')
+
+    context = {
+        'query': query,
+        'products': products,
+        'categories': categories,
+        'selected_category': category_filter,
+        'selected_sort': sort_by
+    }
     return render(request, 'home/search.html', context)
 
 
