@@ -15,46 +15,119 @@
       margin-bottom: 0;
     }
     
-    /* Mobile search bar */
+    /* Mobile search bar - PWA optimized */
     .header-main .search {
       width: 100%;
       margin: 0;
       position: relative;
     }
     
+    /* Mobile-specific search bar improvements */
+    @media (max-width: 768px) {
+      .header-main .search {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .header-main .search .input-group {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 16px;
+      }
+      
+      .header-main .search input {
+        font-size: 16px; /* Critical: prevents zoom on iOS */
+        min-height: 52px; /* Larger touch target */
+        padding: 1rem 1.25rem;
+        border-radius: 16px 0 0 16px;
+        border: 2px solid #e9ecef;
+        background: white;
+      }
+      
+      .header-main .search input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+        outline: none;
+        transform: translateY(-2px);
+      }
+      
+      .header-main .search .btn {
+        min-height: 52px;
+        min-width: 52px;
+        padding: 1rem;
+        border-radius: 0 16px 16px 0;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: 2px solid #667eea;
+        border-left: none;
+      }
+      
+      .header-main .search .btn:active {
+        transform: scale(0.98);
+        background: linear-gradient(135deg, #5a6fd8, #6a4190);
+      }
+    }
+    
     .header-main .search .input-group {
       width: 100%;
       position: relative;
+      display: flex;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     .header-main .search input {
       font-size: 16px; /* Prevents zoom on iOS */
-      min-height: 44px;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
+      min-height: 48px; /* Increased for better touch targets */
+      padding: 0.875rem 1rem;
       border: 2px solid #e9ecef;
+      border-right: none;
+      border-radius: 12px 0 0 12px;
       transition: all 0.3s ease;
+      background: white;
+      flex: 1;
     }
     
     .header-main .search input:focus {
-      border-color: var(--color-primary-600);
+      border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
       outline: none;
+      transform: translateY(-1px);
+    }
+    
+    .header-main .search input::placeholder {
+      color: #6c757d;
+      font-weight: 400;
     }
     
     .header-main .search .btn {
-      min-height: 44px;
-      padding: 0.75rem 1rem;
-      border-radius: 0 0.5rem 0.5rem 0;
-      background: var(--color-primary-600);
-      border: 2px solid var(--color-primary-600);
+      min-height: 48px;
+      min-width: 48px; /* Square button for better touch */
+      padding: 0.875rem 1rem;
+      border-radius: 0 12px 12px 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: 2px solid #667eea;
+      border-left: none;
       transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .header-main .search .btn:hover {
-      background: var(--color-primary-700);
-      border-color: var(--color-primary-700);
-      transform: none;
+      background: linear-gradient(135deg, #5a6fd8, #6a4190);
+      border-color: #5a6fd8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .header-main .search .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+    }
+    
+    .header-main .search .btn i {
+      font-size: 1.1rem;
+      color: white;
     }
     
     /* Mobile navigation icons - horizontal layout */
@@ -199,41 +272,96 @@
 </style>
 
 <script>
-// Mobile search enhancements
+// PWA Mobile Search Enhancements
 document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.querySelector('.search input[name="q"]');
   const searchForm = document.querySelector('.search');
   
   if (searchInput && searchForm) {
-    // Focus search on mobile when search icon is tapped
+    // PWA: Enhanced mobile search experience
     const searchBtn = document.querySelector('.search .btn');
+    
+    // Mobile-optimized search button behavior
     if (searchBtn) {
       searchBtn.addEventListener('click', function(e) {
         if (window.innerWidth <= 768) {
-          e.preventDefault();
-          searchInput.focus();
+          // On mobile, focus input first, then submit on second tap
+          if (document.activeElement !== searchInput) {
+            e.preventDefault();
+            searchInput.focus();
+            // Add visual feedback
+            searchInput.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+              searchInput.style.transform = 'scale(1)';
+            }, 150);
+          }
         }
       });
     }
     
-    // Enhanced search experience (no auto-submit)
+    // PWA: Enhanced search input behavior
     let searchTimeout;
+    let isSearching = false;
+    
     searchInput.addEventListener('input', function() {
-      // Clear any existing timeout
       clearTimeout(searchTimeout);
       
-      // Show search suggestions if needed (future enhancement)
+      // Visual feedback for typing
+      this.style.borderColor = '#667eea';
+      
+      // Search suggestions (future enhancement)
       if (this.value.length >= 2) {
-        // Could add search suggestions here
-        console.log('Searching for:', this.value);
+        console.log('PWA Search:', this.value);
+        // Could implement search suggestions here
       }
+      
+      // Auto-clear visual feedback
+      searchTimeout = setTimeout(() => {
+        this.style.borderColor = '#e9ecef';
+      }, 1000);
     });
     
-    // Clear search on escape
+    // PWA: Enhanced keyboard navigation
     searchInput.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         this.value = '';
         this.blur();
+        this.style.borderColor = '#e9ecef';
+      } else if (e.key === 'Enter') {
+        // Add loading state for PWA
+        if (!isSearching) {
+          isSearching = true;
+          searchBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+          searchBtn.disabled = true;
+          
+          // Re-enable after form submission
+          setTimeout(() => {
+            isSearching = false;
+            searchBtn.innerHTML = '<i class="fa fa-search"></i>';
+            searchBtn.disabled = false;
+          }, 2000);
+        }
+      }
+    });
+    
+    // PWA: Touch-friendly focus behavior
+    searchInput.addEventListener('focus', function() {
+      if (window.innerWidth <= 768) {
+        // Scroll to search bar on mobile focus
+        this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+    
+    // PWA: Form submission enhancement
+    searchForm.addEventListener('submit', function(e) {
+      if (searchInput.value.trim() === '') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.style.borderColor = '#dc3545';
+        setTimeout(() => {
+          searchInput.style.borderColor = '#e9ecef';
+        }, 2000);
+        return false;
       }
     });
   }
@@ -311,6 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <section class="header-main border-bottom">
     <div class="container">
       <div class="row align-items-center">
+        <!-- Desktop Logo -->
         <div class="col-lg-2 col-4 d-none d-lg-block">
           <div class="brand-wrap">
             <a href="{% url 'products_only' %}">
@@ -318,7 +447,42 @@ document.addEventListener('DOMContentLoaded', function() {
             </a>
           </div>
         </div>
-        <div class="col-lg-6 col-12">
+        
+        <!-- Mobile Logo (hidden on desktop) -->
+        <div class="col-4 d-lg-none">
+          <div class="brand-wrap">
+            <a href="{% url 'products_only' %}">
+              <img class="logo" src="{% static 'images/logo.png' %}" alt="Logo" height="30" />
+            </a>
+          </div>
+        </div>
+        
+        <!-- Mobile Navigation Icons (hidden on desktop) -->
+        <div class="col-8 d-lg-none">
+          <div class="widgets-wrap d-flex justify-content-end">
+            <!-- Cart Icon with badge -->
+            <div class="widget-header me-3">
+              <a href="{% url 'cart' %}" class="icon icon-sm rounded-circle border position-relative">
+                <i class="fa fa-shopping-cart"></i>
+                {% if user.is_authenticated and request.user.profile.get_cart_count > 0 %}
+                  <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
+                    {{request.user.profile.get_cart_count}}
+                  </span>
+                {% endif %}
+              </a>
+            </div>
+
+            <!-- Account Menu -->
+            <div class="widget-header icontext">
+              <button class="icon icon-sm rounded-circle border account-menu-btn" onclick="toggleSidePanel()" style="border: 1px solid #dee2e6; background: white; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
+                <i class="fas fa-bars" style="margin: 0;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Search Bar - Full width on mobile, centered on desktop -->
+        <div class="col-lg-6 col-12 mt-3 mt-lg-0">
           <form method="GET" action="{% url 'product_search' %}" class="search">
             <div class="input-group w-100">
               <input type="text" class="form-control" name="q"
@@ -333,7 +497,8 @@ document.addEventListener('DOMContentLoaded', function() {
           </form>
         </div>
 
-        <div class="col-lg-4 col-12">
+        <!-- Desktop Navigation Icons (hidden on mobile) -->
+        <div class="col-lg-4 col-12 d-none d-lg-block">
           <div class="widgets-wrap d-flex justify-content-center justify-content-lg-end flex-wrap">
 
             <!-- Cart Icon with badge -->

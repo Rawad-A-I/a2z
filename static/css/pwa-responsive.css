@@ -506,6 +506,58 @@ h6 { font-size: var(--font-size-base); }
   box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
+/* PWA Search Bar Optimizations */
+.search {
+  position: relative;
+  width: 100%;
+}
+
+.search .input-group {
+  display: flex;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.search .input-group:focus-within {
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
+}
+
+.search input {
+  border: 2px solid #e9ecef;
+  border-right: none;
+  border-radius: 16px 0 0 16px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.search input:focus {
+  border-color: var(--primary-color);
+  box-shadow: none;
+  outline: none;
+}
+
+.search .btn {
+  border: 2px solid var(--primary-color);
+  border-left: none;
+  border-radius: 0 16px 16px 0;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.search .btn:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.search .btn:active {
+  transform: scale(0.98);
+}
+
 .form-label {
   font-weight: 600;
   color: var(--dark-color);
@@ -521,6 +573,49 @@ h6 { font-size: var(--font-size-base); }
   
   .form-group {
     margin-bottom: var(--spacing-lg);
+  }
+  
+  /* PWA Mobile Search Bar */
+  .search {
+    margin: var(--spacing-md) 0;
+  }
+  
+  .search .input-group {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
+  }
+  
+  .search input {
+    font-size: 16px; /* Critical: prevents zoom on iOS */
+    min-height: 56px; /* Larger touch target for mobile */
+    padding: 1.25rem 1.5rem;
+    border-radius: 20px 0 0 20px;
+    border: 2px solid #e9ecef;
+  }
+  
+  .search input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .search .btn {
+    min-height: 56px;
+    min-width: 56px;
+    padding: 1.25rem;
+    border-radius: 0 20px 20px 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  }
+  
+  .search .btn:active {
+    transform: scale(0.95);
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  }
+  
+  /* Mobile search bar positioning */
+  .header-main .search {
+    order: 2; /* Move search below navigation on mobile */
+    margin-top: var(--spacing-md);
   }
 }
 
