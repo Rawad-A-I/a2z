@@ -52,6 +52,7 @@ urlpatterns = [
     path('remove-cart/<uid>/', remove_cart, name="remove_cart"),
     path('remove_from_cart/<uuid:cart_item_id>/', remove_cart, name='remove_from_cart'),  # Alias for template compatibility
     path('remove-coupon/<cart_id>/', remove_coupon, name="remove_coupon"),
+    path('checkout/', checkout, name="checkout"),
 
     # Order history and details urls
     path('order-history/', order_history, name='order_history'),

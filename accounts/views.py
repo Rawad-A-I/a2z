@@ -539,3 +539,35 @@ def delete_account(request):
         user.delete()
         messages.success(request, "Your account has been deleted successfully.")
         return redirect('index')
+
+
+@login_required
+def checkout(request):
+    """
+    Checkout view - creates an order from the cart and redirects to order details.
+    """
+    try:
+        # Get the user's cart
+        cart = Cart.objects.get(user=request.user, is_paid=False)
+        
+        # Check if cart has items
+        if not cart.cart_items.exists():
+            messages.warning(request, "Your cart is empty. Add some items before checkout.")
+            return redirect('cart')
+        
+        # Create order from cart
+        order = create_order(cart)
+        
+        # Mark cart as paid
+        cart.is_paid = True
+        cart.save()
+        
+        messages.success(request, f"Order created successfully! Order ID: {order.order_id}")
+        return redirect('order_details', order_id=order.order_id)
+        
+    except Cart.DoesNotExist:
+        messages.warning(request, "You don't have any items in your cart.")
+        return redirect('cart')
+    except Exception as e:
+        messages.error(request, f"Error creating order: {str(e)}")
+        return redirect('cart')
