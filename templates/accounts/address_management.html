@@ -740,6 +740,14 @@ function reverseGeocode(lat, lng) {
           }
         });
         
+        // Also check the main feature properties for country
+        if (!country && feature.properties && feature.properties.context) {
+          const mainContext = feature.properties.context;
+          if (mainContext.country) {
+            country = mainContext.country;
+          }
+        }
+        
         // Update form fields
         document.getElementById('address').value = (streetNumber + ' ' + route).trim();
         document.getElementById('city').value = city;
@@ -753,9 +761,14 @@ function reverseGeocode(lat, lng) {
             // Map country names to country codes
             const countryMap = {
               'Lebanon': 'LB',
+              'لبنان': 'LB', // Arabic name for Lebanon
               'United States': 'US',
+              'United States of America': 'US',
+              'USA': 'US',
               'Canada': 'CA',
               'United Kingdom': 'UK',
+              'UK': 'UK',
+              'Great Britain': 'UK',
               'France': 'FR',
               'Germany': 'DE',
               'Italy': 'IT',
@@ -769,6 +782,7 @@ function reverseGeocode(lat, lng) {
               'Russia': 'RU',
               'Saudi Arabia': 'SA',
               'United Arab Emirates': 'AE',
+              'UAE': 'AE',
               'Egypt': 'EG',
               'Jordan': 'JO',
               'Syria': 'SY',
@@ -788,6 +802,11 @@ function reverseGeocode(lat, lng) {
             
             const countryCode = countryMap[country] || 'LB';
             countrySelect.value = countryCode;
+            
+            // If no country was detected, default to Lebanon
+            if (!country) {
+              countrySelect.value = 'LB';
+            }
           }
         }
         

@@ -627,6 +627,40 @@ h6 { font-size: var(--font-size-base); }
     order: 2; /* Move search below navigation on mobile */
     margin-top: var(--spacing-md);
   }
+  
+  /* Mobile search inputs in account pages */
+  .mobile-search-input {
+    font-size: 16px !important; /* Critical: prevents zoom on iOS */
+    min-height: 56px !important; /* Larger touch target for mobile */
+    padding: 1.25rem 1.5rem !important;
+    border-radius: 20px !important;
+    border: 2px solid #e9ecef !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  
+  .mobile-search-input:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15) !important;
+    transform: translateY(-2px) !important;
+  }
+  
+  .mobile-search-btn {
+    min-height: 56px !important;
+    min-width: 56px !important;
+    padding: 1.25rem !important;
+    border-radius: 20px !important;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    border: none !important;
+    color: white !important;
+  }
+  
+  .mobile-search-btn:active {
+    transform: scale(0.95) !important;
+    background: linear-gradient(135deg, #5a6fd8, #6a4190) !important;
+  }
 }
 
 /* Responsive Pagination */
