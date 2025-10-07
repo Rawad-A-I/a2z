@@ -9,7 +9,7 @@
           <h1 class="display-4 fw-bold mb-4">Welcome to A2Z Mart</h1>
           <p class="lead mb-4">Discover amazing deals, special offers, and the latest products! Use the search to find exactly what you're looking for.</p>
           <div class="d-flex gap-3">
-            <a href="{% url 'product_search' %}" class="btn btn-outline-light btn-lg">
+            <a href="{% url 'products_only' %}" class="btn btn-outline-light btn-lg">
               <i class="fas fa-search me-2"></i>Search Products
             </a>
           </div>
@@ -27,7 +27,7 @@
 <!-- Main Content Section - starts after hero -->
 <div class="main-content-section">
 <!-- Special Offers Section -->
-<section id="special-offers" class="special-offers py-5">
+<section id="special-offers" class="special-offers">
   <div class="container">
     <div class="row">
       <div class="col-12">
@@ -75,7 +75,7 @@
 </section>
 
 <!-- Featured Categories -->
-<section class="featured-categories py-5 bg-light">
+<section class="featured-categories bg-light">
   <div class="container">
     <div class="row">
       <div class="col-12">

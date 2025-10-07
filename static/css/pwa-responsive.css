@@ -383,6 +383,13 @@ body {
   z-index: 2;
   margin-top: 100vh;
   background: white;
+  padding-top: 0;
+}
+
+/* Remove padding from special offers section */
+.special-offers {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 .hero-wrapper {
