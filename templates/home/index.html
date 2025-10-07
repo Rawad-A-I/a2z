@@ -120,9 +120,6 @@
           <a href="{% url 'products_only' %}" class="btn btn-primary btn-lg">
             <i class="fas fa-th-large me-2"></i>View All Products
           </a>
-          <a href="{% url 'product_search' %}" class="btn btn-outline-primary btn-lg">
-            <i class="fas fa-search me-2"></i>Advanced Search
-          </a>
         </div>
       </div>
     </div>
@@ -143,9 +140,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const targetElement = document.querySelector(targetId);
       
       if (targetElement) {
-        // Calculate offset to completely hide the hero section
+        // Calculate offset to scroll down to special offers section
         const heroHeight = document.querySelector('.hero-section').offsetHeight;
-        const targetPosition = targetElement.offsetTop - heroHeight;
+        const targetPosition = targetElement.offsetTop;
         
         window.scrollTo({
           top: targetPosition,
