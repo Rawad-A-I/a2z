@@ -404,18 +404,9 @@ body {
 }
 
 
-/* Smooth scrolling for Shop Now button */
+/* Smooth scrolling for general use */
 html {
   scroll-behavior: smooth;
-}
-
-.scroll-to-section {
-  transition: all 0.3s ease;
-}
-
-.scroll-to-section:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Force proper stacking context for all sections */

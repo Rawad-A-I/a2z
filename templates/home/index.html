@@ -7,11 +7,8 @@
       <div class="row align-items-center">
         <div class="col-lg-6">
           <h1 class="display-4 fw-bold mb-4">Welcome to A2Z Mart</h1>
-          <p class="lead mb-4">Discover amazing deals, special offers, and the latest products!</p>
+          <p class="lead mb-4">Discover amazing deals, special offers, and the latest products! Use the search to find exactly what you're looking for.</p>
           <div class="d-flex gap-3">
-            <a href="#special-offers" class="btn btn-light btn-lg scroll-to-section">
-              <i class="fas fa-shopping-bag me-2"></i>Shop Now
-            </a>
             <a href="{% url 'product_search' %}" class="btn btn-outline-light btn-lg">
               <i class="fas fa-search me-2"></i>Search Products
             </a>
@@ -128,31 +125,6 @@
 
 </div> <!-- End of main-content-section -->
 
-<script>
-// Enhanced scroll behavior for Shop Now button
-document.addEventListener('DOMContentLoaded', function() {
-  const scrollLinks = document.querySelectorAll('.scroll-to-section');
-  
-  scrollLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      const targetId = this.getAttribute('href');
-      const targetElement = document.querySelector(targetId);
-      
-      if (targetElement) {
-        // Calculate offset to scroll down to special offers section
-        const heroHeight = document.querySelector('.hero-section').offsetHeight;
-        const targetPosition = targetElement.offsetTop;
-        
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-      }
-    });
-  });
-});
-</script>
 
 {% endblock %}
 
