@@ -9,7 +9,7 @@
           <h1 class="display-4 fw-bold mb-4">Welcome to A2Z Mart</h1>
           <p class="lead mb-4">Discover amazing deals, special offers, and the latest products!</p>
           <div class="d-flex gap-3">
-            <a href="{% url 'products_only' %}" class="btn btn-light btn-lg">
+            <a href="#special-offers" class="btn btn-light btn-lg scroll-to-section">
               <i class="fas fa-shopping-bag me-2"></i>Shop Now
             </a>
             <a href="{% url 'product_search' %}" class="btn btn-outline-light btn-lg">
@@ -31,7 +31,7 @@
 <div class="hero-spacer"></div>
 
 <!-- Special Offers Section -->
-<section class="special-offers py-5">
+<section id="special-offers" class="special-offers py-5">
   <div class="container">
     <div class="row">
       <div class="col-12">
@@ -129,6 +129,32 @@
     </div>
   </div>
 </section>
+
+<script>
+// Enhanced scroll behavior for Shop Now button
+document.addEventListener('DOMContentLoaded', function() {
+  const scrollLinks = document.querySelectorAll('.scroll-to-section');
+  
+  scrollLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const targetElement = document.querySelector(targetId);
+      
+      if (targetElement) {
+        // Calculate offset to account for fixed hero section
+        const heroHeight = document.querySelector('.hero-section').offsetHeight;
+        const targetPosition = targetElement.offsetTop - heroHeight - 20;
+        
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+});
+</script>
 
 {% endblock %}
 
