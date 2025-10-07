@@ -1,12 +1,5 @@
 {% extends "base/base.html"%} 
 {% block start %}
-<!-- Back to Mart Home Fixed Button -->
-<div class="back-to-home-fixed">
-  <a href="{% url 'redirect_homepage' %}" class="btn btn-outline btn-sm">
-    <i class="fas fa-arrow-left"></i> Back to Mart Home
-  </a>
-</div>
-
 <!-- Special Offers & New Items Section -->
 <section class="hero-section py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
   <div class="hero-wrapper">
@@ -33,6 +26,9 @@
     </div>
   </div>
 </section>
+
+<!-- Spacer to push content below fixed hero -->
+<div class="hero-spacer"></div>
 
 <!-- Special Offers Section -->
 <section class="special-offers py-5">

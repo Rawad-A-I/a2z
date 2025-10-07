@@ -358,62 +358,21 @@ body {
   }
 }
 
-/* Back to Home Overlay Button */
-.back-to-home-overlay {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1050;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 25px;
-  padding: 0.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
 
-/* Left positioning for home page */
-.back-to-home-left {
-  left: 1rem;
-  right: auto;
-}
 
-/* Fixed back button for home page - Try absolute positioning */
-.back-to-home-fixed {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 25px;
-  padding: 0.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  isolation: isolate;
-  contain: layout;
-}
-
-.back-to-home-fixed .btn {
-  border-radius: 20px;
-  font-size: 0.875rem;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.back-to-home-fixed .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-}
-
-/* Hero section fixes - More aggressive approach */
+/* Hero section - Fixed positioning to prevent overlay */
 .hero-section {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1;
   overflow: hidden;
   isolation: isolate;
   contain: layout;
+  height: 100vh;
+  display: flex;
+  align-items: center;
 }
 
 .hero-wrapper {
@@ -421,6 +380,7 @@ body {
   z-index: 2;
   isolation: isolate;
   contain: layout;
+  width: 100%;
 }
 
 .hero-section::before {
@@ -433,6 +393,14 @@ body {
   background: inherit;
   z-index: -1;
   isolation: isolate;
+}
+
+/* Hero spacer to push content below fixed hero */
+.hero-spacer {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  z-index: 0;
 }
 
 /* Force proper stacking context for all sections */
@@ -456,18 +424,6 @@ body {
   contain: layout;
 }
 
-.back-to-home-overlay .btn {
-  border-radius: 20px;
-  font-size: 0.875rem;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.back-to-home-overlay .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-}
 
 /* PWA Install Button */
 .pwa-install-button {
@@ -523,16 +479,6 @@ body {
   font-weight: 600;
 }
 
-/* Adjust positioning when both buttons are present */
-.back-to-home-overlay + .pwa-install-button {
-  top: 4rem;
-}
-
-/* Adjust PWA install button when back button is on the left */
-.back-to-home-left + .pwa-install-button {
-  top: 1rem;
-  right: 1rem;
-}
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
@@ -555,22 +501,19 @@ body {
     font-size: 1.1rem;
   }
   
-  /* Adjust when back button is present */
-  .back-to-home-overlay + .pwa-install-button {
-    top: 3.5rem;
-  }
-  
   /* Mobile hero section fixes */
   .hero-section {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 1;
-    min-height: auto;
-    padding: 2rem 0 !important;
+    height: 100vh;
+    padding: 1rem 0 !important;
   }
   
-  .back-to-home-fixed {
-    top: 0.5rem;
-    left: 0.5rem;
+  .hero-spacer {
+    height: 100vh;
   }
 }
 
