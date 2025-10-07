@@ -8,7 +8,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0027_cart_unique_constraint_final'),
+        ('accounts', '0025_cart_unique_constraint'),
         ('auth', '0012_alter_user_first_name_max_length'),
     ]
 

@@ -177,12 +177,15 @@ def get_business_data(request):
         
     except Exception as e:
         print(f"Error in get_business_data: {e}")
-        import traceback
-        traceback.print_exc()
+        # Return empty data if table doesn't exist yet
         return JsonResponse({
-            'status': 'error',
-            'message': f'Error retrieving data: {str(e)}'
-        }, status=500)
+            'data': [],
+            'count': 0,
+            'total_pages': 0,
+            'current_page': 1,
+            'has_next': False,
+            'has_previous': False,
+        })
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)
@@ -190,15 +193,24 @@ def business_form_admin(request):
     """
     Display admin interface for viewing business form submissions
     """
-    # Get basic stats
-    total_submissions = BusinessFormSubmission.objects.count()
-    pending_submissions = BusinessFormSubmission.objects.filter(status='pending').count()
-    approved_submissions = BusinessFormSubmission.objects.filter(status='approved').count()
-    
-    context = {
-        'total_submissions': total_submissions,
-        'pending_submissions': pending_submissions,
-        'approved_submissions': approved_submissions,
-    }
+    try:
+        # Get basic stats
+        total_submissions = BusinessFormSubmission.objects.count()
+        pending_submissions = BusinessFormSubmission.objects.filter(status='pending').count()
+        approved_submissions = BusinessFormSubmission.objects.filter(status='approved').count()
+        
+        context = {
+            'total_submissions': total_submissions,
+            'pending_submissions': pending_submissions,
+            'approved_submissions': approved_submissions,
+        }
+    except Exception as e:
+        # Handle case where table doesn't exist yet
+        print(f"Error accessing BusinessFormSubmission table: {e}")
+        context = {
+            'total_submissions': 0,
+            'pending_submissions': 0,
+            'approved_submissions': 0,
+        }
     
     return render(request, 'business_form_admin.html', context)
