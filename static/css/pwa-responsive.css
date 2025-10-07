@@ -375,6 +375,14 @@ body {
   align-items: center;
 }
 
+/* Main content section - starts after hero */
+.main-content-section {
+  position: relative;
+  z-index: 2;
+  margin-top: 100vh;
+  background: white;
+}
+
 .hero-wrapper {
   position: relative;
   z-index: 2;
@@ -395,13 +403,6 @@ body {
   isolation: isolate;
 }
 
-/* Hero spacer to push content below fixed hero */
-.hero-spacer {
-  height: 100vh;
-  width: 100%;
-  position: relative;
-  z-index: 0;
-}
 
 /* Smooth scrolling for Shop Now button */
 html {
@@ -526,9 +527,6 @@ body {
     padding: 1rem 0 !important;
   }
   
-  .hero-spacer {
-    height: 100vh;
-  }
 }
 
 /* Mobile Bottom Navigation */

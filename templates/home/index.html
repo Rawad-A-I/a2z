@@ -27,9 +27,8 @@
   </div>
 </section>
 
-<!-- Spacer to push content below fixed hero -->
-<div class="hero-spacer"></div>
-
+<!-- Main Content Section - starts after hero -->
+<div class="main-content-section">
 <!-- Special Offers Section -->
 <section id="special-offers" class="special-offers py-5">
   <div class="container">
@@ -130,6 +129,8 @@
   </div>
 </section>
 
+</div> <!-- End of main-content-section -->
+
 <script>
 // Enhanced scroll behavior for Shop Now button
 document.addEventListener('DOMContentLoaded', function() {
@@ -142,9 +143,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const targetElement = document.querySelector(targetId);
       
       if (targetElement) {
-        // Calculate offset to account for fixed hero section
+        // Calculate offset to completely hide the hero section
         const heroHeight = document.querySelector('.hero-section').offsetHeight;
-        const targetPosition = targetElement.offsetTop - heroHeight - 20;
+        const targetPosition = targetElement.offsetTop - heroHeight;
         
         window.scrollTo({
           top: targetPosition,
