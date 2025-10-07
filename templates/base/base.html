@@ -1204,38 +1204,7 @@
     {% include 'home/footer.html' %}
     
     <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav">
-      <a href="{% url 'index' %}" class="mobile-nav-item">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-      </a>
-      <a href="{% url 'products_only' %}" class="mobile-nav-item">
-        <i class="fas fa-th-large"></i>
-        <span>Products</span>
-      </a>
-      <a href="{% url 'cart' %}" class="mobile-nav-item">
-        <i class="fas fa-shopping-cart"></i>
-        <span>Cart</span>
-      </a>
-      {% if user.is_authenticated %}
-        {% if user.is_staff %}
-          <a href="{% url 'employee_hub' %}" class="mobile-nav-item">
-            <i class="fas fa-briefcase"></i>
-            <span>Employee</span>
-          </a>
-        {% else %}
-          <a href="{% url 'profile' username=user.username %}" class="mobile-nav-item">
-            <i class="fas fa-user"></i>
-            <span>Profile</span>
-          </a>
-        {% endif %}
-      {% else %}
-        <a href="{% url 'login' %}" class="mobile-nav-item">
-          <i class="fas fa-sign-in-alt"></i>
-          <span>Login</span>
-        </a>
-      {% endif %}
-    </nav>
+    {% include 'base/mobile_nav.html' %}
     
     <!-- Side Panel -->
     <div id="sidePanel" class="side-panel">

@@ -250,9 +250,6 @@ def cart(request):
     
     try:
         cart_obj = get_or_create_cart(request)
-        if not cart_obj.cart_items.exists():
-            messages.warning(request, "Your cart is empty. Please add a product to cart.")
-            return redirect('products_only')
     except Exception as e:
         messages.error(request, "Error loading cart. Please try again.")
         return redirect('products_only')
