@@ -373,6 +373,8 @@ body {
   height: 100vh;
   display: flex;
   align-items: center;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* Main content section - starts after hero */

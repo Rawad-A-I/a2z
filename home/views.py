@@ -52,6 +52,7 @@ def index(request):
         'selected_category': selected_category,
         'selected_sort': selected_sort,
         'show_search_bar': False,  # Hide search bar on home page
+        'hide_navbar': True,  # Hide navbar on home page
     }
     
     # Detect mobile devices and serve optimized template

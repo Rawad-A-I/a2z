@@ -1207,7 +1207,9 @@
       </button>
     </div>
 
+    {% if not hide_navbar %}
     {% include 'home/navbar.html' %}
+    {% endif %}
     {% block start %} {% endblock %}
     {% include 'home/footer.html' %}
     
