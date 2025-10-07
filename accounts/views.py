@@ -33,15 +33,15 @@ def accounts_dashboard(request):
     else:
         return redirect('login')
 
-def employee_login_page(request):
-    """Dedicated employee login page"""
+def account_login_page(request):
+    """Dedicated account login page"""
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user_obj = User.objects.filter(username=username)
 
         if not user_obj.exists():
-            messages.warning(request, 'Employee account not found!')
+            messages.warning(request, 'Account not found!')
             return HttpResponseRedirect(request.path_info)
 
         user_obj = authenticate(username=username, password=password)
@@ -49,7 +49,7 @@ def employee_login_page(request):
             # Check if user is staff (has staff privileges)
             if user_obj.is_staff:
                 login(request, user_obj)
-                messages.success(request, 'Employee login successful!')
+                messages.success(request, 'Account login successful!')
                 return redirect('employee_hub')
             else:
                 messages.error(request, 'This account is not authorized for employee access. Please contact administrator.')

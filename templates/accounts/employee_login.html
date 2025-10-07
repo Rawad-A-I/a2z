@@ -1,23 +1,23 @@
 {% extends "base/base.html" %} {% load static %}
-{% block title %}Employee Login{% endblock %}
+{% block title %}Account Login{% endblock %}
 {% block start %}
 
-<!-- ============================ EMPLOYEE LOGIN   ================================= -->
+<!-- ============================ ACCOUNT LOGIN   ================================= -->
 <section class="section-content padding-bottom">
   <div class="container-xl d-flex justify-content-center align-items-center mt-5">
     <div class="row justify-content-center w-100">
       <div class="col-xl-4">
         <div class="card mb-4">
           <div class="card-header" style="text-align: center; font-size: 25px; background-color: #007bff; color: white;">
-            <i class="fas fa-user-tie"></i> Employee Portal
+            <i class="fas fa-user-tie"></i> Account Portal
           </div>
           <div class="card-body">
-            <form method="POST" action="{% url 'employee_login' %}">
+            <form method="POST" action="{% url 'account_login' %}">
               {% csrf_token %} {% include "base/alert.html" %}
 
               <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i>
-                <strong>Employee Access:</strong> Use your employee credentials to access the order management system.
+                <strong>Account Access:</strong> Use your account credentials to access the management system.
               </div>
 
               <div class="form-group">
@@ -70,6 +70,6 @@
     </div>
   </div>
 </section>
-<!-- ============================ EMPLOYEE LOGIN END ================================= -->
+<!-- ============================ ACCOUNT LOGIN END ================================= -->
 
 {% endblock %}

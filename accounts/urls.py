@@ -18,7 +18,7 @@ urlpatterns = [
     path('', accounts_dashboard, name='accounts_dashboard'),
     # User view urls with login, register, logout, and email activation.
     path('login/', login_page, name="login"),
-    path('employee-login/', employee_login_page, name="employee_login"),
+    path('account-login/', account_login_page, name="account_login"),
     path('register/', register_page, name="register"),
     path('logout/', user_logout, name='logout'),
     # Email verification disabled for simple setup
