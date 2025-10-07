@@ -86,6 +86,16 @@
         .spinner-border {
             color: #667eea;
         }
+        
+        .color-preview {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -156,24 +166,23 @@
             let html = `<div class="row">`;
             
             data.data.forEach((item, index) => {
-                const formData = item.data.form_data || {};
-                const filesData = item.data.files_data || {};
-                
                 html += `
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="data-card">
                             <div class="data-header">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0">Submission #${index + 1}</h6>
-                                    <small class="text-muted">${new Date(item.created_at).toLocaleDateString()}</small>
+                                    <h6 class="mb-0">${item.company_name || 'Unknown Company'}</h6>
+                                    <small class="text-muted">${new Date(item.submitted_at).toLocaleDateString()}</small>
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge ${getStatusBadgeClass(item.status)}">${item.status}</span>
                                 </div>
                             </div>
                             <div class="data-body">
-                                ${formatFormData(formData)}
-                                ${formatFilesData(filesData)}
+                                ${formatDatabaseData(item)}
                                 <div class="mt-3">
-                                    <button class="btn btn-download btn-sm" onclick="downloadSubmission('${item.filename}')">
-                                        <i class="fas fa-download"></i> Download JSON
+                                    <button class="btn btn-primary btn-sm" onclick="viewDetails('${item.uid}')">
+                                        <i class="fas fa-eye"></i> View Details
                                     </button>
                                 </div>
                             </div>
@@ -186,26 +195,57 @@
             container.innerHTML = html;
         }
         
-        function formatFormData(data) {
+        function formatDatabaseData(item) {
             let html = '';
             const importantFields = [
-                'company_name', 'business_type', 'industry', 'email', 'phone',
-                'primary_color', 'secondary_color', 'main_products', 'currency'
+                { key: 'business_type', label: 'Business Type' },
+                { key: 'industry', label: 'Industry' },
+                { key: 'email', label: 'Email' },
+                { key: 'phone', label: 'Phone' },
+                { key: 'main_products', label: 'Main Products' },
+                { key: 'currency', label: 'Currency' }
             ];
             
             importantFields.forEach(field => {
-                if (data[field] && data[field] !== '') {
-                    const label = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                if (item[field.key] && item[field.key] !== '') {
                     html += `
                         <div class="data-item">
-                            <div class="data-label">${label}</div>
-                            <div class="data-value">${Array.isArray(data[field]) ? data[field].join(', ') : data[field]}</div>
+                            <div class="data-label">${field.label}</div>
+                            <div class="data-value">${item[field.key]}</div>
                         </div>
                     `;
                 }
             });
             
+            // Add color previews if available
+            if (item.primary_color || item.secondary_color) {
+                html += '<div class="data-item"><div class="data-label">Brand Colors</div>';
+                if (item.primary_color) {
+                    html += `<div class="data-value"><span class="color-preview" style="background-color: ${item.primary_color}"></span> Primary: ${item.primary_color}</div>`;
+                }
+                if (item.secondary_color) {
+                    html += `<div class="data-value"><span class="color-preview" style="background-color: ${item.secondary_color}"></span> Secondary: ${item.secondary_color}</div>`;
+                }
+                html += '</div>';
+            }
+            
             return html;
+        }
+        
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'pending': return 'bg-warning';
+                case 'approved': return 'bg-success';
+                case 'rejected': return 'bg-danger';
+                case 'in_progress': return 'bg-info';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        function viewDetails(uid) {
+            // For now, just show an alert. In a real implementation, 
+            // this would open a modal or redirect to a detail page
+            alert(`View details for submission: ${uid}`);
         }
         
         function formatFilesData(filesData) {

@@ -1,11 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils import timezone
+from django.core.paginator import Paginator
+from django.db import transaction
 import json
 import os
 from django.conf import settings
 from datetime import datetime
+from .models import BusinessFormSubmission
 
 def business_form(request):
     """
@@ -17,44 +22,61 @@ def business_form(request):
 @require_http_methods(["POST"])
 def submit_business_form(request):
     """
-    Handle business form submission and save data
+    Handle business form submission and save data to database
     """
     try:
-        # Get form data
-        form_data = {}
-        files_data = {}
+        print(f"Business form submission received")
+        print(f"POST data: {dict(request.POST)}")
+        print(f"FILES data: {dict(request.FILES)}")
         
-        # Process regular form fields
-        for key, value in request.POST.items():
-            form_data[key] = value
+        # Get client IP and user agent
+        ip_address = request.META.get('REMOTE_ADDR')
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
         
-        # Process uploaded files
-        for key, file in request.FILES.items():
-            files_data[key] = {
-                'name': file.name,
-                'size': file.size,
-                'type': file.content_type,
-                'data': file.read()  # Store file content as bytes
-            }
-        
-        # Create response data
-        response_data = {
-            'form_data': form_data,
-            'files_data': files_data,
-            'submitted_at': datetime.now().isoformat(),
-            'status': 'success'
-        }
-        
-        # Save to JSON file
-        save_business_data(response_data)
+        # Create BusinessFormSubmission instance
+        with transaction.atomic():
+            submission = BusinessFormSubmission(
+                # Basic Information
+                company_name=request.POST.get('company_name', ''),
+                business_type=request.POST.get('business_type', ''),
+                industry=request.POST.get('industry', ''),
+                email=request.POST.get('email', ''),
+                phone=request.POST.get('phone', ''),
+                
+                # Branding
+                primary_color=request.POST.get('primary_color', ''),
+                secondary_color=request.POST.get('secondary_color', ''),
+                logo=request.FILES.get('logo') if 'logo' in request.FILES else None,
+                
+                # Business Details
+                main_products=request.POST.get('main_products', ''),
+                currency=request.POST.get('currency', ''),
+                website_url=request.POST.get('website_url', ''),
+                
+                # Additional Information
+                business_description=request.POST.get('business_description', ''),
+                target_audience=request.POST.get('target_audience', ''),
+                special_requirements=request.POST.get('special_requirements', ''),
+                
+                # Metadata
+                ip_address=ip_address,
+                user_agent=user_agent,
+                status='pending'
+            )
+            
+            submission.save()
+            print(f"Successfully saved business form submission: {submission.uid}")
         
         return JsonResponse({
             'status': 'success',
             'message': 'Business information submitted successfully!',
-            'data_id': datetime.now().strftime('%Y%m%d_%H%M%S')
+            'data_id': str(submission.uid)
         })
         
     except Exception as e:
+        print(f"Error in submit_business_form: {e}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'status': 'error',
             'message': f'Error submitting form: {str(e)}'
@@ -74,9 +96,14 @@ def save_business_data(data):
         filename = f'business_form_{timestamp}.json'
         filepath = os.path.join(data_dir, filename)
         
+        print(f"Saving business data to: {filepath}")
+        print(f"Data keys: {list(data.keys())}")
+        
         # Save data to JSON file
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
+        
+        print(f"Successfully saved business data to {filepath}")
         
         # Also save images if any
         if 'files_data' in data and data['files_data']:
@@ -86,57 +113,92 @@ def save_business_data(data):
                 
                 with open(image_path, 'wb') as img_file:
                     img_file.write(file_info['data'])
+                print(f"Saved image: {image_path}")
         
         return filepath
         
     except Exception as e:
         print(f"Error saving business data: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def get_business_data(request):
     """
-    Retrieve all business form submissions
+    Retrieve all business form submissions from database
     """
     try:
-        data_dir = os.path.join(settings.BASE_DIR, 'business_data')
+        # Get pagination parameters
+        page = int(request.GET.get('page', 1))
+        per_page = int(request.GET.get('per_page', 10))
         
-        if not os.path.exists(data_dir):
-            return JsonResponse({'data': [], 'count': 0})
+        # Get all submissions from database
+        submissions = BusinessFormSubmission.objects.all()
         
-        # Get all JSON files
-        json_files = [f for f in os.listdir(data_dir) if f.endswith('.json')]
+        # Paginate results
+        paginator = Paginator(submissions, per_page)
+        page_obj = paginator.get_page(page)
+        
+        # Convert to JSON format
         all_data = []
+        for submission in page_obj:
+            data = {
+                'uid': str(submission.uid),
+                'company_name': submission.company_name,
+                'business_type': submission.business_type,
+                'industry': submission.industry,
+                'email': submission.email,
+                'phone': submission.phone,
+                'primary_color': submission.primary_color,
+                'secondary_color': submission.secondary_color,
+                'main_products': submission.main_products,
+                'currency': submission.currency,
+                'website_url': submission.website_url,
+                'business_description': submission.business_description,
+                'target_audience': submission.target_audience,
+                'special_requirements': submission.special_requirements,
+                'status': submission.status,
+                'submitted_at': submission.submitted_at.isoformat(),
+                'ip_address': submission.ip_address,
+                'days_since_submission': submission.days_since_submission,
+                'logo_url': submission.logo.url if submission.logo else None,
+            }
+            all_data.append(data)
         
-        for filename in json_files:
-            filepath = os.path.join(data_dir, filename)
-            try:
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    all_data.append({
-                        'filename': filename,
-                        'data': data,
-                        'created_at': data.get('submitted_at', 'Unknown')
-                    })
-            except Exception as e:
-                print(f"Error reading {filename}: {e}")
-                continue
-        
-        # Sort by creation date (newest first)
-        all_data.sort(key=lambda x: x['created_at'], reverse=True)
-        
+        print(f"Returning {len(all_data)} business form submissions from database")
         return JsonResponse({
             'data': all_data,
-            'count': len(all_data)
+            'count': paginator.count,
+            'total_pages': paginator.num_pages,
+            'current_page': page,
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
         })
         
     except Exception as e:
+        print(f"Error in get_business_data: {e}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'status': 'error',
             'message': f'Error retrieving data: {str(e)}'
         }, status=500)
 
+@login_required
+@user_passes_test(lambda u: u.is_staff)
 def business_form_admin(request):
     """
     Display admin interface for viewing business form submissions
     """
-    return render(request, 'business_form_admin.html')
+    # Get basic stats
+    total_submissions = BusinessFormSubmission.objects.count()
+    pending_submissions = BusinessFormSubmission.objects.filter(status='pending').count()
+    approved_submissions = BusinessFormSubmission.objects.filter(status='approved').count()
+    
+    context = {
+        'total_submissions': total_submissions,
+        'pending_submissions': pending_submissions,
+        'approved_submissions': approved_submissions,
+    }
+    
+    return render(request, 'business_form_admin.html', context)

@@ -1218,10 +1218,17 @@
         <span>Cart</span>
       </a>
       {% if user.is_authenticated %}
-        <a href="{% url 'profile' username=user.username %}" class="mobile-nav-item">
-          <i class="fas fa-user"></i>
-          <span>Profile</span>
-        </a>
+        {% if user.is_staff %}
+          <a href="{% url 'employee_hub' %}" class="mobile-nav-item">
+            <i class="fas fa-briefcase"></i>
+            <span>Employee</span>
+          </a>
+        {% else %}
+          <a href="{% url 'profile' username=user.username %}" class="mobile-nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </a>
+        {% endif %}
       {% else %}
         <a href="{% url 'login' %}" class="mobile-nav-item">
           <i class="fas fa-sign-in-alt"></i>

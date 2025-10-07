@@ -386,10 +386,17 @@ body {
   padding-top: 0;
 }
 
-/* Remove padding from special offers section */
+/* Special offers section - directly below hero */
 .special-offers {
   padding-top: 0 !important;
   margin-top: 0 !important;
+  padding-bottom: 2rem !important;
+}
+
+/* Ensure no gap between hero and special offers */
+.hero-section + .main-content-section .special-offers {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .hero-wrapper {

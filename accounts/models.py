@@ -364,3 +364,65 @@ class Analytics(BaseModel):
     
     def __str__(self):
         return f"{self.date} - {self.metric_type}: {self.value}"
+
+
+class BusinessFormSubmission(BaseModel):
+    """
+    Model to store business customization form submissions
+    """
+    # Basic Information
+    company_name = models.CharField(max_length=200, blank=True, null=True)
+    business_type = models.CharField(max_length=100, blank=True, null=True)
+    industry = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    
+    # Branding
+    primary_color = models.CharField(max_length=7, blank=True, null=True, help_text="Hex color code")
+    secondary_color = models.CharField(max_length=7, blank=True, null=True, help_text="Hex color code")
+    logo = models.ImageField(upload_to="business_logos/", blank=True, null=True)
+    
+    # Business Details
+    main_products = models.TextField(blank=True, null=True)
+    currency = models.CharField(max_length=3, blank=True, null=True)
+    website_url = models.URLField(blank=True, null=True)
+    
+    # Additional Information
+    business_description = models.TextField(blank=True, null=True)
+    target_audience = models.TextField(blank=True, null=True)
+    special_requirements = models.TextField(blank=True, null=True)
+    
+    # Form metadata
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True, null=True)
+    
+    # Status
+    status = models.CharField(max_length=20, default='pending', choices=[
+        ('pending', 'Pending Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('in_progress', 'In Progress'),
+    ])
+    
+    # Admin notes
+    admin_notes = models.TextField(blank=True, null=True)
+    processed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_business_forms')
+    processed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-submitted_at']
+        verbose_name = 'Business Form Submission'
+        verbose_name_plural = 'Business Form Submissions'
+    
+    def __str__(self):
+        return f"{self.company_name or 'Unknown Company'} - {self.submitted_at.strftime('%Y-%m-%d %H:%M')}"
+    
+    @property
+    def is_processed(self):
+        return self.status != 'pending'
+    
+    @property
+    def days_since_submission(self):
+        from django.utils import timezone
+        return (timezone.now() - self.submitted_at).days

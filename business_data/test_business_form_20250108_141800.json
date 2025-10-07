@@ -1,0 +1,16 @@
+{
+  "form_data": {
+    "company_name": "Test Company",
+    "business_type": "retail",
+    "industry": "technology",
+    "email": "test@example.com",
+    "phone": "123-456-7890",
+    "primary_color": "#667eea",
+    "secondary_color": "#764ba2",
+    "main_products": "Software, Hardware",
+    "currency": "USD"
+  },
+  "files_data": {},
+  "submitted_at": "2025-01-08T14:18:00.000000",
+  "status": "success"
+}
