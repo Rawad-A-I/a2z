@@ -12,7 +12,7 @@ from accounts.address_management_views import *
 from accounts.admin_views import *
 from accounts.modern_dashboard_views import *
 from accounts.business_form_views import business_form, submit_business_form, get_business_data, business_form_admin
-from accounts.settings_views import *
+# Settings views are now in accounts.views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
