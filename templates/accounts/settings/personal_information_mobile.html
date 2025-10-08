@@ -1,0 +1,74 @@
+<div class="space-y-4">
+    <!-- Profile Picture -->
+    <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+        <div class="relative">
+            <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                {% if user.profile.profile_image %}
+                    <img id="mobile-profile-preview" src="{{ user.profile.profile_image.url }}" alt="Profile" class="w-full h-full object-cover">
+                {% else %}
+                    <i class="fas fa-user text-gray-400 text-xl"></i>
+                {% endif %}
+            </div>
+            <button type="button" onclick="document.getElementById('mobile-profile-upload').click()"
+                    class="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                <i class="fas fa-camera text-xs"></i>
+            </button>
+            <input type="file" id="mobile-profile-upload" accept="image/*" class="hidden" onchange="previewProfilePictureMobile(this)">
+        </div>
+        <div class="flex-1">
+            <h4 class="font-medium text-gray-900">Profile Picture</h4>
+            <p class="text-sm text-gray-500">Tap to change</p>
+        </div>
+    </div>
+
+    <!-- Name Fields -->
+    <div class="space-y-3">
+        <div class="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg">
+            <span class="text-sm font-medium text-gray-700">First Name</span>
+            <span class="text-sm text-gray-900">{{ user.first_name|default:'Not set' }}</span>
+        </div>
+        <div class="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg">
+            <span class="text-sm font-medium text-gray-700">Last Name</span>
+            <span class="text-sm text-gray-900">{{ user.last_name|default:'Not set' }}</span>
+        </div>
+    </div>
+
+    <!-- Email -->
+    <div class="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg">
+        <span class="text-sm font-medium text-gray-700">Email</span>
+        <div class="text-right">
+            <div class="text-sm text-gray-900">{{ user.email }}</div>
+            {% if user.email_verified %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <i class="fas fa-check-circle mr-1"></i>Verified
+                </span>
+            {% else %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <i class="fas fa-exclamation-circle mr-1"></i>Unverified
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Phone -->
+    <div class="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg">
+        <span class="text-sm font-medium text-gray-700">Phone</span>
+        <div class="text-right">
+            <div class="text-sm text-gray-900">{{ user.phone|default:'Not set' }}</div>
+            {% if user.phone_verified %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <i class="fas fa-check-circle mr-1"></i>Verified
+                </span>
+            {% else %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <i class="fas fa-exclamation-circle mr-1"></i>Unverified
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Edit Button -->
+    <button onclick="openEditModal('personal-info')" class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+        Edit Information
+    </button>
+</div>

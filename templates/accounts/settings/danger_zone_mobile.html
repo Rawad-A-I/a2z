@@ -1,0 +1,52 @@
+<div class="space-y-4">
+    <!-- Deactivate Account -->
+    <div class="bg-white border border-gray-200 rounded-lg">
+        <div class="p-4">
+            <div class="flex items-center mb-3">
+                <i class="fas fa-pause-circle text-yellow-600 mr-3"></i>
+                <h4 class="text-sm font-medium text-gray-900">Deactivate Account</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                Temporarily disable your account. You can reactivate it anytime by logging back in.
+            </p>
+            <button onclick="showDeactivateModal()" class="w-full py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700">
+                Deactivate Account
+            </button>
+        </div>
+    </div>
+
+    <!-- Delete Account -->
+    <div class="bg-white border border-red-200 rounded-lg">
+        <div class="p-4">
+            <div class="flex items-center mb-3">
+                <i class="fas fa-times-circle text-red-600 mr-3"></i>
+                <h4 class="text-sm font-medium text-red-900">Delete Account</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">
+                Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <div class="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                <h6 class="text-sm font-medium text-red-900 mb-2">What will be deleted:</h6>
+                <ul class="text-sm text-red-800 space-y-1">
+                    <li>• Profile and personal information</li>
+                    <li>• Order history and reviews</li>
+                    <li>• Wishlist and saved items</li>
+                    <li>• Account settings and preferences</li>
+                </ul>
+            </div>
+            <button onclick="showDeleteModal()" class="w-full py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">
+                Delete Account
+            </button>
+        </div>
+    </div>
+
+    <!-- Account Info -->
+    <div class="bg-gray-50 p-4 rounded-lg">
+        <h5 class="text-sm font-medium text-gray-900 mb-2">Account Information</h5>
+        <div class="text-sm text-gray-600 space-y-1">
+            <p><strong>Member since:</strong> {{ user.date_joined|date:"F Y" }}</p>
+            <p><strong>Last login:</strong> {{ user.last_login|date:"M d, Y H:i" }}</p>
+            <p><strong>Account status:</strong> Active</p>
+        </div>
+    </div>
+</div>

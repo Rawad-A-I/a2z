@@ -1,285 +1,79 @@
-{% extends 'base/base.html' %}
-{% load static %}
+<div class="settings-form">
+    <form id="personal-info-form" class="space-y-6">
+        {% csrf_token %}
 
-{% block title %}Personal Information - {{ block.super }}{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/account-settings.css' %}">
-{% endblock %}
-
-{% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 sidebar">
-            <div class="settings-nav">
-                <h5 class="nav-title">Account Settings</h5>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'account_settings' %}">
-                            <i class="fas fa-cog"></i> General
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'personal_information' %}">
-                            <i class="fas fa-user"></i> Personal Information
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login_security' %}">
-                            <i class="fas fa-shield-alt"></i> Login & Security
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'notification_preferences' %}">
-                            <i class="fas fa-bell"></i> Notifications
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'connected_accounts' %}">
-                            <i class="fas fa-link"></i> Connected Accounts
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'danger_zone' %}">
-                            <i class="fas fa-exclamation-triangle text-danger"></i> Danger Zone
-                        </a>
-                    </li>
-                </ul>
+        <!-- Profile Picture Section -->
+        <div class="flex items-center space-x-6">
+            <div class="relative">
+                <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                    {% if user.profile.profile_image %}
+                        <img id="profile-preview" src="{{ user.profile.profile_image.url }}" alt="Profile" class="w-full h-full object-cover">
+                    {% else %}
+                        <i class="fas fa-user text-gray-400 text-2xl"></i>
+                    {% endif %}
+                </div>
+                <button type="button" onclick="document.getElementById('profile-upload').click()"
+                        class="absolute bottom-0 right-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700">
+                    <i class="fas fa-camera text-xs"></i>
+                </button>
+                <input type="file" id="profile-upload" name="profile_picture" accept="image/*" class="hidden" onchange="previewProfilePicture(this)">
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-900">Profile Picture</h4>
+                <p class="text-sm text-gray-500">Upload a new profile picture. JPG, PNG up to 2MB.</p>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-9 col-lg-10 main-content">
-            <div class="settings-header">
-                <h1>Personal Information</h1>
-                <p class="text-muted">Update your personal details and profile information</p>
+        <!-- Name Fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+                <input type="text" id="first_name" name="first_name" value="{{ user.first_name|default:'' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
-
-            <div class="settings-content">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <!-- A2Z Mart Contact Information -->
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-store"></i> A2Z Mart - Lebanon</h6>
-                        <small>Customize your shopping experience with A2Z Mart</small>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="{{ form.phone_number.id_for_label }}">Phone Number (Lebanon)</label>
-                                {{ form.phone_number }}
-                                <small class="form-text text-muted">Format: +96170123456</small>
-                                {% if form.phone_number.errors %}
-                                    <div class="text-danger">{{ form.phone_number.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="{{ form.preferred_contact_method.id_for_label }}">Preferred Contact Method</label>
-                                {{ form.preferred_contact_method }}
-                                {% if form.preferred_contact_method.errors %}
-                                    <div class="text-danger">{{ form.preferred_contact_method.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Age Verification for Alcohol/Tobacco -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="{{ form.birth_date.id_for_label }}">Date of Birth (Age Verification)</label>
-                                {{ form.birth_date }}
-                                <small class="form-text text-muted">Required for alcohol and tobacco products</small>
-                                {% if form.birth_date.errors %}
-                                    <div class="text-danger">{{ form.birth_date.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <div class="form-check mt-4">
-                                    {{ form.age_verified }}
-                                    <label class="form-check-label" for="{{ form.age_verified.id_for_label }}">
-                                        I am 18+ years old
-                                    </label>
-                                </div>
-                                {% if form.age_verified.errors %}
-                                    <div class="text-danger">{{ form.age_verified.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="{{ form.gender.id_for_label }}">Gender</label>
-                                {{ form.gender }}
-                                {% if form.gender.errors %}
-                                    <div class="text-danger">{{ form.gender.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="{{ form.language.id_for_label }}">Language</label>
-                                {{ form.language }}
-                                {% if form.language.errors %}
-                                    <div class="text-danger">{{ form.language.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="{{ form.timezone.id_for_label }}">Timezone</label>
-                                {{ form.timezone }}
-                                {% if form.timezone.errors %}
-                                    <div class="text-danger">{{ form.timezone.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="{{ form.currency.id_for_label }}">Currency</label>
-                                {{ form.currency }}
-                                {% if form.currency.errors %}
-                                    <div class="text-danger">{{ form.currency.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- A2Z Mart Delivery Preferences -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="{{ form.preferred_delivery_method.id_for_label }}">Preferred Delivery Method</label>
-                                {{ form.preferred_delivery_method }}
-                                {% if form.preferred_delivery_method.errors %}
-                                    <div class="text-danger">{{ form.preferred_delivery_method.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <div class="form-check mt-4">
-                                    {{ form.promotional_codes_enabled }}
-                                    <label class="form-check-label" for="{{ form.promotional_codes_enabled.id_for_label }}">
-                                        Enable promotional codes (5% first order discount)
-                                    </label>
-                                </div>
-                                {% if form.promotional_codes_enabled.errors %}
-                                    <div class="text-danger">{{ form.promotional_codes_enabled.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Dietary Restrictions -->
-                    <div class="form-group">
-                        <label>Dietary Restrictions</label>
-                        {{ form.dietary_restrictions }}
-                        <small class="form-text text-muted">Select any dietary restrictions you have</small>
-                        {% if form.dietary_restrictions.errors %}
-                            <div class="text-danger">{{ form.dietary_restrictions.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Product Categories -->
-                    <div class="form-group">
-                        <label>Product Categories</label>
-                        {{ form.product_categories }}
-                        <small class="form-text text-muted">Select categories you're interested in</small>
-                        {% if form.product_categories.errors %}
-                            <div class="text-danger">{{ form.product_categories.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="{{ form.bio.id_for_label }}">Bio</label>
-                        {{ form.bio }}
-                        {% if form.bio.errors %}
-                            <div class="text-danger">{{ form.bio.errors.0 }}</div>
-                        {% endif %}
-                        <small class="form-text text-muted">Tell us about yourself (optional)</small>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Changes
-                        </button>
-                        <a href="{% url 'account_settings' %}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to Settings
-                        </a>
-                    </div>
-                </form>
+            <div>
+                <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                <input type="text" id="last_name" name="last_name" value="{{ user.last_name|default:'' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
         </div>
-    </div>
+
+        <!-- Email Field -->
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+                <input type="email" id="email" name="email" value="{{ user.email }}"
+                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button type="button" onclick="showEmailVerification()" class="text-blue-600 hover:text-blue-900 text-sm">
+                        {% if user.email_verified %}Verified{% else %}Verify{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phone Field -->
+        <div>
+            <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+                <input type="tel" id="phone" name="phone" value="{{ user.phone|default:'' }}"
+                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-20">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button type="button" onclick="verifyPhone()" class="text-blue-600 hover:text-blue-900 text-sm">
+                        {% if user.phone_verified %}Verified{% else %}Verify{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button type="button" onclick="resetPersonalInfoForm()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Cancel
+            </button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
+                Save Changes
+            </button>
+        </div>
+    </form>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add form validation
-    const form = document.querySelector('form');
-    const phoneInput = document.querySelector('input[name="phone_number"]');
-    
-    if (phoneInput) {
-        phoneInput.addEventListener('input', function() {
-            // Lebanon phone number formatting
-            let value = this.value.replace(/\D/g, '');
-            if (value.length > 0) {
-                if (value.startsWith('961')) {
-                    // Lebanon format: +96170123456
-                    this.value = '+961' + value.slice(3);
-                } else if (value.startsWith('961')) {
-                    this.value = '+961' + value.slice(3);
-                } else {
-                    this.value = '+961' + value;
-                }
-            }
-        });
-    }
-    
-    // Age verification logic
-    const birthDateInput = document.querySelector('input[name="birth_date"]');
-    const ageVerifiedCheckbox = document.querySelector('input[name="age_verified"]');
-    
-    if (birthDateInput && ageVerifiedCheckbox) {
-        birthDateInput.addEventListener('change', function() {
-            const birthDate = new Date(this.value);
-            const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            
-            if (age >= 18) {
-                ageVerifiedCheckbox.checked = true;
-            } else {
-                ageVerifiedCheckbox.checked = false;
-            }
-        });
-    }
-    
-    // Form submission with loading state
-    form.addEventListener('submit', function() {
-        const submitBtn = this.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        submitBtn.disabled = true;
-    });
-});
-</script>
-{% endblock %}

@@ -1,0 +1,101 @@
+<div class="settings-form">
+    <!-- Connected Accounts -->
+    <div class="bg-white p-6 rounded-lg border border-gray-200 mb-6">
+        <h4 class="text-lg font-medium text-gray-900 mb-4">Connected Accounts</h4>
+        <p class="text-sm text-gray-600 mb-6">Connect your social media accounts for faster login and better experience.</p>
+
+        <div class="space-y-4">
+            <!-- Google -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fab fa-google text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Google</p>
+                        {% if user.social_accounts.google %}
+                            <p class="text-xs text-green-600">Connected as {{ user.social_accounts.google.email }}</p>
+                        {% else %}
+                            <p class="text-xs text-gray-500">Not connected</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if user.social_accounts.google %}
+                    <button onclick="disconnectAccount('google')" class="px-3 py-1 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50">
+                        Disconnect
+                    </button>
+                {% else %}
+                    <button onclick="connectAccount('google')" class="px-3 py-1 text-sm text-white bg-red-600 rounded-md hover:bg-red-700">
+                        Connect
+                    </button>
+                {% endif %}
+            </div>
+
+            <!-- Facebook -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fab fa-facebook-f text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Facebook</p>
+                        {% if user.social_accounts.facebook %}
+                            <p class="text-xs text-green-600">Connected as {{ user.social_accounts.facebook.name }}</p>
+                        {% else %}
+                            <p class="text-xs text-gray-500">Not connected</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if user.social_accounts.facebook %}
+                    <button onclick="disconnectAccount('facebook')" class="px-3 py-1 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50">
+                        Disconnect
+                    </button>
+                {% else %}
+                    <button onclick="connectAccount('facebook')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                        Connect
+                    </button>
+                {% endif %}
+            </div>
+
+            <!-- Apple -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center mr-3">
+                        <i class="fab fa-apple text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Apple</p>
+                        {% if user.social_accounts.apple %}
+                            <p class="text-xs text-green-600">Connected</p>
+                        {% else %}
+                            <p class="text-xs text-gray-500">Not connected</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if user.social_accounts.apple %}
+                    <button onclick="disconnectAccount('apple')" class="px-3 py-1 text-sm text-red-600 border border-red-600 rounded-md hover:bg-red-50">
+                        Disconnect
+                    </button>
+                {% else %}
+                    <button onclick="connectAccount('apple')" class="px-3 py-1 text-sm text-white bg-black rounded-md hover:bg-gray-800">
+                        Connect
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Benefits -->
+    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+        <h5 class="text-sm font-medium text-blue-900 mb-3">
+            <i class="fas fa-info-circle mr-2"></i>
+            Benefits of Connected Accounts
+        </h5>
+        <ul class="text-sm text-blue-800 space-y-2">
+            <li>• Faster login without entering credentials</li>
+            <li>• Access to personalized recommendations</li>
+            <li>• Sync preferences across devices</li>
+            <li>• Receive notifications from connected services</li>
+        </ul>
+    </div>
+</div>

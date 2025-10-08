@@ -1,0 +1,95 @@
+<div class="space-y-4">
+    <!-- Email Notifications Summary -->
+    <div class="bg-white border border-gray-200 rounded-lg">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center">
+                <i class="fas fa-envelope text-blue-600 mr-3"></i>
+                <span class="text-sm font-medium text-gray-900">Email Notifications</span>
+            </div>
+        </div>
+        <div class="p-4 space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Order Updates</span>
+                <button class="notification-toggle" data-type="email" data-setting="order_updates" onclick="toggleNotification(this)">
+                    <span class="notification-toggle-slider {% if user.notification_preferences.email_order_updates %}active{% endif %}"></span>
+                </button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Promotions</span>
+                <button class="notification-toggle" data-type="email" data-setting="promotional" onclick="toggleNotification(this)">
+                    <span class="notification-toggle-slider {% if user.notification_preferences.email_promotional %}active{% endif %}"></span>
+                </button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Newsletter</span>
+                <button class="notification-toggle" data-type="email" data-setting="newsletter" onclick="toggleNotification(this)">
+                    <span class="notification-toggle-slider {% if user.notification_preferences.email_newsletter %}active{% endif %}"></span>
+                </button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Security Alerts</span>
+                <button class="notification-toggle" data-type="email" data-setting="security" onclick="toggleNotification(this)">
+                    <span class="notification-toggle-slider {% if user.notification_preferences.email_security %}active{% endif %}"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SMS Notifications Summary -->
+    <div class="bg-white border border-gray-200 rounded-lg">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center">
+                <i class="fas fa-sms text-green-600 mr-3"></i>
+                <span class="text-sm font-medium text-gray-900">SMS Notifications</span>
+            </div>
+        </div>
+        <div class="p-4 space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Order Updates</span>
+                <button class="notification-toggle" data-type="sms" data-setting="order_updates" onclick="toggleNotification(this)">
+                    <span class="notification-toggle-slider {% if user.notification_preferences.sms_order_updates %}active{% endif %}"></span>
+                </button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Delivery Updates</span>
+                <button class="notification-toggle" data-type="sms" data-setting="delivery" onclick="toggleNotification(this)">
+                    <span class="notification-toggle-slider {% if user.notification_preferences.sms_delivery %}active{% endif %}"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Push Notifications Summary -->
+    <div class="bg-white border border-gray-200 rounded-lg">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center">
+                <i class="fas fa-bell text-purple-600 mr-3"></i>
+                <span class="text-sm font-medium text-gray-900">Push Notifications</span>
+            </div>
+        </div>
+        <div class="p-4 space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Browser Notifications</span>
+                <button class="notification-toggle" data-type="push" data-setting="browser" onclick="toggleNotification(this)">
+                    <span class="notification-toggle-slider {% if user.notification_preferences.push_browser %}active{% endif %}"></span>
+                </button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Mobile App</span>
+                <button class="notification-toggle" data-type="push" data-setting="mobile" onclick="toggleNotification(this)">
+                    <span class="notification-toggle-slider {% if user.notification_preferences.push_mobile %}active{% endif %}"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Summary -->
+    <div class="bg-blue-50 p-4 rounded-lg">
+        <h5 class="text-sm font-medium text-blue-900 mb-2">Notification Summary</h5>
+        <div class="text-sm text-blue-800">
+            <p>You have <span id="mobile-email-count" class="font-medium">4</span> email notifications enabled</p>
+            <p>You have <span id="mobile-sms-count" class="font-medium">2</span> SMS notifications enabled</p>
+            <p>You have <span id="mobile-push-count" class="font-medium">1</span> push notification enabled</p>
+        </div>
+    </div>
+</div>

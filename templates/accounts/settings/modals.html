@@ -1,0 +1,280 @@
+<!-- Personal Information Edit Modal -->
+<div id="personal-info-modal" class="fixed inset-0 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4 bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Edit Personal Information</h3>
+                <button onclick="closeModal('personal-info-modal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-4">
+                <form id="mobile-personal-info-form" class="space-y-4">
+                    <!-- Profile Picture -->
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                                <img id="mobile-modal-profile-preview" src="{% if user.profile.profile_image %}{{ user.profile.profile_image.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Profile" class="w-full h-full object-cover">
+                            </div>
+                            <button type="button" onclick="document.getElementById('mobile-modal-profile-upload').click()"
+                                    class="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-camera text-xs"></i>
+                            </button>
+                            <input type="file" id="mobile-modal-profile-upload" accept="image/*" class="hidden" onchange="previewModalProfilePicture(this)">
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-medium text-gray-900">Profile Picture</h4>
+                            <p class="text-xs text-gray-500">Tap to change</p>
+                        </div>
+                    </div>
+
+                    <!-- Name Fields -->
+                    <div>
+                        <label for="mobile_first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <input type="text" id="mobile_first_name" name="first_name" value="{{ user.first_name|default:'' }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="mobile_last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <input type="text" id="mobile_last_name" name="last_name" value="{{ user.last_name|default:'' }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="mobile_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="mobile_email" name="email" value="{{ user.email }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label for="mobile_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <input type="tel" id="mobile_phone" name="phone" value="{{ user.phone|default:'' }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex space-x-3 p-4 border-t border-gray-200 bg-gray-50">
+                <button onclick="closeModal('personal-info-modal')" class="flex-1 py-2 border border-gray-300 text-gray-700 rounded-md font-medium">
+                    Cancel
+                </button>
+                <button onclick="savePersonalInfo()" class="flex-1 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="password-modal" class="fixed inset-0 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4 bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Change Password</h3>
+                <button onclick="closeModal('password-modal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4">
+                <form id="mobile-password-form" class="space-y-4">
+                    <div>
+                        <label for="mobile_current_password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                        <input type="password" id="mobile_current_password" name="current_password"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               required>
+                    </div>
+                    <div>
+                        <label for="mobile_new_password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                        <input type="password" id="mobile_new_password" name="new_password"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               required minlength="8">
+                        <div class="mt-2">
+                            <div class="flex items-center text-sm">
+                                <span class="password-strength-text">Strength: </span>
+                                <span id="mobile-password-strength" class="ml-1 font-medium">Weak</span>
+                            </div>
+                            <div class="mt-1 h-2 bg-gray-200 rounded-full">
+                                <div id="mobile-password-strength-bar" class="h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="mobile_confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input type="password" id="mobile_confirm_password" name="confirm_password"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               required>
+                    </div>
+                </form>
+            </div>
+
+            <div class="flex space-x-3 p-4 border-t border-gray-200 bg-gray-50">
+                <button onclick="closeModal('password-modal')" class="flex-1 py-2 border border-gray-300 text-gray-700 rounded-md font-medium">
+                    Cancel
+                </button>
+                <button onclick="changePassword()" class="flex-1 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700">
+                    Update Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2FA Setup Modal -->
+<div id="2fa-modal" class="fixed inset-0 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4 bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Two-Factor Authentication</h3>
+                <button onclick="closeModal('2fa-modal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4">
+                {% if user.two_factor_enabled %}
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shield-alt text-green-600 text-2xl"></i>
+                        </div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-2">2FA is Enabled</h4>
+                        <p class="text-sm text-gray-600 mb-6">Your account is protected with two-factor authentication.</p>
+                        <button onclick="disable2FA()" class="w-full py-2 bg-red-600 text-white rounded-md font-medium hover:bg-red-700">
+                            Disable 2FA
+                        </button>
+                    </div>
+                {% else %}
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shield-alt text-blue-600 text-2xl"></i>
+                        </div>
+                        <h4 class="text-lg font-medium text-gray-900 mb-2">Enable 2FA</h4>
+                        <p class="text-sm text-gray-600 mb-6">Add an extra layer of security to your account.</p>
+                        <button onclick="enable2FA()" class="w-full py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700">
+                            Enable Two-Factor Authentication
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deactivate Account Modal -->
+<div id="deactivate-modal" class="fixed inset-0 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4 bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Deactivate Account</h3>
+                <button onclick="closeModal('deactivate-modal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-pause-circle text-yellow-600 text-2xl"></i>
+                    </div>
+                    <h4 class="text-lg font-medium text-gray-900 mb-2">Deactivate Your Account?</h4>
+                    <p class="text-sm text-gray-600">You can reactivate your account anytime by logging back in.</p>
+                </div>
+
+                <form id="deactivate-form" class="space-y-4">
+                    <div>
+                        <label for="deactivate_reason" class="block text-sm font-medium text-gray-700 mb-1">Reason (Optional)</label>
+                        <select id="deactivate_reason" name="reason"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select a reason</option>
+                            <option value="privacy">Privacy concerns</option>
+                            <option value="not_using">Not using the service</option>
+                            <option value="technical">Technical issues</option>
+                            <option value="cost">Cost concerns</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="deactivate_feedback" class="block text-sm font-medium text-gray-700 mb-1">Additional Feedback</label>
+                        <textarea id="deactivate_feedback" name="feedback" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Let us know how we can improve..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="flex space-x-3 p-4 border-t border-gray-200 bg-gray-50">
+                <button onclick="closeModal('deactivate-modal')" class="flex-1 py-2 border border-gray-300 text-gray-700 rounded-md font-medium">
+                    Cancel
+                </button>
+                <button onclick="deactivateAccount()" class="flex-1 py-2 bg-yellow-600 text-white rounded-md font-medium hover:bg-yellow-700">
+                    Deactivate Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div id="delete-modal" class="fixed inset-0 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4 bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg max-w-md w-full">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Delete Account</h3>
+                <button onclick="closeModal('delete-modal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                    <h4 class="text-lg font-medium text-gray-900 mb-2">Delete Your Account?</h4>
+                    <p class="text-sm text-gray-600 mb-4">This action cannot be undone. All your data will be permanently deleted.</p>
+
+                    <div class="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                        <h6 class="text-sm font-medium text-red-900 mb-2">What will be deleted:</h6>
+                        <ul class="text-sm text-red-800 space-y-1">
+                            <li>• Your profile and personal information</li>
+                            <li>• Order history and reviews</li>
+                            <li>• Wishlist and saved items</li>
+                            <li>• Account settings and preferences</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <form id="delete-form" class="space-y-4">
+                    <div>
+                        <label for="delete_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input type="password" id="delete_password" name="password"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Enter your password to confirm" required>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="delete_confirm" name="confirm" class="mr-2" required>
+                        <label for="delete_confirm" class="text-sm text-gray-700">
+                            I understand this action cannot be undone
+                        </label>
+                    </div>
+                </form>
+            </div>
+
+            <div class="flex space-x-3 p-4 border-t border-gray-200 bg-gray-50">
+                <button onclick="closeModal('delete-modal')" class="flex-1 py-2 border border-gray-300 text-gray-700 rounded-md font-medium">
+                    Cancel
+                </button>
+                <button onclick="deleteAccount()" class="flex-1 py-2 bg-red-600 text-white rounded-md font-medium hover:bg-red-700">
+                    Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
