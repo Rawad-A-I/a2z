@@ -468,10 +468,49 @@ class UserPreferences(BaseModel):
     show_online_status = models.BooleanField(default=True)
     allow_friend_requests = models.BooleanField(default=True)
     
-    # Language and Region
-    language = models.CharField(max_length=10, default='en')
-    timezone = models.CharField(max_length=50, default='UTC')
-    currency = models.CharField(max_length=3, default='USD')
+    # Language and Region (A2Z Mart Customization)
+    language = models.CharField(max_length=10, default='en', choices=[
+        ('en', 'English'),
+        ('ar', 'العربية'),
+        ('fr', 'Français')
+    ])
+    additional_languages = models.JSONField(default=list, blank=True)
+    timezone = models.CharField(max_length=50, default='Asia/Beirut')
+    currency = models.CharField(max_length=3, default='USD', choices=[
+        ('USD', 'US Dollar'),
+        ('LBP', 'Lebanese Pound'),
+        ('EUR', 'Euro')
+    ])
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=11.00)
+    
+    # A2Z Mart Business-Specific Fields
+    # Age Verification for Alcohol/Tobacco
+    age_verified = models.BooleanField(default=False)
+    birth_date = models.DateField(blank=True, null=True)
+    
+    # Dietary Restrictions
+    dietary_restrictions = models.JSONField(default=list, blank=True)
+    
+    # Delivery Preferences
+    preferred_delivery_method = models.CharField(max_length=20, choices=[
+        ('express', 'Express'),
+        ('same_day', 'Same Day'),
+        ('pickup', 'Pickup')
+    ], default='express')
+    
+    # Product Category Preferences
+    product_categories = models.JSONField(default=list, blank=True)
+    
+    # Communication Preferences
+    preferred_contact_method = models.CharField(max_length=20, choices=[
+        ('email', 'Email'),
+        ('sms', 'SMS'),
+        ('phone', 'Phone')
+    ], default='email')
+    
+    # Promotional Preferences
+    promotional_codes_enabled = models.BooleanField(default=True)
+    first_order_discount_used = models.BooleanField(default=False)
     
     # Marketing Preferences
     marketing_consent = models.BooleanField(default=False)

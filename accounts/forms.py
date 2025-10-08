@@ -166,19 +166,22 @@ import re
 
 
 class PersonalInfoForm(forms.ModelForm):
-    """Personal information form."""
+    """Personal information form - A2Z Mart customized."""
     
     class Meta:
         model = UserPreferences
         fields = [
             'phone_number', 'bio', 'date_of_birth', 'gender',
-            'language', 'timezone', 'currency'
+            'language', 'timezone', 'currency', 'tax_rate',
+            'age_verified', 'birth_date', 'dietary_restrictions',
+            'preferred_delivery_method', 'product_categories',
+            'preferred_contact_method', 'promotional_codes_enabled'
         ]
         widgets = {
             'phone_number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter your phone number',
-                'pattern': r'^\+?1?\d{9,15}$'
+                'placeholder': 'Enter your phone number (Lebanon: +961)',
+                'pattern': r'^\+?961?\d{8}$'
             }),
             'bio': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -187,6 +190,10 @@ class PersonalInfoForm(forms.ModelForm):
                 'maxlength': 500
             }),
             'date_of_birth': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'birth_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
             }),
@@ -201,17 +208,83 @@ class PersonalInfoForm(forms.ModelForm):
             }),
             'currency': forms.Select(attrs={
                 'class': 'form-control'
+            }),
+            'tax_rate': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0',
+                'max': '100'
+            }),
+            'age_verified': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'dietary_restrictions': forms.CheckboxSelectMultiple(attrs={
+                'class': 'form-check-input'
+            }),
+            'preferred_delivery_method': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'product_categories': forms.CheckboxSelectMultiple(attrs={
+                'class': 'form-check-input'
+            }),
+            'preferred_contact_method': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'promotional_codes_enabled': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
             })
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # A2Z Mart specific choices
+        self.fields['dietary_restrictions'].choices = [
+            ('halal', 'Halal'),
+            ('kosher', 'Kosher'),
+            ('vegetarian', 'Vegetarian'),
+            ('vegan', 'Vegan'),
+            ('gluten_free', 'Gluten Free'),
+            ('dairy_free', 'Dairy Free'),
+            ('nut_free', 'Nut Free')
+        ]
+        
+        self.fields['product_categories'].choices = [
+            ('grocery', 'Grocery'),
+            ('alcohol', 'Alcohol'),
+            ('soft_drinks', 'Soft Drinks'),
+            ('snacks', 'Snacks'),
+            ('beverages', 'Beverages'),
+            ('coffee', 'Coffee'),
+            ('home_appliances', 'Home Appliances'),
+            ('pet_food', 'Pet Food'),
+            ('tobacco', 'Tobacco'),
+            ('bakery', 'Bakery'),
+            ('candy', 'Candy'),
+            ('detergent', 'Detergent'),
+            ('ice_cream', 'Ice Cream'),
+            ('dairy', 'Dairy'),
+            ('take_away', 'Take Away Drinks')
+        ]
     
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
         if phone_number:
-            # Basic phone number validation
-            phone_pattern = re.compile(r'^\+?1?\d{9,15}$')
+            # Lebanon phone number validation
+            phone_pattern = re.compile(r'^\+?961?\d{8}$')
             if not phone_pattern.match(phone_number):
-                raise forms.ValidationError('Please enter a valid phone number.')
+                raise forms.ValidationError('Please enter a valid Lebanese phone number (e.g., +96170123456).')
         return phone_number
+    
+    def clean_birth_date(self):
+        birth_date = self.cleaned_data.get('birth_date')
+        if birth_date:
+            from datetime import date
+            today = date.today()
+            age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+            if age < 18:
+                raise forms.ValidationError('You must be at least 18 years old to purchase alcohol and tobacco products.')
+        return birth_date
 
 
 class PasswordChangeForm(forms.Form):

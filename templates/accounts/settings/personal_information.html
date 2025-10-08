@@ -60,11 +60,18 @@
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
+                    <!-- A2Z Mart Contact Information -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-store"></i> A2Z Mart - Lebanon</h6>
+                        <small>Customize your shopping experience with A2Z Mart</small>
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                                <label for="{{ form.phone_number.id_for_label }}">Phone Number (Lebanon)</label>
                                 {{ form.phone_number }}
+                                <small class="form-text text-muted">Format: +96170123456</small>
                                 {% if form.phone_number.errors %}
                                     <div class="text-danger">{{ form.phone_number.errors.0 }}</div>
                                 {% endif %}
@@ -73,10 +80,38 @@
                         
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
-                                {{ form.date_of_birth }}
-                                {% if form.date_of_birth.errors %}
-                                    <div class="text-danger">{{ form.date_of_birth.errors.0 }}</div>
+                                <label for="{{ form.preferred_contact_method.id_for_label }}">Preferred Contact Method</label>
+                                {{ form.preferred_contact_method }}
+                                {% if form.preferred_contact_method.errors %}
+                                    <div class="text-danger">{{ form.preferred_contact_method.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Age Verification for Alcohol/Tobacco -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.birth_date.id_for_label }}">Date of Birth (Age Verification)</label>
+                                {{ form.birth_date }}
+                                <small class="form-text text-muted">Required for alcohol and tobacco products</small>
+                                {% if form.birth_date.errors %}
+                                    <div class="text-danger">{{ form.birth_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check mt-4">
+                                    {{ form.age_verified }}
+                                    <label class="form-check-label" for="{{ form.age_verified.id_for_label }}">
+                                        I am 18+ years old
+                                    </label>
+                                </div>
+                                {% if form.age_verified.errors %}
+                                    <div class="text-danger">{{ form.age_verified.errors.0 }}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -126,6 +161,53 @@
                         </div>
                     </div>
                     
+                    <!-- A2Z Mart Delivery Preferences -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.preferred_delivery_method.id_for_label }}">Preferred Delivery Method</label>
+                                {{ form.preferred_delivery_method }}
+                                {% if form.preferred_delivery_method.errors %}
+                                    <div class="text-danger">{{ form.preferred_delivery_method.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check mt-4">
+                                    {{ form.promotional_codes_enabled }}
+                                    <label class="form-check-label" for="{{ form.promotional_codes_enabled.id_for_label }}">
+                                        Enable promotional codes (5% first order discount)
+                                    </label>
+                                </div>
+                                {% if form.promotional_codes_enabled.errors %}
+                                    <div class="text-danger">{{ form.promotional_codes_enabled.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dietary Restrictions -->
+                    <div class="form-group">
+                        <label>Dietary Restrictions</label>
+                        {{ form.dietary_restrictions }}
+                        <small class="form-text text-muted">Select any dietary restrictions you have</small>
+                        {% if form.dietary_restrictions.errors %}
+                            <div class="text-danger">{{ form.dietary_restrictions.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Product Categories -->
+                    <div class="form-group">
+                        <label>Product Categories</label>
+                        {{ form.product_categories }}
+                        <small class="form-text text-muted">Select categories you're interested in</small>
+                        {% if form.product_categories.errors %}
+                            <div class="text-danger">{{ form.product_categories.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
                     <div class="form-group">
                         <label for="{{ form.bio.id_for_label }}">Bio</label>
                         {{ form.bio }}
@@ -159,18 +241,35 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (phoneInput) {
         phoneInput.addEventListener('input', function() {
-            // Basic phone number formatting
+            // Lebanon phone number formatting
             let value = this.value.replace(/\D/g, '');
             if (value.length > 0) {
-                if (value.length <= 3) {
-                    this.value = value;
-                } else if (value.length <= 6) {
-                    this.value = value.slice(0, 3) + '-' + value.slice(3);
-                } else if (value.length <= 10) {
-                    this.value = value.slice(0, 3) + '-' + value.slice(3, 6) + '-' + value.slice(6);
+                if (value.startsWith('961')) {
+                    // Lebanon format: +96170123456
+                    this.value = '+961' + value.slice(3);
+                } else if (value.startsWith('961')) {
+                    this.value = '+961' + value.slice(3);
                 } else {
-                    this.value = value.slice(0, 3) + '-' + value.slice(3, 6) + '-' + value.slice(6, 10);
+                    this.value = '+961' + value;
                 }
+            }
+        });
+    }
+    
+    // Age verification logic
+    const birthDateInput = document.querySelector('input[name="birth_date"]');
+    const ageVerifiedCheckbox = document.querySelector('input[name="age_verified"]');
+    
+    if (birthDateInput && ageVerifiedCheckbox) {
+        birthDateInput.addEventListener('change', function() {
+            const birthDate = new Date(this.value);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            
+            if (age >= 18) {
+                ageVerifiedCheckbox.checked = true;
+            } else {
+                ageVerifiedCheckbox.checked = false;
             }
         });
     }
