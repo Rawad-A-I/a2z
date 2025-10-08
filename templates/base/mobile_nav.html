@@ -87,6 +87,14 @@ Usage: {% include 'base/mobile_nav.html' %}
         <span>About Us</span>
       </a>
       
+      <!-- Account Settings -->
+      <a href="{% url 'account_settings' %}" 
+         class="nav-mobile-link {% if request.resolver_match.url_name == 'account_settings' %}active{% endif %}"
+         role="menuitem">
+        <i class="fas fa-user-cog"></i>
+        <span>Account Settings</span>
+      </a>
+      
       {% if user.is_authenticated %}
         <hr class="my-3">
         <a href="{% url 'profile' username=user.username %}" 

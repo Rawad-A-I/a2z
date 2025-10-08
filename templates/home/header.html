@@ -1,0 +1,227 @@
+{% load static %}
+{% load cart_tags %}
+
+<!-- Main Header with Account Icon -->
+<div class="header-main">
+  <div class="container">
+    <div class="row align-items-center">
+      <!-- Logo -->
+      <div class="col-lg-2">
+        <a href="{% url 'index' %}" class="navbar-brand">
+          <img src="{% static 'images/logo.png' %}" alt="A2Z Mart" height="40">
+        </a>
+      </div>
+      
+      <!-- Search Bar -->
+      <div class="col-lg-6">
+        <div class="search">
+          <form method="GET" action="{% url 'product_search' %}">
+            <div class="input-group">
+              <input type="text" name="q" class="form-control" placeholder="Search products..." value="{{ request.GET.q }}">
+              <button class="btn btn-primary" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- User Actions -->
+      <div class="col-lg-4">
+        <div class="widgets-wrap d-flex justify-content-end align-items-center">
+          <!-- Account Icon -->
+          <div class="widget-header">
+            <a href="{% url 'account_settings' %}" class="icon" title="Account Settings">
+              <i class="fas fa-user"></i>
+            </a>
+          </div>
+          
+          <!-- Wishlist Icon -->
+          <div class="widget-header">
+            <a href="{% url 'wishlist' %}" class="icon" title="Wishlist">
+              <i class="fas fa-heart"></i>
+              {% if user.is_authenticated and request.user.wishlist.count > 0 %}
+                <span class="badge bg-danger">{{ request.user.wishlist.count }}</span>
+              {% endif %}
+            </a>
+          </div>
+          
+          <!-- Cart Icon -->
+          <div class="widget-header">
+            <a href="{% url 'cart' %}" class="icon" title="Shopping Cart">
+              <i class="fas fa-shopping-cart"></i>
+              {% if user.is_authenticated and request.user.profile.get_cart_count > 0 %}
+                <span class="badge bg-danger">{{ request.user.profile.get_cart_count }}</span>
+              {% endif %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Header Styles */
+.header-main {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-main .navbar-brand {
+  text-decoration: none;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-main .navbar-brand:hover {
+  color: #007bff;
+}
+
+/* Search Bar */
+.header-main .search {
+  position: relative;
+}
+
+.header-main .search .input-group {
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header-main .search input {
+  border: none;
+  padding: 0.75rem 1rem;
+  font-size: 16px;
+}
+
+.header-main .search input:focus {
+  box-shadow: none;
+  border: none;
+}
+
+.header-main .search .btn {
+  border: none;
+  background: #007bff;
+  color: white;
+  padding: 0.75rem 1.25rem;
+}
+
+.header-main .search .btn:hover {
+  background: #0056b3;
+}
+
+/* Widget Icons */
+.header-main .widgets-wrap {
+  gap: 1rem;
+}
+
+.header-main .widget-header {
+  position: relative;
+}
+
+.header-main .widget-header .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 50%;
+  color: #495057;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.header-main .widget-header .icon:hover {
+  background: #e9ecef;
+  color: #007bff;
+  transform: scale(1.05);
+}
+
+.header-main .widget-header .icon i {
+  font-size: 1.2rem;
+}
+
+.header-main .widget-header .badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 0.7rem;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .header-main .row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .header-main .col-lg-2,
+  .header-main .col-lg-6,
+  .header-main .col-lg-4 {
+    width: 100%;
+  }
+  
+  .header-main .widgets-wrap {
+    justify-content: center;
+    gap: 2rem;
+  }
+  
+  .header-main .widget-header .icon {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Account Icon Specific Styles */
+.header-main .widget-header:first-child .icon {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.header-main .widget-header:first-child .icon:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+/* User Authentication States */
+.header-main .widget-header .icon[href*="account_settings"] {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.header-main .widget-header .icon[href*="account_settings"]:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Login/Register Links */
+.header-main .auth-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.header-main .auth-links a {
+  color: #495057;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.header-main .auth-links a:hover {
+  color: #007bff;
+}
+</style>
