@@ -302,22 +302,23 @@ class NotificationPreferencesForm(forms.ModelForm):
         }
 
 
-class SecurityQuestionForm(forms.ModelForm):
+class SecurityQuestionForm(forms.Form):
     """Security question form."""
     
-    class Meta:
-        model = UserPreferences
-        fields = ['security_question', 'security_answer']
-        widgets = {
-            'security_question': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter your security question'
-            }),
-            'security_answer': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter your answer'
-            })
-        }
+    security_question = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your security question'
+        })
+    )
+    security_answer = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your answer'
+        })
+    )
 
 
 class PhoneVerificationForm(forms.Form):

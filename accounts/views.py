@@ -584,7 +584,7 @@ from accounts.models import (
 )
 from accounts.forms import (
     PersonalInfoForm, PasswordChangeForm, NotificationPreferencesForm,
-    SecurityQuestionForm, PhoneVerificationForm
+    PhoneVerificationForm
 )
 
 
