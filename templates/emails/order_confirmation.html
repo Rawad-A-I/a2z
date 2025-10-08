@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - A2Z Mart</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .email-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .order-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .order-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-price {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .total-section {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .tracking-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">🛒 A2Z Mart</div>
+            <h1 style="color: #2d3748;">Order Confirmation</h1>
+        </div>
+
+        <div class="order-success">
+            <h2>✅ Order Placed Successfully!</h2>
+            <p>Thank you for your order. We've received it and will process it shortly.</p>
+        </div>
+
+        <div class="order-details">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">Order Details</h3>
+            <p><strong>Order ID:</strong> {{ order.order_id }}</p>
+            <p><strong>Order Date:</strong> {{ order.order_date|date:"F d, Y" }}</p>
+            <p><strong>Status:</strong> {{ order.status|title }}</p>
+            <p><strong>Payment Method:</strong> {{ order.payment_mode }}</p>
+        </div>
+
+        <div class="order-details">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">Items Ordered</h3>
+            {% for item in order.order_items.all %}
+            <div class="order-item">
+                <div class="item-info">
+                    <strong>{{ item.product.product_name }}</strong>
+                    {% if item.size_variant %}<br><small>Size: {{ item.size_variant.size_name }}</small>{% endif %}
+                    {% if item.color_variant %}<br><small>Color: {{ item.color_variant.color_name }}</small>{% endif %}
+                    <br><small>Quantity: {{ item.quantity }}</small>
+                </div>
+                <div class="item-price">${{ item.product_price }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="total-section">
+            <h3>Order Total: ${{ order.grand_total }}</h3>
+        </div>
+
+        <div class="tracking-info">
+            <h4>📦 What's Next?</h4>
+            <p>We'll send you a tracking number once your order ships. You can also track your order status in your account.</p>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ site_url }}/order-details/{{ order.order_id }}/" class="cta-button">View Order Details</a>
+        </div>
+
+        <div class="footer">
+            <p>Questions about your order? Contact us at support@a2zmart.com</p>
+            <p>© 2024 A2Z Mart. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

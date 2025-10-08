@@ -1,0 +1,397 @@
+{% extends "base/base.html" %}
+{% block title %}Track Your Order - A2Z Mart{% endblock %}
+{% block start %}
+
+<style>
+    .tracking-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    .tracking-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .order-status {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .status-timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    .timeline-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 50px;
+        width: 2px;
+        height: 40px;
+        background: #e2e8f0;
+    }
+    .timeline-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+    .timeline-icon.completed {
+        background: #48bb78;
+        color: white;
+    }
+    .timeline-icon.current {
+        background: #667eea;
+        color: white;
+    }
+    .timeline-icon.pending {
+        background: #e2e8f0;
+        color: #718096;
+    }
+    .timeline-content {
+        flex: 1;
+    }
+    .timeline-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+    .timeline-description {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    .timeline-date {
+        color: #a0aec0;
+        font-size: 0.8rem;
+    }
+    .order-details {
+        background: #f7fafc;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+    .product-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .product-item:last-child {
+        border-bottom: none;
+    }
+    .product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 1rem;
+    }
+    .product-info {
+        flex: 1;
+    }
+    .product-name {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+    .product-variant {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    .product-price {
+        color: #667eea;
+        font-weight: 600;
+    }
+    .tracking-form {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+    }
+    .estimated-delivery {
+        background: #e6fffa;
+        border: 1px solid #81e6d9;
+        color: #234e52;
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+</style>
+
+<div class="tracking-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 font-weight-bold text-primary mb-3">
+                <i class="fas fa-truck"></i> Track Your Order
+            </h1>
+            <p class="lead text-muted">Enter your order ID to track your package</p>
+        </div>
+
+        <!-- Tracking Form -->
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="tracking-form">
+                    <form method="GET" action="{% url 'track_order' %}">
+                        <div class="form-group">
+                            <label for="order_id" class="form-label font-weight-bold">
+                                <i class="fas fa-receipt"></i> Order ID
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="order_id" 
+                                   name="order_id" 
+                                   placeholder="Enter your order ID (e.g., COD_ABC12345)"
+                                   required>
+                            <small class="form-text text-muted">
+                                You can find your order ID in your confirmation email or order history.
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label font-weight-bold">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="Enter your email address"
+                                   required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-search"></i> Track Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if order %}
+        <!-- Order Found -->
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <!-- Order Status -->
+                <div class="order-status">
+                    <h2 class="mb-2">
+                        {% if order.status == 'delivered' %}
+                            <i class="fas fa-check-circle"></i> Order Delivered!
+                        {% elif order.status == 'shipped' %}
+                            <i class="fas fa-truck"></i> Order Shipped!
+                        {% elif order.status == 'processing' %}
+                            <i class="fas fa-cog fa-spin"></i> Processing Order
+                        {% else %}
+                            <i class="fas fa-clock"></i> Order Pending
+                        {% endif %}
+                    </h2>
+                    <p class="mb-0">Order ID: {{ order.order_id }}</p>
+                </div>
+
+                <!-- Status Timeline -->
+                <div class="tracking-card">
+                    <h4 class="mb-4">
+                        <i class="fas fa-route"></i> Order Progress
+                    </h4>
+                    <div class="status-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-icon completed">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Order Placed</div>
+                                <div class="timeline-description">Your order has been received and confirmed</div>
+                                <div class="timeline-date">{{ order.order_date|date:"M d, Y g:i A" }}</div>
+                            </div>
+                        </div>
+
+                        {% if order.status in 'processing,shipped,delivered' %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon {% if order.status in 'shipped,delivered' %}completed{% elif order.status == 'processing' %}current{% else %}pending{% endif %}">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Processing</div>
+                                <div class="timeline-description">Your order is being prepared for shipment</div>
+                                {% if order.status in 'shipped,delivered' %}
+                                <div class="timeline-date">{{ order.order_date|date:"M d, Y g:i A" }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if order.status in 'shipped,delivered' %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon {% if order.status == 'delivered' %}completed{% elif order.status == 'shipped' %}current{% else %}pending{% endif %}">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Shipped</div>
+                                <div class="timeline-description">Your order is on its way to you</div>
+                                {% if order.tracking_number %}
+                                <div class="timeline-description">
+                                    <strong>Tracking Number:</strong> {{ order.tracking_number }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if order.status == 'delivered' %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon completed">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Delivered</div>
+                                <div class="timeline-description">Your order has been delivered successfully</div>
+                                <div class="timeline-date">{{ order.delivery_date|date:"M d, Y g:i A" }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Order Details -->
+                <div class="tracking-card">
+                    <h4 class="mb-4">
+                        <i class="fas fa-shopping-bag"></i> Order Details
+                    </h4>
+                    <div class="order-details">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Order ID:</strong> {{ order.order_id }}</p>
+                                <p><strong>Order Date:</strong> {{ order.order_date|date:"M d, Y" }}</p>
+                                <p><strong>Payment Method:</strong> {{ order.payment_mode }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Total Amount:</strong> ${{ order.grand_total }}</p>
+                                <p><strong>Status:</strong> {{ order.status|title }}</p>
+                                {% if order.tracking_number %}
+                                <p><strong>Tracking Number:</strong> {{ order.tracking_number }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Address -->
+                    <div class="order-details">
+                        <h5><i class="fas fa-map-marker-alt"></i> Shipping Address</h5>
+                        <p>{{ order.shipping_address.street_address }}<br>
+                           {{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.zip_code }}<br>
+                           {{ order.shipping_address.country }}</p>
+                    </div>
+
+                    <!-- Products -->
+                    <div class="order-details">
+                        <h5><i class="fas fa-box"></i> Items Ordered</h5>
+                        {% for item in order.order_items.all %}
+                        <div class="product-item">
+                            {% if item.product.product_images.first %}
+                            <img src="/media/{{ item.product.product_images.first.image }}" 
+                                 alt="{{ item.product.product_name }}" class="product-image">
+                            {% else %}
+                            <div class="product-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                📦
+                            </div>
+                            {% endif %}
+                            <div class="product-info">
+                                <div class="product-name">{{ item.product.product_name }}</div>
+                                {% if item.size_variant %}
+                                <div class="product-variant">Size: {{ item.size_variant.size_name }}</div>
+                                {% endif %}
+                                {% if item.color_variant %}
+                                <div class="product-variant">Color: {{ item.color_variant.color_name }}</div>
+                                {% endif %}
+                                <div class="product-variant">Quantity: {{ item.quantity }}</div>
+                            </div>
+                            <div class="product-price">${{ item.product_price }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Estimated Delivery -->
+                    {% if order.status == 'shipped' %}
+                    <div class="estimated-delivery">
+                        <h6><i class="fas fa-clock"></i> Estimated Delivery</h6>
+                        <p class="mb-0">Your order should arrive within 2-3 business days.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Actions -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'order_details' order.order_id %}" class="btn btn-primary btn-lg mr-3">
+                        <i class="fas fa-eye"></i> View Full Details
+                    </a>
+                    <a href="{% url 'contact' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-headset"></i> Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% elif request.GET.order_id %}
+        <!-- Order Not Found -->
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="tracking-card text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-search text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3 class="text-muted">Order Not Found</h3>
+                    <p class="text-muted">
+                        We couldn't find an order with ID "{{ request.GET.order_id }}" for email "{{ request.GET.email }}".
+                    </p>
+                    <div class="mt-4">
+                        <a href="{% url 'track_order' %}" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Try Again
+                        </a>
+                        <a href="{% url 'contact' %}" class="btn btn-outline-primary ml-2">
+                            <i class="fas fa-headset"></i> Contact Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
