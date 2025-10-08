@@ -1,0 +1,441 @@
+{% extends "base/base.html" %}
+{% block title %}Danger Zone - A2Z Mart{% endblock %}
+{% block start %}
+
+<style>
+    .settings-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    .settings-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+    .danger-zone {
+        background: #fed7d7;
+        border: 1px solid #feb2b2;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .danger-zone h4 {
+        color: #c53030;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    .danger-zone p {
+        color: #742a2a;
+        margin-bottom: 1.5rem;
+    }
+    .danger-item {
+        background: white;
+        border: 1px solid #feb2b2;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .danger-item:last-child {
+        margin-bottom: 0;
+    }
+    .danger-item h5 {
+        color: #c53030;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    .danger-item p {
+        color: #4a5568;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+    }
+    .btn-danger {
+        background: #e53e3e;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        color: white;
+    }
+    .btn-danger:hover {
+        background: #c53030;
+    }
+    .btn-outline-danger {
+        border: 2px solid #e53e3e;
+        color: #e53e3e;
+        background: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    .btn-outline-danger:hover {
+        background: #e53e3e;
+        color: white;
+    }
+    .section-header {
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+    }
+    .section-subtitle {
+        color: #718096;
+        margin: 0.5rem 0 0 0;
+    }
+    .mobile-header {
+        background: white;
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    .mobile-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+    .back-button {
+        background: none;
+        border: none;
+        color: #667eea;
+        font-size: 1.2rem;
+        margin-right: 0.75rem;
+        padding: 0.25rem;
+    }
+    .mobile-container {
+        padding: 1rem;
+    }
+    .mobile-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .mobile-danger-zone {
+        background: #fed7d7;
+        border: 1px solid #feb2b2;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .mobile-danger-zone h4 {
+        color: #c53030;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    .mobile-danger-zone p {
+        color: #742a2a;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+    }
+    .mobile-danger-item {
+        background: white;
+        border: 1px solid #feb2b2;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .mobile-danger-item:last-child {
+        margin-bottom: 0;
+    }
+    .mobile-danger-item h5 {
+        color: #c53030;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    .mobile-danger-item p {
+        color: #4a5568;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+    }
+    .mobile-btn {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        margin-bottom: 0.5rem;
+    }
+    .mobile-btn-danger {
+        background: #e53e3e;
+        color: white;
+    }
+    .mobile-btn-outline-danger {
+        background: none;
+        border: 2px solid #e53e3e;
+        color: #e53e3e;
+    }
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        display: none;
+    }
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .modal-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #a0aec0;
+        padding: 0.25rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #667eea;
+        outline: none;
+    }
+    .warning-text {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+    }
+</style>
+
+{% if is_mobile %}
+<!-- Mobile Layout -->
+<div class="mobile-settings">
+    <div class="mobile-header">
+        <h1 class="mobile-title">
+            <button class="back-button" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            Danger Zone
+        </h1>
+    </div>
+
+    <div class="mobile-container">
+        <div class="mobile-danger-zone">
+            <h4><i class="fas fa-exclamation-triangle"></i> Danger Zone</h4>
+            <p>These actions are permanent and cannot be undone. Please proceed with caution.</p>
+        </div>
+
+        <!-- Deactivate Account -->
+        <div class="mobile-card">
+            <div class="mobile-danger-item">
+                <h5><i class="fas fa-pause-circle"></i> Deactivate Account</h5>
+                <p>Your account will be temporarily disabled. You can reactivate it by logging in again.</p>
+                <button class="mobile-btn mobile-btn-outline-danger" onclick="showDeactivateModal()">
+                    <i class="fas fa-pause"></i> Deactivate Account
+                </button>
+            </div>
+        </div>
+
+        <!-- Delete Account -->
+        <div class="mobile-card">
+            <div class="mobile-danger-item">
+                <h5><i class="fas fa-trash-alt"></i> Delete Account</h5>
+                <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
+                <button class="mobile-btn mobile-btn-danger" onclick="showDeleteModal()">
+                    <i class="fas fa-trash"></i> Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Desktop Layout -->
+<div class="settings-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="settings-card">
+                    <div class="section-header">
+                        <h2 class="section-title">Danger Zone</h2>
+                        <p class="section-subtitle">These actions are permanent and cannot be undone</p>
+                    </div>
+
+                    <div class="danger-zone">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Warning</h4>
+                        <p>These actions are permanent and cannot be undone. Please proceed with caution.</p>
+                    </div>
+
+                    <!-- Deactivate Account -->
+                    <div class="danger-item">
+                        <h5><i class="fas fa-pause-circle"></i> Deactivate Account</h5>
+                        <p>Your account will be temporarily disabled. You can reactivate it by logging in again. Your data will be preserved.</p>
+                        <button class="btn btn-outline-danger" onclick="showDeactivateModal()">
+                            <i class="fas fa-pause"></i> Deactivate Account
+                        </button>
+                    </div>
+
+                    <!-- Delete Account -->
+                    <div class="danger-item">
+                        <h5><i class="fas fa-trash-alt"></i> Delete Account</h5>
+                        <p>Permanently delete your account and all associated data. This action cannot be undone and will remove all your orders, reviews, and personal information.</p>
+                        <button class="btn btn-danger" onclick="showDeleteModal()">
+                            <i class="fas fa-trash"></i> Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Deactivate Account Modal -->
+<div class="modal-overlay" id="deactivateModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Deactivate Account</h3>
+            <button class="modal-close" onclick="closeModal('deactivateModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="warning-text">
+                <strong>Warning:</strong> Your account will be temporarily disabled. You can reactivate it by logging in again.
+            </div>
+            <form method="POST" id="deactivateForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="deactivate">
+                <div class="form-group">
+                    <label class="form-label">Reason for deactivation (optional)</label>
+                    <textarea class="form-control" name="reason" rows="3" 
+                              placeholder="Tell us why you're deactivating your account..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" name="confirm_deactivation" required>
+                        I understand that deactivating my account will prevent me from logging in and accessing my data.
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="fas fa-pause"></i> Deactivate Account
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Delete Account</h3>
+            <button class="modal-close" onclick="closeModal('deleteModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="warning-text">
+                <strong>Warning:</strong> This action is permanent and cannot be undone. All your data will be permanently deleted.
+            </div>
+            <form method="POST" id="deleteForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <div class="form-group">
+                    <label class="form-label">Enter your password to confirm</label>
+                    <input type="password" class="form-control" name="password" 
+                           placeholder="Enter your password" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" name="confirm_deletion" required>
+                        I understand that deleting my account is permanent and cannot be undone.
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete Account
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDeactivateModal() {
+    document.getElementById('deactivateModal').style.display = 'block';
+}
+
+function showDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+        e.target.style.display = 'none';
+    }
+});
+
+// Handle form submissions
+document.getElementById('deactivateForm').addEventListener('submit', function(e) {
+    if (!confirm('Are you sure you want to deactivate your account?')) {
+        e.preventDefault();
+    }
+});
+
+document.getElementById('deleteForm').addEventListener('submit', function(e) {
+    if (!confirm('Are you absolutely sure you want to permanently delete your account? This action cannot be undone!')) {
+        e.preventDefault();
+    }
+});
+</script>
+
+{% endblock %}

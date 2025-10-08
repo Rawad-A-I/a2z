@@ -1,0 +1,474 @@
+{% extends "base/base.html" %}
+{% block title %}Account Settings - A2Z Mart{% endblock %}
+{% block start %}
+
+<style>
+    .settings-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    .settings-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .settings-sidebar {
+        background: #f7fafc;
+        border-right: 1px solid #e2e8f0;
+        padding: 0;
+    }
+    .settings-content {
+        padding: 2rem;
+    }
+    .nav-item {
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .nav-item:last-child {
+        border-bottom: none;
+    }
+    .nav-link {
+        padding: 1rem 1.5rem;
+        color: #4a5568;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+    }
+    .nav-link:hover {
+        background: #e2e8f0;
+        color: #2d3748;
+    }
+    .nav-link.active {
+        background: #667eea;
+        color: white;
+    }
+    .nav-link i {
+        margin-right: 0.75rem;
+        width: 20px;
+        text-align: center;
+    }
+    .settings-header {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1.5rem 2rem;
+        background: white;
+    }
+    .settings-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+    }
+    .settings-subtitle {
+        color: #718096;
+        margin: 0.5rem 0 0 0;
+    }
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    .form-section h4 {
+        color: #2d3748;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+    .form-control {
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    .btn-outline-primary {
+        border: 2px solid #667eea;
+        color: #667eea;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    .profile-picture-container {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .profile-picture {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #e2e8f0;
+        margin-bottom: 1rem;
+    }
+    .profile-picture-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #a0aec0;
+        margin: 0 auto 1rem auto;
+    }
+    .session-item {
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .session-current {
+        border-color: #667eea;
+        background: #e6f3ff;
+    }
+    .danger-zone {
+        background: #fed7d7;
+        border: 1px solid #feb2b2;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    .danger-zone h4 {
+        color: #c53030;
+        margin-bottom: 1rem;
+    }
+    .btn-danger {
+        background: #e53e3e;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    .notification-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: #667eea;
+    }
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+</style>
+
+<div class="settings-container">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="settings-card">
+                    <div class="row g-0">
+                        <!-- Sidebar -->
+                        <div class="col-md-3">
+                            <div class="settings-sidebar">
+                                <div class="settings-header">
+                                    <h3 class="settings-title">Account Settings</h3>
+                                    <p class="settings-subtitle">Manage your account preferences</p>
+                                </div>
+                                
+                                <nav class="nav flex-column">
+                                    <div class="nav-item">
+                                        <a class="nav-link active" href="{% url 'personal_information' %}">
+                                            <i class="fas fa-user"></i>
+                                            Personal Information
+                                        </a>
+                                    </div>
+                                    <div class="nav-item">
+                                        <a class="nav-link" href="{% url 'login_security' %}">
+                                            <i class="fas fa-shield-alt"></i>
+                                            Login & Security
+                                        </a>
+                                    </div>
+                                    <div class="nav-item">
+                                        <a class="nav-link" href="{% url 'notification_preferences' %}">
+                                            <i class="fas fa-bell"></i>
+                                            Notifications
+                                        </a>
+                                    </div>
+                                    <div class="nav-item">
+                                        <a class="nav-link" href="{% url 'connected_accounts' %}">
+                                            <i class="fas fa-link"></i>
+                                            Connected Accounts
+                                        </a>
+                                    </div>
+                                    <div class="nav-item">
+                                        <a class="nav-link" href="{% url 'danger_zone' %}">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Danger Zone
+                                        </a>
+                                    </div>
+                                </nav>
+                            </div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="col-md-9">
+                            <div class="settings-content">
+                                <!-- Profile Picture Section -->
+                                <div class="form-section">
+                                    <h4>Profile Picture</h4>
+                                    <div class="profile-picture-container">
+                                        {% if user.preferences.profile_picture %}
+                                        <img src="{{ user.preferences.profile_picture.url }}" 
+                                             alt="Profile Picture" class="profile-picture" id="profilePicture">
+                                        {% else %}
+                                        <div class="profile-picture-placeholder">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <button type="button" class="btn btn-primary" onclick="document.getElementById('profilePictureInput').click()">
+                                                <i class="fas fa-camera"></i> Change Picture
+                                            </button>
+                                            {% if user.preferences.profile_picture %}
+                                            <button type="button" class="btn btn-outline-danger ml-2" onclick="deleteProfilePicture()">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                        <input type="file" id="profilePictureInput" accept="image/*" style="display: none;" onchange="uploadProfilePicture(this)">
+                                    </div>
+                                </div>
+                                
+                                <!-- Personal Information Form -->
+                                <div class="form-section">
+                                    <h4>Personal Information</h4>
+                                    <form method="POST" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label">First Name</label>
+                                                    <input type="text" class="form-control" name="first_name" 
+                                                           value="{{ user.first_name }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label">Last Name</label>
+                                                    <input type="text" class="form-control" name="last_name" 
+                                                           value="{{ user.last_name }}" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Email Address</label>
+                                            <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                                            <small class="form-text text-muted">
+                                                <a href="#" onclick="changeEmail()">Change email address</a>
+                                            </small>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Phone Number</label>
+                                            <input type="tel" class="form-control" name="phone_number" 
+                                                   value="{{ user.preferences.phone_number|default:'' }}" 
+                                                   placeholder="Enter your phone number">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Bio</label>
+                                            <textarea class="form-control" name="bio" rows="3" 
+                                                      placeholder="Tell us about yourself...">{{ user.preferences.bio|default:'' }}</textarea>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Date of Birth</label>
+                                                    <input type="date" class="form-control" name="date_of_birth" 
+                                                           value="{{ user.preferences.date_of_birth|default:'' }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Gender</label>
+                                                    <select class="form-control" name="gender">
+                                                        <option value="">Select Gender</option>
+                                                        <option value="male" {% if user.preferences.gender == 'male' %}selected{% endif %}>Male</option>
+                                                        <option value="female" {% if user.preferences.gender == 'female' %}selected{% endif %}>Female</option>
+                                                        <option value="other" {% if user.preferences.gender == 'other' %}selected{% endif %}>Other</option>
+                                                        <option value="prefer_not_to_say" {% if user.preferences.gender == 'prefer_not_to_say' %}selected{% endif %}>Prefer not to say</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Language</label>
+                                                    <select class="form-control" name="language">
+                                                        <option value="en" {% if user.preferences.language == 'en' %}selected{% endif %}>English</option>
+                                                        <option value="ar" {% if user.preferences.language == 'ar' %}selected{% endif %}>Arabic</option>
+                                                        <option value="fr" {% if user.preferences.language == 'fr' %}selected{% endif %}>French</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="text-right">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                <!-- Quick Stats -->
+                                <div class="form-section">
+                                    <h4>Account Overview</h4>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="card-title text-primary">{{ user.orders.count }}</h5>
+                                                    <p class="card-text">Total Orders</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="card-title text-success">${{ user.orders.aggregate.total=Sum('grand_total')|default:0 }}</h5>
+                                                    <p class="card-text">Total Spent</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="card-title text-info">{{ user.date_joined|date:"M Y" }}</h5>
+                                                    <p class="card-text">Member Since</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center">
+                                                <div class="card-body">
+                                                    <h5 class="card-title text-warning">{{ user.reviews.count }}</h5>
+                                                    <p class="card-text">Reviews Written</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function uploadProfilePicture(input) {
+    if (input.files && input.files[0]) {
+        const formData = new FormData();
+        formData.append('profile_picture', input.files[0]);
+        
+        fetch('{% url "upload_profile_picture" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('profilePicture').src = data.url;
+                location.reload();
+            } else {
+                alert('Error uploading picture: ' + data.error);
+            }
+        });
+    }
+}
+
+function deleteProfilePicture() {
+    if (confirm('Are you sure you want to remove your profile picture?')) {
+        fetch('{% url "delete_profile_picture" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error removing picture: ' + data.error);
+            }
+        });
+    }
+}
+
+function changeEmail() {
+    // Implement email change modal
+    alert('Email change feature will be implemented soon!');
+}
+</script>
+
+{% endblock %}

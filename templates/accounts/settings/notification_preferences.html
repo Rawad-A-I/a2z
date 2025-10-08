@@ -1,0 +1,515 @@
+{% extends "base/base.html" %}
+{% block title %}Notification Preferences - A2Z Mart{% endblock %}
+{% block start %}
+
+<style>
+    .settings-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    .settings-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+    .notification-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    .notification-toggle:hover {
+        background: #edf2f7;
+    }
+    .notification-info {
+        flex: 1;
+    }
+    .notification-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+    .notification-description {
+        color: #718096;
+        font-size: 0.875rem;
+    }
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: #667eea;
+    }
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    .section-header {
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+    }
+    .section-subtitle {
+        color: #718096;
+        margin: 0.5rem 0 0 0;
+    }
+    .mobile-header {
+        background: white;
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    .mobile-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+    .back-button {
+        background: none;
+        border: none;
+        color: #667eea;
+        font-size: 1.2rem;
+        margin-right: 0.75rem;
+        padding: 0.25rem;
+    }
+    .mobile-container {
+        padding: 1rem;
+    }
+    .mobile-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .mobile-notification-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f7fafc;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    .mobile-notification-info {
+        flex: 1;
+    }
+    .mobile-notification-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+    .mobile-notification-description {
+        color: #718096;
+        font-size: 0.875rem;
+    }
+    .mobile-toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    .mobile-toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .mobile-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    .mobile-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .mobile-slider {
+        background-color: #667eea;
+    }
+    input:checked + .mobile-slider:before {
+        transform: translateX(26px);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    .mobile-btn {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+</style>
+
+{% if is_mobile %}
+<!-- Mobile Layout -->
+<div class="mobile-settings">
+    <div class="mobile-header">
+        <h1 class="mobile-title">
+            <button class="back-button" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            Notifications
+        </h1>
+    </div>
+
+    <div class="mobile-container">
+        <!-- Email Notifications -->
+        <div class="mobile-card">
+            <h4 style="color: #2d3748; margin-bottom: 1rem;">Email Notifications</h4>
+            
+            <div class="mobile-notification-toggle">
+                <div class="mobile-notification-info">
+                    <div class="mobile-notification-title">Order Updates</div>
+                    <div class="mobile-notification-description">Get notified about order status changes</div>
+                </div>
+                <label class="mobile-toggle-switch">
+                    <input type="checkbox" {% if user.preferences.order_updates %}checked{% endif %} 
+                           onchange="updateNotificationPreference('order_updates', this.checked)">
+                    <span class="mobile-slider"></span>
+                </label>
+            </div>
+            
+            <div class="mobile-notification-toggle">
+                <div class="mobile-notification-info">
+                    <div class="mobile-notification-title">Promotional Emails</div>
+                    <div class="mobile-notification-description">Receive special offers and discounts</div>
+                </div>
+                <label class="mobile-toggle-switch">
+                    <input type="checkbox" {% if user.preferences.promotional_emails %}checked{% endif %} 
+                           onchange="updateNotificationPreference('promotional_emails', this.checked)">
+                    <span class="mobile-slider"></span>
+                </label>
+            </div>
+            
+            <div class="mobile-notification-toggle">
+                <div class="mobile-notification-info">
+                    <div class="mobile-notification-title">Newsletter</div>
+                    <div class="mobile-notification-description">Stay updated with our latest news</div>
+                </div>
+                <label class="mobile-toggle-switch">
+                    <input type="checkbox" {% if user.preferences.newsletter %}checked{% endif %} 
+                           onchange="updateNotificationPreference('newsletter', this.checked)">
+                    <span class="mobile-slider"></span>
+                </label>
+            </div>
+            
+            <div class="mobile-notification-toggle">
+                <div class="mobile-notification-info">
+                    <div class="mobile-notification-title">Product Recommendations</div>
+                    <div class="mobile-notification-description">Get personalized product suggestions</div>
+                </div>
+                <label class="mobile-toggle-switch">
+                    <input type="checkbox" {% if user.preferences.product_recommendations %}checked{% endif %} 
+                           onchange="updateNotificationPreference('product_recommendations', this.checked)">
+                    <span class="mobile-slider"></span>
+                </label>
+            </div>
+            
+            <div class="mobile-notification-toggle">
+                <div class="mobile-notification-info">
+                    <div class="mobile-notification-title">Security Alerts</div>
+                    <div class="mobile-notification-description">Important security notifications</div>
+                </div>
+                <label class="mobile-toggle-switch">
+                    <input type="checkbox" {% if user.preferences.security_alerts %}checked{% endif %} 
+                           onchange="updateNotificationPreference('security_alerts', this.checked)">
+                    <span class="mobile-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- SMS Notifications -->
+        <div class="mobile-card">
+            <h4 style="color: #2d3748; margin-bottom: 1rem;">SMS Notifications</h4>
+            
+            <div class="mobile-notification-toggle">
+                <div class="mobile-notification-info">
+                    <div class="mobile-notification-title">SMS Notifications</div>
+                    <div class="mobile-notification-description">Receive text messages for important updates</div>
+                </div>
+                <label class="mobile-toggle-switch">
+                    <input type="checkbox" {% if user.preferences.sms_notifications %}checked{% endif %} 
+                           onchange="updateNotificationPreference('sms_notifications', this.checked)">
+                    <span class="mobile-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Push Notifications -->
+        <div class="mobile-card">
+            <h4 style="color: #2d3748; margin-bottom: 1rem;">Push Notifications</h4>
+            
+            <div class="mobile-notification-toggle">
+                <div class="mobile-notification-info">
+                    <div class="mobile-notification-title">Push Notifications</div>
+                    <div class="mobile-notification-description">Receive notifications on your device</div>
+                </div>
+                <label class="mobile-toggle-switch">
+                    <input type="checkbox" {% if user.preferences.push_notifications %}checked{% endif %} 
+                           onchange="updateNotificationPreference('push_notifications', this.checked)">
+                    <span class="mobile-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Desktop Layout -->
+<div class="settings-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="settings-card">
+                    <div class="section-header">
+                        <h2 class="section-title">Notification Preferences</h2>
+                        <p class="section-subtitle">Choose how you want to be notified about updates and offers</p>
+                    </div>
+
+                    <!-- Email Notifications -->
+                    <div class="mb-4">
+                        <h4 style="color: #2d3748; margin-bottom: 1.5rem;">
+                            <i class="fas fa-envelope text-primary"></i> Email Notifications
+                        </h4>
+                        
+                        <div class="notification-toggle">
+                            <div class="notification-info">
+                                <div class="notification-title">Order Updates</div>
+                                <div class="notification-description">Get notified about order status changes, shipping updates, and delivery confirmations</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {% if user.preferences.order_updates %}checked{% endif %} 
+                                       onchange="updateNotificationPreference('order_updates', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="notification-toggle">
+                            <div class="notification-info">
+                                <div class="notification-title">Promotional Emails</div>
+                                <div class="notification-description">Receive special offers, discounts, and promotional content</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {% if user.preferences.promotional_emails %}checked{% endif %} 
+                                       onchange="updateNotificationPreference('promotional_emails', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="notification-toggle">
+                            <div class="notification-info">
+                                <div class="notification-title">Newsletter</div>
+                                <div class="notification-description">Stay updated with our latest news, product launches, and company updates</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {% if user.preferences.newsletter %}checked{% endif %} 
+                                       onchange="updateNotificationPreference('newsletter', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="notification-toggle">
+                            <div class="notification-info">
+                                <div class="notification-title">Product Recommendations</div>
+                                <div class="notification-description">Get personalized product suggestions based on your preferences and purchase history</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {% if user.preferences.product_recommendations %}checked{% endif %} 
+                                       onchange="updateNotificationPreference('product_recommendations', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="notification-toggle">
+                            <div class="notification-info">
+                                <div class="notification-title">Security Alerts</div>
+                                <div class="notification-description">Important security notifications, password changes, and account activity</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {% if user.preferences.security_alerts %}checked{% endif %} 
+                                       onchange="updateNotificationPreference('security_alerts', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- SMS Notifications -->
+                    <div class="mb-4">
+                        <h4 style="color: #2d3748; margin-bottom: 1.5rem;">
+                            <i class="fas fa-sms text-success"></i> SMS Notifications
+                        </h4>
+                        
+                        <div class="notification-toggle">
+                            <div class="notification-info">
+                                <div class="notification-title">SMS Notifications</div>
+                                <div class="notification-description">Receive text messages for important updates and order confirmations</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {% if user.preferences.sms_notifications %}checked{% endif %} 
+                                       onchange="updateNotificationPreference('sms_notifications', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Push Notifications -->
+                    <div class="mb-4">
+                        <h4 style="color: #2d3748; margin-bottom: 1.5rem;">
+                            <i class="fas fa-bell text-warning"></i> Push Notifications
+                        </h4>
+                        
+                        <div class="notification-toggle">
+                            <div class="notification-info">
+                                <div class="notification-title">Push Notifications</div>
+                                <div class="notification-description">Receive notifications on your device for real-time updates</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" {% if user.preferences.push_notifications %}checked{% endif %} 
+                                       onchange="updateNotificationPreference('push_notifications', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="text-center">
+                        <button class="btn btn-primary" onclick="saveAllPreferences()">
+                            <i class="fas fa-save"></i> Save Preferences
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function updateNotificationPreference(preference, value) {
+    fetch('{% url "update_notification_preference" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `preference=${preference}&value=${value}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success feedback
+            showNotification('Preference updated successfully!', 'success');
+        } else {
+            // Revert the toggle
+            document.querySelector(`input[onchange*="${preference}"]`).checked = !value;
+            showNotification('Error updating preference', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Revert the toggle
+        document.querySelector(`input[onchange*="${preference}"]`).checked = !value;
+        showNotification('Error updating preference', 'error');
+    });
+}
+
+function saveAllPreferences() {
+    showNotification('All preferences saved successfully!', 'success');
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        ${type === 'success' ? 'background: #48bb78;' : 'background: #e53e3e;'}
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+</script>
+
+{% endblock %}
