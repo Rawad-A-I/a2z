@@ -1,500 +1,445 @@
-{% extends "base/base.html" %}
-{% block title %}Account Settings - A2Z Mart{% endblock %}
-{% block start %}
+{% extends 'base/base.html' %}
+{% load static %}
 
-<style>
-    .mobile-settings {
-        background: #f8f9fa;
-        min-height: 100vh;
-        padding: 1rem 0;
-    }
-    .settings-header {
-        background: white;
-        padding: 1rem;
-        border-bottom: 1px solid #e2e8f0;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    .settings-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin: 0;
-        display: flex;
-        align-items: center;
-    }
-    .back-button {
-        background: none;
-        border: none;
-        color: #667eea;
-        font-size: 1.2rem;
-        margin-right: 0.75rem;
-        padding: 0.25rem;
-    }
-    .settings-list {
-        background: white;
-        margin: 1rem;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .settings-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        border-bottom: 1px solid #e2e8f0;
-        text-decoration: none;
-        color: #2d3748;
-        transition: background-color 0.2s ease;
-    }
-    .settings-item:last-child {
-        border-bottom: none;
-    }
-    .settings-item:hover {
-        background: #f7fafc;
-        color: #2d3748;
-    }
-    .settings-item-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        font-size: 1.2rem;
-    }
-    .settings-item-content {
-        flex: 1;
-    }
-    .settings-item-title {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-    .settings-item-subtitle {
-        font-size: 0.875rem;
-        color: #718096;
-    }
-    .settings-item-arrow {
-        color: #a0aec0;
-        font-size: 0.875rem;
-    }
-    .profile-section {
-        background: white;
-        margin: 1rem;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-    .profile-picture {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #e2e8f0;
-        margin-bottom: 1rem;
-    }
-    .profile-picture-placeholder {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: #e2e8f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        color: #a0aec0;
-        margin: 0 auto 1rem auto;
-    }
-    .profile-name {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.25rem;
-    }
-    .profile-email {
-        color: #718096;
-        font-size: 0.875rem;
-    }
-    .quick-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        margin: 1rem;
-    }
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1rem;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .stat-number {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #667eea;
-        margin-bottom: 0.25rem;
-    }
-    .stat-label {
-        font-size: 0.75rem;
-        color: #718096;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    .danger-item {
-        color: #e53e3e;
-    }
-    .danger-item .settings-item-icon {
-        background: #fed7d7;
-        color: #e53e3e;
-    }
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        display: none;
-    }
-    .modal-content {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: white;
-        border-radius: 20px 20px 0 0;
-        padding: 1.5rem;
-        max-height: 80vh;
-        overflow-y: auto;
-    }
-    .modal-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    .modal-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #2d3748;
-    }
-    .modal-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: #a0aec0;
-        padding: 0.25rem;
-    }
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    .form-label {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-    .form-control {
-        width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: border-color 0.3s ease;
-    }
-    .form-control:focus {
-        border-color: #667eea;
-        outline: none;
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        color: white;
-        width: 100%;
-    }
-    .btn-danger {
-        background: #e53e3e;
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        color: white;
-        width: 100%;
-    }
-    .notification-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1rem;
-        background: #f7fafc;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-    }
-    .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 50px;
-        height: 24px;
-    }
-    .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: .4s;
-        border-radius: 24px;
-    }
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: white;
-        transition: .4s;
-        border-radius: 50%;
-    }
-    input:checked + .slider {
-        background-color: #667eea;
-    }
-    input:checked + .slider:before {
-        transform: translateX(26px);
-    }
-</style>
+{% block title %}Account Settings - {{ block.super }}{% endblock %}
 
-<div class="mobile-settings">
-    <!-- Header -->
-    <div class="settings-header">
-        <h1 class="settings-title">
-            <button class="back-button" onclick="history.back()">
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/mobile-account-settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="mobile-settings-container">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="header-content">
+            <button class="back-btn" onclick="history.back()">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            Account Settings
-        </h1>
+            <h1>Settings</h1>
+            <button class="menu-btn">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+        </div>
     </div>
 
-    <!-- Profile Section -->
-    <div class="profile-section">
-        {% if user.preferences.profile_picture %}
-        <img src="{{ user.preferences.profile_picture.url }}" 
-             alt="Profile Picture" class="profile-picture" id="profilePicture">
-        {% else %}
-        <div class="profile-picture-placeholder">
+    <!-- Settings Navigation -->
+    <div class="settings-nav-mobile">
+        <div class="nav-item active" data-section="general">
+            <i class="fas fa-cog"></i>
+            <span>General</span>
+        </div>
+        <div class="nav-item" data-section="personal">
             <i class="fas fa-user"></i>
+            <span>Personal</span>
         </div>
-        {% endif %}
-        <div class="profile-name">{{ user.get_full_name|default:user.username }}</div>
-        <div class="profile-email">{{ user.email }}</div>
-        <button type="button" class="btn btn-primary mt-2" onclick="changeProfilePicture()">
-            <i class="fas fa-camera"></i> Change Picture
-        </button>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="quick-stats">
-        <div class="stat-card">
-            <div class="stat-number">{{ user.orders.count }}</div>
-            <div class="stat-label">Orders</div>
+        <div class="nav-item" data-section="security">
+            <i class="fas fa-shield-alt"></i>
+            <span>Security</span>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">${{ user.orders.aggregate.total=Sum('grand_total')|default:0 }}</div>
-            <div class="stat-label">Spent</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ user.reviews.count }}</div>
-            <div class="stat-label">Reviews</div>
+        <div class="nav-item" data-section="notifications">
+            <i class="fas fa-bell"></i>
+            <span>Notifications</span>
         </div>
     </div>
 
-    <!-- Settings List -->
-    <div class="settings-list">
-        <a href="{% url 'personal_information' %}" class="settings-item">
-            <div class="settings-item-icon" style="background: #e6f3ff; color: #667eea;">
-                <i class="fas fa-user"></i>
+    <!-- Settings Content -->
+    <div class="settings-content-mobile">
+        <!-- General Settings -->
+        <div class="settings-section active" id="general">
+            <div class="section-header">
+                <h2>General Settings</h2>
+                <p>Manage your account preferences</p>
             </div>
-            <div class="settings-item-content">
-                <div class="settings-item-title">Personal Information</div>
-                <div class="settings-item-subtitle">Name, email, phone, bio</div>
-            </div>
-            <div class="settings-item-arrow">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </a>
 
-        <a href="{% url 'login_security' %}" class="settings-item">
-            <div class="settings-item-icon" style="background: #e6f7ff; color: #1890ff;">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <div class="settings-item-content">
-                <div class="settings-item-title">Login & Security</div>
-                <div class="settings-item-subtitle">Password, 2FA, sessions</div>
-            </div>
-            <div class="settings-item-arrow">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </a>
+            <div class="settings-cards">
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Personal Information</h6>
+                        <p>Update your profile and contact details</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{% url 'personal_information' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
 
-        <a href="{% url 'notification_preferences' %}" class="settings-item">
-            <div class="settings-item-icon" style="background: #fff7e6; color: #fa8c16;">
-                <i class="fas fa-bell"></i>
-            </div>
-            <div class="settings-item-content">
-                <div class="settings-item-title">Notifications</div>
-                <div class="settings-item-subtitle">Email, SMS, push notifications</div>
-            </div>
-            <div class="settings-item-arrow">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </a>
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Login & Security</h6>
+                        <p>Password, 2FA, and security settings</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{% url 'login_security' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-lock"></i>
+                        </a>
+                    </div>
+                </div>
 
-        <a href="{% url 'connected_accounts' %}" class="settings-item">
-            <div class="settings-item-icon" style="background: #f6ffed; color: #52c41a;">
-                <i class="fas fa-link"></i>
-            </div>
-            <div class="settings-item-content">
-                <div class="settings-item-title">Connected Accounts</div>
-                <div class="settings-item-subtitle">Google, Facebook, Apple</div>
-            </div>
-            <div class="settings-item-arrow">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </a>
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Notifications</h6>
+                        <p>Control your notification preferences</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{% url 'notification_preferences' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    </div>
+                </div>
 
-        <a href="{% url 'danger_zone' %}" class="settings-item danger-item">
-            <div class="settings-item-icon">
-                <i class="fas fa-exclamation-triangle"></i>
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Connected Accounts</h6>
+                        <p>Manage social media connections</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{% url 'connected_accounts' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="settings-item-content">
-                <div class="settings-item-title">Danger Zone</div>
-                <div class="settings-item-subtitle">Deactivate or delete account</div>
+        </div>
+
+        <!-- Personal Settings -->
+        <div class="settings-section" id="personal">
+            <div class="section-header">
+                <h2>Personal Information</h2>
+                <p>Update your personal details</p>
             </div>
-            <div class="settings-item-arrow">
-                <i class="fas fa-chevron-right"></i>
+
+            <div class="settings-cards">
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Profile Picture</h6>
+                        <p>Update your profile photo</p>
+                    </div>
+                    <div class="card-action">
+                        <button class="btn btn-outline-primary btn-sm" onclick="uploadProfilePicture()">
+                            <i class="fas fa-upload"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Phone Number</h6>
+                        <p>Update your contact number</p>
+                    </div>
+                    <div class="card-action">
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-birthday-cake"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Date of Birth</h6>
+                        <p>Update your birth date</p>
+                    </div>
+                    <div class="card-action">
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </a>
+        </div>
+
+        <!-- Security Settings -->
+        <div class="settings-section" id="security">
+            <div class="section-header">
+                <h2>Security Settings</h2>
+                <p>Manage your account security</p>
+            </div>
+
+            <div class="settings-cards">
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Change Password</h6>
+                        <p>Update your account password</p>
+                    </div>
+                    <div class="card-action">
+                        <button class="btn btn-outline-primary btn-sm" onclick="changePassword()">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Two-Factor Authentication</h6>
+                        <p>Add an extra layer of security</p>
+                    </div>
+                    <div class="card-action">
+                        <button class="btn btn-outline-primary btn-sm" onclick="setup2FA()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Login History</h6>
+                        <p>View your recent login activity</p>
+                    </div>
+                    <div class="card-action">
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="settings-section" id="notifications">
+            <div class="section-header">
+                <h2>Notification Settings</h2>
+                <p>Control how you receive notifications</p>
+            </div>
+
+            <div class="settings-cards">
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Email Notifications</h6>
+                        <p>Order updates and promotions</p>
+                    </div>
+                    <div class="card-action">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="email-notifications" checked>
+                            <label for="email-notifications"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-sms"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>SMS Notifications</h6>
+                        <p>Text messages for important updates</p>
+                    </div>
+                    <div class="card-action">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="sms-notifications">
+                            <label for="sms-notifications"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="card-content">
+                        <h6>Push Notifications</h6>
+                        <p>In-app and browser notifications</p>
+                    </div>
+                    <div class="card-action">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="push-notifications" checked>
+                            <label for="push-notifications"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="settings-list" style="margin-top: 1rem;">
-        <a href="{% url 'order_history' %}" class="settings-item">
-            <div class="settings-item-icon" style="background: #f0f9ff; color: #0ea5e9;">
-                <i class="fas fa-shopping-bag"></i>
-            </div>
-            <div class="settings-item-content">
-                <div class="settings-item-title">Order History</div>
-                <div class="settings-item-subtitle">View your past orders</div>
-            </div>
-            <div class="settings-item-arrow">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </a>
-
-        <a href="{% url 'wishlist' %}" class="settings-item">
-            <div class="settings-item-icon" style="background: #fef2f2; color: #ef4444;">
-                <i class="fas fa-heart"></i>
-            </div>
-            <div class="settings-item-content">
-                <div class="settings-item-title">Wishlist</div>
-                <div class="settings-item-subtitle">Your saved items</div>
-            </div>
-            <div class="settings-item-arrow">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </a>
-
-        <a href="{% url 'address_management' %}" class="settings-item">
-            <div class="settings-item-icon" style="background: #f0fdf4; color: #22c55e;">
-                <i class="fas fa-map-marker-alt"></i>
-            </div>
-            <div class="settings-item-content">
-                <div class="settings-item-title">Addresses</div>
-                <div class="settings-item-subtitle">Manage shipping addresses</div>
-            </div>
-            <div class="settings-item-arrow">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </a>
-    </div>
-</div>
-
-<!-- Profile Picture Change Modal -->
-<div class="modal-overlay" id="profilePictureModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Change Profile Picture</h3>
-            <button class="modal-close" onclick="closeModal('profilePictureModal')">
-                <i class="fas fa-times"></i>
+    <div class="quick-actions-mobile">
+        <h5>Quick Actions</h5>
+        <div class="action-buttons">
+            <button class="action-btn" onclick="downloadData()">
+                <i class="fas fa-download"></i>
+                <span>Download Data</span>
             </button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label class="form-label">Choose a new picture</label>
-                <input type="file" class="form-control" id="profilePictureInput" accept="image/*">
-            </div>
-            <button class="btn btn-primary" onclick="uploadProfilePicture()">
-                <i class="fas fa-upload"></i> Upload Picture
+            <button class="action-btn" onclick="viewActivity()">
+                <i class="fas fa-history"></i>
+                <span>Activity Log</span>
+            </button>
+            <button class="action-btn" onclick="getHelp()">
+                <i class="fas fa-question-circle"></i>
+                <span>Get Help</span>
             </button>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-function changeProfilePicture() {
-    document.getElementById('profilePictureModal').style.display = 'block';
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile navigation
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = document.querySelectorAll('.settings-section');
 
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const section = this.dataset.section;
+            
+            // Remove active class from all items and sections
+            navItems.forEach(nav => nav.classList.remove('active'));
+            sections.forEach(sec => sec.classList.remove('active'));
+            
+            // Add active class to clicked item and corresponding section
+            this.classList.add('active');
+            document.getElementById(section).classList.add('active');
+        });
+    });
+
+    // Toggle switches
+    const toggles = document.querySelectorAll('.toggle-switch input');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const preference = this.id;
+            const value = this.checked;
+            
+            // Update preference via AJAX
+            updateNotificationPreference(preference, value);
+        });
+    });
+});
+
+function updateNotificationPreference(preference, value) {
+    fetch('{% url "update_notification_preference" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `preference=${preference}&value=${value}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Preference updated successfully!', 'success');
+        } else {
+            showToast('Failed to update preference', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred', 'error');
+    });
 }
 
 function uploadProfilePicture() {
-    const input = document.getElementById('profilePictureInput');
-    if (input.files && input.files[0]) {
-        const formData = new FormData();
-        formData.append('profile_picture', input.files[0]);
-        
-        fetch('{% url "upload_profile_picture" %}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error uploading picture: ' + data.error);
-            }
-        });
-    }
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append('profile_picture', file);
+            
+            fetch('{% url "upload_profile_picture" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Profile picture updated!', 'success');
+                    // Update profile picture in UI
+                    const profileImg = document.querySelector('.profile-img');
+                    if (profileImg) {
+                        profileImg.src = data.url;
+                    }
+                } else {
+                    showToast('Failed to update profile picture', 'error');
+                }
+            });
+        }
+    };
+    input.click();
 }
 
-// Close modal when clicking outside
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal-overlay')) {
-        e.target.style.display = 'none';
-    }
-});
-</script>
+function changePassword() {
+    // Show password change modal or redirect
+    window.location.href = '{% url "login_security" %}';
+}
 
+function setup2FA() {
+    // Show 2FA setup modal or redirect
+    window.location.href = '{% url "two_factor_setup" %}';
+}
+
+function downloadData() {
+    showToast('Data download started', 'info');
+}
+
+function viewActivity() {
+    showToast('Opening activity log', 'info');
+}
+
+function getHelp() {
+    showToast('Opening help center', 'info');
+}
+
+function showToast(message, type) {
+    // Simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>
 {% endblock %}

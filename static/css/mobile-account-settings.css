@@ -1,0 +1,485 @@
+/* Mobile Account Settings Styles */
+.mobile-settings-container {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding-bottom: 80px;
+}
+
+/* Mobile Header */
+.mobile-header {
+    background: white;
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.back-btn, .menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #495057;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover, .menu-btn:hover {
+    background: #f8f9fa;
+    color: #007bff;
+}
+
+.mobile-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+    margin: 0;
+}
+
+/* Mobile Navigation */
+.settings-nav-mobile {
+    background: white;
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px 20px;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 15px;
+    margin-right: 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 80px;
+    text-align: center;
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.nav-item span {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.nav-item.active {
+    background: #007bff;
+    color: white;
+}
+
+.nav-item.active i,
+.nav-item.active span {
+    color: white;
+}
+
+.nav-item:hover {
+    background: #f8f9fa;
+}
+
+.nav-item.active:hover {
+    background: #0056b3;
+}
+
+/* Settings Content */
+.settings-content-mobile {
+    padding: 20px;
+}
+
+.settings-section {
+    display: none;
+}
+
+.settings-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.section-header {
+    margin-bottom: 25px;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 8px;
+}
+
+.section-header p {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Settings Cards */
+.settings-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.settings-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.settings-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.card-icon i {
+    font-size: 1.2rem;
+    color: #007bff;
+}
+
+.card-content {
+    flex: 1;
+}
+
+.card-content h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 5px;
+}
+
+.card-content p {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin: 0;
+}
+
+.card-action {
+    margin-left: 10px;
+}
+
+/* Toggle Switches */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.toggle-switch label:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + label {
+    background-color: #007bff;
+}
+
+.toggle-switch input:checked + label:before {
+    transform: translateX(26px);
+}
+
+/* Quick Actions */
+.quick-actions-mobile {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.quick-actions-mobile h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 15px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.action-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+}
+
+.action-btn:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+}
+
+.action-btn i {
+    font-size: 1.1rem;
+    color: #007bff;
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+}
+
+.action-btn span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toast-success {
+    background: #28a745;
+}
+
+.toast-error {
+    background: #dc3545;
+}
+
+.toast-info {
+    background: #17a2b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .mobile-header {
+        padding: 12px 15px;
+    }
+    
+    .mobile-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .settings-nav-mobile {
+        padding: 12px 15px;
+    }
+    
+    .nav-item {
+        padding: 8px 12px;
+        margin-right: 15px;
+        min-width: 70px;
+    }
+    
+    .nav-item i {
+        font-size: 1.1rem;
+    }
+    
+    .nav-item span {
+        font-size: 0.75rem;
+    }
+    
+    .settings-content-mobile {
+        padding: 15px;
+    }
+    
+    .settings-card {
+        padding: 15px;
+    }
+    
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 12px;
+    }
+    
+    .card-icon i {
+        font-size: 1rem;
+    }
+    
+    .card-content h6 {
+        font-size: 0.9rem;
+    }
+    
+    .card-content p {
+        font-size: 0.8rem;
+    }
+    
+    .quick-actions-mobile {
+        margin: 15px;
+        padding: 15px;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .mobile-settings-container {
+        background: #1a1a1a;
+    }
+    
+    .mobile-header {
+        background: #2d2d2d;
+        border-bottom-color: #404040;
+    }
+    
+    .mobile-header h1 {
+        color: #ffffff;
+    }
+    
+    .back-btn, .menu-btn {
+        color: #ffffff;
+    }
+    
+    .settings-nav-mobile {
+        background: #2d2d2d;
+        border-bottom-color: #404040;
+    }
+    
+    .nav-item {
+        color: #ffffff;
+    }
+    
+    .nav-item:hover {
+        background: #404040;
+    }
+    
+    .settings-card {
+        background: #2d2d2d;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .card-content h6 {
+        color: #ffffff;
+    }
+    
+    .card-content p {
+        color: #cccccc;
+    }
+    
+    .quick-actions-mobile {
+        background: #2d2d2d;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .quick-actions-mobile h5 {
+        color: #ffffff;
+    }
+    
+    .action-btn {
+        background: #404040;
+        border-color: #404040;
+        color: #ffffff;
+    }
+    
+    .action-btn:hover {
+        background: #505050;
+    }
+}

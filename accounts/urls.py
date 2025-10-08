@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import render
 from accounts.views import *
 from accounts.employee_views import *
 from accounts.inventory_views import *
@@ -11,6 +12,7 @@ from accounts.address_management_views import *
 from accounts.admin_views import *
 from accounts.modern_dashboard_views import *
 from accounts.business_form_views import business_form, submit_business_form, get_business_data, business_form_admin
+from accounts.settings_views import *
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -174,4 +176,23 @@ urlpatterns = [
     path('business-form/submit/', submit_business_form, name='submit_business_form'),
     path('business-form/data/', get_business_data, name='get_business_data'),
     path('business-form/admin/', business_form_admin, name='business_form_admin'),
+    
+    # Account Settings URLs
+    path('settings/', account_settings, name='account_settings'),
+    path('settings/personal-information/', personal_information, name='personal_information'),
+    path('settings/login-security/', login_security, name='login_security'),
+    path('settings/change-password/', change_password, name='change_password'),
+    path('settings/revoke-session/<int:session_id>/', revoke_session, name='revoke_session'),
+    path('settings/notifications/', notification_preferences, name='notification_preferences'),
+    path('settings/update-notification-preference/', update_notification_preference, name='update_notification_preference'),
+    path('settings/connected-accounts/', connected_accounts, name='connected_accounts'),
+    path('settings/disconnect-account/<int:account_id>/', disconnect_account, name='disconnect_account'),
+    path('settings/two-factor-setup/', two_factor_setup, name='two_factor_setup'),
+    path('settings/verify-phone-2fa/', verify_phone_2fa, name='verify_phone_2fa'),
+    path('settings/danger-zone/', danger_zone, name='danger_zone'),
+    path('settings/upload-profile-picture/', upload_profile_picture, name='upload_profile_picture'),
+    path('settings/delete-profile-picture/', delete_profile_picture, name='delete_profile_picture'),
+    
+    # Test URL for settings integration
+    path('settings/test/', lambda request: render(request, 'accounts/settings/test_settings.html'), name='test_settings'),
 ]

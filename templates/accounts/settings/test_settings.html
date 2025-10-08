@@ -1,0 +1,103 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Test Settings - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Settings Integration Test</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <h5>✅ Settings Successfully Integrated!</h5>
+                        <p>The account settings system has been successfully integrated into your Django e-commerce project.</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Website Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Full-featured settings interface for desktop users</p>
+                                    <a href="{% url 'account_settings' %}" class="btn btn-primary">
+                                        <i class="fas fa-cog"></i> Open Website Settings
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Mobile Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Mobile-optimized settings interface for mobile users</p>
+                                    <a href="{% url 'personal_information' %}" class="btn btn-primary">
+                                        <i class="fas fa-mobile-alt"></i> Open Mobile Settings
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Features Implemented:</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> 
+                                <strong>Personal Information Management</strong> - Update profile, contact details, preferences
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> 
+                                <strong>Login & Security</strong> - Password management, 2FA, session control
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> 
+                                <strong>Notification Preferences</strong> - Email, SMS, push notification controls
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> 
+                                <strong>Connected Accounts</strong> - Social media account management
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> 
+                                <strong>Account Security</strong> - Activity logging, security questions, account recovery
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success"></i> 
+                                <strong>Mobile-First Design</strong> - Responsive interface that adapts to device type
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Next Steps:</h5>
+                        <ol>
+                            <li>Run database migrations to create the new models</li>
+                            <li>Test the settings functionality</li>
+                            <li>Customize the styling to match your brand</li>
+                            <li>Add any additional features specific to your needs</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <h6>Database Migration Required</h6>
+                            <p>To activate the settings system, run the following commands:</p>
+                            <pre><code>python manage.py makemigrations accounts
+python manage.py migrate</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
