@@ -161,7 +161,7 @@ class MultipleAddressForm(forms.ModelForm):
 
 
 # Account Settings Forms
-from accounts.settings_models import UserPreferences
+from accounts.models import UserPreferences
 import re
 
 

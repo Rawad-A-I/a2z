@@ -578,11 +578,11 @@ def checkout(request):
 
 
 # Account Settings Views
-from accounts.settings_models import (
+from accounts.models import (
     UserPreferences, UserSession, TwoFactorAuth, ConnectedAccount,
     AccountActivity, SecurityQuestion, EmailVerification, PhoneVerification
 )
-from accounts.settings_forms import (
+from accounts.forms import (
     PersonalInfoForm, PasswordChangeForm, NotificationPreferencesForm,
     SecurityQuestionForm, PhoneVerificationForm
 )
