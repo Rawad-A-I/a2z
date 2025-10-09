@@ -26,36 +26,11 @@
         </div>
       </div>
       
-      <!-- User Actions -->
-      <div class="col-lg-4">
-        <div class="widgets-wrap d-flex justify-content-end align-items-center">
-          <!-- Account Icon -->
-          <div class="widget-header">
-            <a href="{% url 'account_settings' %}" class="icon" title="Account Settings">
-              <i class="fas fa-user"></i>
-            </a>
-          </div>
-          
-          <!-- Wishlist Icon -->
-          <div class="widget-header">
-            <a href="{% url 'wishlist' %}" class="icon" title="Wishlist">
-              <i class="fas fa-heart"></i>
-              {% if user.is_authenticated and request.user.wishlist.count > 0 %}
-                <span class="badge bg-danger">{{ request.user.wishlist.count }}</span>
-              {% endif %}
-            </a>
-          </div>
-          
-          <!-- Cart Icon -->
-          <div class="widget-header">
-            <a href="{% url 'cart' %}" class="icon" title="Shopping Cart">
-              <i class="fas fa-shopping-cart"></i>
-              {% if user.is_authenticated and request.user.profile.get_cart_count > 0 %}
-                <span class="badge bg-danger">{{ request.user.profile.get_cart_count }}</span>
-              {% endif %}
-            </a>
-          </div>
-        </div>
+      <!-- Mobile Menu Button (for mobile navigation) -->
+      <div class="col-lg-4 d-flex justify-content-end align-items-center">
+        <button class="mobile-menu-btn d-lg-none" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+          <i class="fas fa-bars"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -207,21 +182,23 @@
   border-color: #0056b3;
 }
 
-/* Login/Register Links */
-.header-main .auth-links {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.header-main .auth-links a {
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
   color: #495057;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
-.header-main .auth-links a:hover {
+.mobile-menu-btn:hover {
   color: #007bff;
+}
+
+.mobile-menu-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 </style>

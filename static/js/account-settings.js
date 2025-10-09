@@ -451,3 +451,4 @@ function previewModalProfilePicture(input) {
 document.addEventListener('DOMContentLoaded', function() {
     new AccountSettings();
 });
+
