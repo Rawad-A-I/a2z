@@ -6,195 +6,207 @@
 {% block extra_css %}
 <!-- Tailwind CSS (CDN for now) -->
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="{% static 'css/account-settings.css' %}">
+<link rel="stylesheet" href="{% static 'css/account-settings-mobile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="account-settings-page">
-    <!-- Desktop Sidebar Layout -->
-    <div class="hidden lg:flex min-h-screen">
-        <!-- Sidebar -->
-        <div class="w-64 bg-white border-r border-gray-200 flex-shrink-0">
-            <div class="p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-6">Account Settings</h2>
-                <nav class="space-y-2">
-                    <a href="#personal-info" class="settings-nav-item active" data-section="personal-info">
-                        <i class="fas fa-user"></i>
-                        <span>Personal Information</span>
-                    </a>
-                    <a href="#security" class="settings-nav-item" data-section="security">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Security & Password</span>
-                    </a>
-                    <a href="#notifications" class="settings-nav-item" data-section="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span>Notifications</span>
-                    </a>
-                    <a href="#linked-accounts" class="settings-nav-item" data-section="linked-accounts">
-                        <i class="fas fa-link"></i>
-                        <span>Linked Accounts</span>
-                    </a>
-                    <a href="#danger-zone" class="settings-nav-item text-red-600" data-section="danger-zone">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>Danger Zone</span>
-                    </a>
-                </nav>
+<div class="mobile-account-settings">
+    <!-- Header -->
+    <div class="mobile-header">
+        <div class="flex items-center justify-between p-4 bg-white border-b border-gray-200">
+            <button onclick="goBack()" class="text-gray-600 hover:text-gray-900 p-2">
+                <i class="fas fa-arrow-left text-lg"></i>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">Account Settings</h1>
+            <div class="w-10"></div> <!-- Spacer for centering -->
+        </div>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="profile-section bg-white mx-4 mt-4 rounded-lg shadow-sm overflow-hidden">
+        <div class="p-6 text-center">
+            <!-- Profile Picture -->
+            <div class="relative inline-block mb-4">
+                <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mx-auto">
+                    {% if user.preferences.profile_picture %}
+                        <img id="profile-picture" src="{{ user.preferences.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                    {% else %}
+                        <i class="fas fa-user text-gray-400 text-2xl"></i>
+                    {% endif %}
+                </div>
+                <button onclick="editProfilePicture()" class="absolute bottom-0 right-1/2 transform translate-x-1/2 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700">
+                    <i class="fas fa-camera text-xs"></i>
+                </button>
+            </div>
+
+            <!-- User Name -->
+            <h2 class="text-xl font-semibold text-gray-900">{{ user.get_full_name|default:user.username }}</h2>
+            <p class="text-sm text-gray-500 mt-1">{{ user.email }}</p>
+        </div>
+    </div>
+
+    <!-- Account Menu -->
+    <div class="account-menu mx-4 mt-4 space-y-2">
+        <!-- My Account Section Header -->
+        <div class="px-4 py-2">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">My Account</h3>
+        </div>
+
+        <!-- Notification -->
+        <div class="menu-item" onclick="openSection('notifications')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-bell text-blue-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Notification</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 bg-gray-50">
-            <div class="p-6">
-                <div class="max-w-4xl mx-auto">
-                    <!-- Personal Information Section -->
-                    <div id="personal-info" class="settings-section active">
-                        <div class="settings-header">
-                            <h3 class="text-2xl font-bold text-gray-900">Personal Information</h3>
-                            <p class="text-gray-600 mt-1">Update your personal details and contact information</p>
-                        </div>
-                        <div class="settings-content">
-                            {% include 'accounts/settings/personal_information.html' %}
-                        </div>
+        <!-- My Order -->
+        <div class="menu-item" onclick="openSection('orders')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-box text-green-600"></i>
                     </div>
-
-                    <!-- Security & Password Section -->
-                    <div id="security" class="settings-section">
-                        <div class="settings-header">
-                            <h3 class="text-2xl font-bold text-gray-900">Security & Password</h3>
-                            <p class="text-gray-600 mt-1">Manage your password and security settings</p>
-                        </div>
-                        <div class="settings-content">
-                            {% include 'accounts/settings/security_password.html' %}
-                        </div>
-                    </div>
-
-                    <!-- Notifications Section -->
-                    <div id="notifications" class="settings-section">
-                        <div class="settings-header">
-                            <h3 class="text-2xl font-bold text-gray-900">Notifications</h3>
-                            <p class="text-gray-600 mt-1">Choose what notifications you want to receive</p>
-                        </div>
-                        <div class="settings-content">
-                            {% include 'accounts/settings/notifications.html' %}
-                        </div>
-                    </div>
-
-                    <!-- Linked Accounts Section -->
-                    <div id="linked-accounts" class="settings-section">
-                        <div class="settings-header">
-                            <h3 class="text-2xl font-bold text-gray-900">Linked Accounts</h3>
-                            <p class="text-gray-600 mt-1">Connect your social media accounts for easier login</p>
-                        </div>
-                        <div class="settings-content">
-                            {% include 'accounts/settings/linked_accounts.html' %}
-                        </div>
-                    </div>
-
-                    <!-- Danger Zone Section -->
-                    <div id="danger-zone" class="settings-section">
-                        <div class="settings-header">
-                            <h3 class="text-2xl font-bold text-red-600">Danger Zone</h3>
-                            <p class="text-gray-600 mt-1">Irreversible actions that affect your account</p>
-                        </div>
-                        <div class="settings-content">
-                            {% include 'accounts/settings/danger_zone.html' %}
-                        </div>
-                    </div>
+                    <span class="text-sm font-medium text-gray-900">My Order</span>
                 </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="menu-item" onclick="openSection('payment')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-credit-card text-purple-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Payment</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Cart -->
+        <div class="menu-item" onclick="openSection('cart')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-shopping-cart text-orange-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Cart</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Wish List -->
+        <div class="menu-item" onclick="openSection('wishlist')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-heart text-red-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Wish List</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Password -->
+        <div class="menu-item" onclick="openSection('password')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-lock text-gray-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Password</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
             </div>
         </div>
     </div>
 
-    <!-- Mobile Layout -->
-    <div class="lg:hidden">
-        <!-- Mobile Header -->
-        <div class="mobile-header bg-white border-b border-gray-200 sticky top-0 z-50">
-            <div class="flex items-center justify-between p-4">
-                <button id="mobile-back-btn" class="text-gray-600 hover:text-gray-900">
+    <!-- Sub-pages/Modals -->
+    <div id="section-content" class="hidden">
+        <!-- Notification Settings -->
+        <div id="notifications-page" class="section-page">
+            <div class="section-header">
+                <button onclick="goBackToMenu()" class="back-btn">
                     <i class="fas fa-arrow-left"></i>
                 </button>
-                <h1 class="text-lg font-semibold text-gray-900">Account Settings</h1>
-                <div class="w-8"></div> <!-- Spacer for centering -->
+                <h2>Notification Settings</h2>
+            </div>
+            <div class="section-content">
+                <div class="space-y-4 p-4">
+                    <div class="flex items-center justify-between p-4 bg-white rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-bell text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Order Updates</p>
+                                <p class="text-sm text-gray-500">Get notified when your order status changes</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-white rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-truck text-green-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Delivery Updates</p>
+                                <p class="text-sm text-gray-500">Get notified when your order is out for delivery</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-white rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-gift text-purple-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Promotions</p>
+                                <p class="text-sm text-gray-500">Receive special offers and promotions</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Mobile Sections Stack -->
-        <div class="mobile-sections">
-            <!-- Personal Information (Mobile) -->
-            <div class="mobile-section" data-section="personal-info">
-                <div class="mobile-section-header" onclick="openMobileSection('personal-info')">
-                    <div class="flex items-center">
-                        <i class="fas fa-user text-blue-600 mr-3"></i>
-                        <span>Personal Information</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-gray-400"></i>
-                </div>
-                <div class="mobile-section-content">
-                    {% include 'accounts/settings/personal_information_mobile.html' %}
-                </div>
+        <!-- Other sections would be implemented similarly -->
+        <div id="orders-page" class="section-page">
+            <div class="section-header">
+                <button onclick="goBackToMenu()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>My Orders</h2>
             </div>
-
-            <!-- Security & Password (Mobile) -->
-            <div class="mobile-section" data-section="security">
-                <div class="mobile-section-header" onclick="openMobileSection('security')">
-                    <div class="flex items-center">
-                        <i class="fas fa-shield-alt text-green-600 mr-3"></i>
-                        <span>Security & Password</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-gray-400"></i>
-                </div>
-                <div class="mobile-section-content">
-                    {% include 'accounts/settings/security_password_mobile.html' %}
-                </div>
-            </div>
-
-            <!-- Notifications (Mobile) -->
-            <div class="mobile-section" data-section="notifications">
-                <div class="mobile-section-header" onclick="openMobileSection('notifications')">
-                    <div class="flex items-center">
-                        <i class="fas fa-bell text-purple-600 mr-3"></i>
-                        <span>Notifications</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-gray-400"></i>
-                </div>
-                <div class="mobile-section-content">
-                    {% include 'accounts/settings/notifications_mobile.html' %}
-                </div>
-            </div>
-
-            <!-- Linked Accounts (Mobile) -->
-            <div class="mobile-section" data-section="linked-accounts">
-                <div class="mobile-section-header" onclick="openMobileSection('linked-accounts')">
-                    <div class="flex items-center">
-                        <i class="fas fa-link text-orange-600 mr-3"></i>
-                        <span>Linked Accounts</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-gray-400"></i>
-                </div>
-                <div class="mobile-section-content">
-                    {% include 'accounts/settings/linked_accounts_mobile.html' %}
-                </div>
-            </div>
-
-            <!-- Danger Zone (Mobile) -->
-            <div class="mobile-section" data-section="danger-zone">
-                <div class="mobile-section-header" onclick="openMobileSection('danger-zone')">
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
-                        <span>Danger Zone</span>
-                    </div>
-                    <i class="fas fa-chevron-right text-gray-400"></i>
-                </div>
-                <div class="mobile-section-content">
-                    {% include 'accounts/settings/danger_zone_mobile.html' %}
+            <div class="section-content">
+                <div class="p-4 text-center text-gray-500">
+                    <i class="fas fa-box text-4xl mb-4"></i>
+                    <p>Order history will be displayed here</p>
                 </div>
             </div>
         </div>
+
+        <!-- Add similar sections for payment, cart, wishlist, password -->
     </div>
-
-    <!-- Modals for Mobile -->
-    {% include 'accounts/settings/modals.html' %}
 </div>
 
-<script src="{% static 'js/account-settings.js' %}"></script>
+<script src="{% static 'js/account-settings-mobile.js' %}"></script>
 {% endblock %}
