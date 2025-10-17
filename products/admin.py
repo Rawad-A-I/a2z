@@ -25,7 +25,7 @@ class BarcodeInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['product_name', 'category', 'section', 'price', 'stock_quantity', 'is_in_stock', 'weight', 'dimensions', 'created_at']
+    list_display = ['product_name', 'size_name', 'category', 'section', 'price', 'stock_quantity', 'is_in_stock', 'has_size_variants', 'created_at']
     list_filter = ['category', 'section', 'is_in_stock', 'newest_product', 'is_featured', 'is_bestseller', 'is_new_arrival', 'created_at']
     search_fields = ['product_name', 'product_desription', 'meta_title', 'keywords']
     prepopulated_fields = {'slug': ('product_name',)}
@@ -35,6 +35,10 @@ class ProductAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Basic Information', {
             'fields': ('product_name', 'slug', 'category', 'product_desription', 'section')
+        }),
+        ('Size Variants', {
+            'fields': ('parent', 'size_name', 'has_size_variants'),
+            'description': 'For size variants: select parent product and enter size name. For standalone products: leave empty.'
         }),
         ('Pricing & Inventory', {
             'fields': ('price', 'stock_quantity', 'low_stock_threshold', 'is_in_stock')
@@ -69,7 +73,7 @@ class ColorVariantAdmin(admin.ModelAdmin):
 
 @admin.register(SizeVariant)
 class SizeVariantAdmin(admin.ModelAdmin):
-    list_display = ['size_name', 'price']
+    list_display = ['size_name']
 
 @admin.register(ProductVariant)
 class ProductVariantAdmin(admin.ModelAdmin):

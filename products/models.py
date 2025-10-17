@@ -70,7 +70,7 @@ class ColorVariant(BaseModel):
 
 class SizeVariant(BaseModel):
     size_name = models.CharField(max_length=100)
-    price = models.IntegerField(default=0)
+    # Removed price field - pricing now handled at product level
 
     def __str__(self) -> str:
         return self.size_name
@@ -107,7 +107,8 @@ class ProductVariant(BaseModel):
 
 class Product(BaseModel):
     parent = models.ForeignKey(
-        'self', related_name='child_products', on_delete=models.CASCADE, blank=True, null=True)
+        'self', related_name='child_products', on_delete=models.CASCADE, blank=True, null=True,
+        help_text="Parent product for size variants. Leave empty for standalone products or parent products.")
     product_name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
@@ -116,6 +117,10 @@ class Product(BaseModel):
     color_variant = models.ManyToManyField(ColorVariant, blank=True)
     size_variant = models.ManyToManyField(SizeVariant, blank=True)
     newest_product = models.BooleanField(default=False)
+    
+    # Size variant information
+    size_name = models.CharField(max_length=100, blank=True, help_text="Size name for this variant (e.g., Small, Medium, Large)")
+    has_size_variants = models.BooleanField(default=False, help_text="Check if this product has different sizes")
     
     # Enhanced inventory management
     stock_quantity = models.PositiveIntegerField(default=0)
@@ -148,20 +153,56 @@ class Product(BaseModel):
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.product_name)
+            # Create slug based on product name and size (if applicable)
+            base_name = self.product_name
+            if self.size_name:
+                base_name = f"{self.product_name}-{self.size_name}"
+            
+            self.slug = slugify(base_name)
             # Ensure slug is unique
             original_slug = self.slug
             counter = 1
             while Product.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 self.slug = f"{original_slug}-{counter}"
                 counter += 1
+        
+        # If this is a size variant, mark the parent as having size variants
+        if self.parent:
+            self.parent.has_size_variants = True
+            self.parent.save(update_fields=['has_size_variants'])
+        
         super(Product, self).save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.product_name
 
-    def get_product_price_by_size(self, size):
-        return self.price + SizeVariant.objects.get(size_name=size).price
+    def get_size_variants(self):
+        """Get all size variants of this product"""
+        if self.parent:
+            # This is a size variant, return siblings
+            return self.parent.child_products.filter(size_name__isnull=False).exclude(pk=self.pk)
+        else:
+            # This is a parent product, return all size variants
+            return self.child_products.filter(size_name__isnull=False)
+    
+    def get_product_by_size(self, size_name):
+        """Get a specific size variant of this product"""
+        if self.parent:
+            # This is a size variant, look in parent's children
+            return self.parent.child_products.filter(size_name=size_name).first()
+        else:
+            # This is a parent product, look in own children
+            return self.child_products.filter(size_name=size_name).first()
+    
+    def is_size_variant(self):
+        """Check if this product is a size variant"""
+        return self.parent is not None and self.size_name
+    
+    def get_display_name(self):
+        """Get display name including size if applicable"""
+        if self.size_name:
+            return f"{self.product_name} ({self.size_name})"
+        return self.product_name
 
     def get_rating(self):
         total = sum(int(review['stars']) for review in self.reviews.values())

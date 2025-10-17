@@ -21,6 +21,22 @@ class BarcodeForm(forms.ModelForm):
                 'placeholder': 'Optional notes about this barcode'
             })
         }
+    
+    def clean_barcode_value(self):
+        barcode_value = self.cleaned_data.get('barcode_value')
+        
+        if barcode_value:
+            # Check if barcode already exists
+            existing = Barcode.objects.filter(barcode_value=barcode_value)
+            if self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+            
+            if existing.exists():
+                raise forms.ValidationError(
+                    f"Barcode '{barcode_value}' already exists for another product."
+                )
+        
+        return barcode_value
 
 
 class ProductInsertionForm(forms.ModelForm):
@@ -29,7 +45,7 @@ class ProductInsertionForm(forms.ModelForm):
         model = Product
         fields = [
             'product_name', 'category', 'price', 'product_desription',
-            'parent', 'color_variant', 'size_variant', 'newest_product',
+            'parent', 'size_name', 'has_size_variants', 'color_variant', 'size_variant', 'newest_product',
             'is_in_stock', 'stock_quantity', 'low_stock_threshold',
             'weight', 'dimensions', 'section', 'is_featured', 
             'is_bestseller', 'is_new_arrival', 'meta_title', 
@@ -55,6 +71,11 @@ class ProductInsertionForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Select parent product (optional)'
             }),
+            'size_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Small, Medium, Large (leave empty for standalone products)'
+            }),
+            'has_size_variants': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'color_variant': forms.CheckboxSelectMultiple(attrs={
                 'class': 'form-check-input'
             }),
@@ -128,6 +149,42 @@ class ProductInsertionForm(forms.ModelForm):
         # Make variant fields optional
         self.fields['color_variant'].required = False
         self.fields['size_variant'].required = False
+        
+        # Make size_name optional
+        self.fields['size_name'].required = False
+        self.fields['has_size_variants'].required = False
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        product_name = cleaned_data.get('product_name')
+        size_name = cleaned_data.get('size_name')
+        parent = cleaned_data.get('parent')
+        
+        # Check for existing products with same name and size
+        if product_name and size_name:
+            existing = Product.objects.filter(
+                product_name=product_name,
+                size_name=size_name
+            ).exclude(pk=self.instance.pk if self.instance else None)
+            
+            if existing.exists():
+                raise forms.ValidationError(
+                    f"A product with name '{product_name}' and size '{size_name}' already exists."
+                )
+        
+        # If parent is selected, size_name should be provided
+        if parent and not size_name:
+            raise forms.ValidationError(
+                "Size name is required when creating a size variant of an existing product."
+            )
+        
+        # If size_name is provided, parent should be selected
+        if size_name and not parent:
+            raise forms.ValidationError(
+                "Parent product is required when creating a size variant."
+            )
+        
+        return cleaned_data
 
 
 class ProductImageForm(forms.ModelForm):

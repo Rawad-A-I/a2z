@@ -74,9 +74,16 @@ def get_product(request, slug):
 
     if request.GET.get('size'):
         size = request.GET.get('size')
-        price = product.get_product_price_by_size(size)
-        context['selected_size'] = size
-        context['updated_price'] = price
+        # Get the specific size variant
+        size_variant = product.get_product_by_size(size)
+        if size_variant:
+            context['selected_size'] = size
+            context['selected_variant'] = size_variant
+            context['updated_price'] = size_variant.price
+        else:
+            # Fallback to original product if size variant not found
+            context['selected_size'] = size
+            context['updated_price'] = product.price
 
     return render(request, 'product/product.html', context=context)
 
