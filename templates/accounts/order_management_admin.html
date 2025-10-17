@@ -1,0 +1,472 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Admin Order Management{% endblock %}
+
+{% block start %}
+<style>
+  /* Mobile Order Management Optimizations */
+  @media (max-width: 768px) {
+    .container-fluid {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    .order-management-container {
+      padding: 0;
+    }
+    
+    /* Mobile-friendly header */
+    .d-flex.justify-content-between {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 1rem;
+    }
+    
+    .d-flex.gap-2 {
+      flex-wrap: wrap;
+      gap: 0.5rem !important;
+    }
+    
+    .btn {
+      min-height: 44px;
+      font-size: 0.9rem;
+      padding: 0.6rem 0.8rem;
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    .btn i {
+      font-size: 0.9rem;
+    }
+    
+    /* Mobile-friendly stats cards */
+    .col-xl-3,
+    .col-md-6 {
+      margin-bottom: 1rem;
+    }
+    
+    .card {
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .bg-primary.bg-gradient {
+      width: 40px;
+      height: 40px;
+      padding: 0.5rem !important;
+    }
+    
+    .bg-primary.bg-gradient i {
+      font-size: 1rem;
+    }
+    
+    .h4 {
+      font-size: 1.5rem;
+    }
+    
+    /* Mobile-friendly filters */
+    .filter-section {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .filter-section .col-md-3,
+    .filter-section .col-md-4 {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-control,
+    .form-select {
+      min-height: 44px;
+      font-size: 1rem;
+    }
+    
+    /* Mobile-friendly table */
+    .table-responsive {
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .table th {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    /* Mobile-friendly badges */
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.5rem 0.75rem;
+    }
+    
+    /* Mobile-friendly pagination */
+    .pagination {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .page-link {
+      min-height: 44px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .container-fluid {
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .btn {
+      font-size: 0.8rem;
+      padding: 0.5rem 0.6rem;
+      min-height: 40px;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.5rem 0.25rem;
+      font-size: 0.8rem;
+    }
+    
+    .h4 {
+      font-size: 1.25rem;
+    }
+  }
+  
+  /* Touch-friendly elements */
+  @media (hover: none) and (pointer: coarse) {
+    .btn {
+      min-height: 48px;
+      font-size: 1rem;
+    }
+    
+    .page-link {
+      min-height: 48px;
+    }
+  }
+</style>
+
+<div class="order-management-container">
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1 text-dark fw-bold">Admin Order Management</h2>
+                    <p class="text-muted mb-0">Comprehensive order management and analytics</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-success" onclick="bulkUpdateStatus()">
+                        <i class="fas fa-tasks me-2"></i>Bulk Update
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="exportOrders()">
+                        <i class="fas fa-download me-2"></i>Export
+                    </button>
+                    <a href="{% url 'order_management_dashboard' %}" class="btn btn-primary">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-gradient rounded-circle p-3">
+                                <i class="fas fa-shopping-cart text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Total Orders</div>
+                            <div class="h4 mb-0 text-primary fw-bold">{{ total_orders|default:"0" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-gradient rounded-circle p-3">
+                                <i class="fas fa-check-circle text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Completed</div>
+                            <div class="h4 mb-0 text-success fw-bold">{{ completed_orders|default:"0" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-gradient rounded-circle p-3">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Pending</div>
+                            <div class="h4 mb-0 text-warning fw-bold">{{ pending_orders|default:"0" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-danger bg-gradient rounded-circle p-3">
+                                <i class="fas fa-times-circle text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Cancelled</div>
+                            <div class="h4 mb-0 text-danger fw-bold">{{ cancelled_orders|default:"0" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Orders Management Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-list me-2 text-primary"></i>Orders Management
+                            <span class="badge bg-light text-dark ms-2">{{ orders.paginator.count }} total</span>
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-success" onclick="bulkAssignEmployee()">
+                                <i class="fas fa-user-plus me-1"></i>Assign Employee
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="bulkUpdateStatus()">
+                                <i class="fas fa-edit me-1"></i>Update Status
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 py-3 px-4">
+                                        <input type="checkbox" class="form-check-input" id="selectAllAdmin">
+                                    </th>
+                                    <th class="border-0 py-3">Order ID</th>
+                                    <th class="border-0 py-3">Customer</th>
+                                    <th class="border-0 py-3">Total</th>
+                                    <th class="border-0 py-3">Status</th>
+                                    <th class="border-0 py-3">Date</th>
+                                    <th class="border-0 py-3">Employee</th>
+                                    <th class="border-0 py-3 text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr class="border-bottom">
+                                    <td class="py-3 px-4">
+                                        <input type="checkbox" class="form-check-input order-checkbox" value="{{ order.order_id }}">
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="fw-bold text-primary">#{{ order.order_id }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-circle p-2 me-3">
+                                                <i class="fas fa-user text-muted"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ order.user.get_full_name|default:order.user.username }}</div>
+                                                <small class="text-muted">{{ order.user.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="fw-bold">${{ order.grand_total }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-{% if order.status == 'pending' %}warning{% elif order.status == 'confirmed' %}info{% elif order.status == 'processing' %}primary{% elif order.status == 'shipped' %}success{% elif order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %} px-3 py-2">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="text-muted">{{ order.order_date|date:"M d, Y" }}</span>
+                                        <br><small class="text-muted">{{ order.order_date|time:"H:i" }}</small>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if order.assigned_employee %}
+                                        <span class="badge bg-light text-dark">
+                                            {{ order.assigned_employee.get_full_name|default:order.assigned_employee.username }}
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">Unassigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'order_detail' order.order_id %}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'update_order_status' order.order_id %}" class="btn btn-sm btn-outline-warning" title="Update Status">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-info" title="Print Invoice" onclick="printInvoice('{{ order.order_id }}')">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success" title="Assign Employee" onclick="assignEmployee('{{ order.order_id }}')">
+                                                <i class="fas fa-user-plus"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if orders.has_other_pages %}
+                    <div class="card-footer bg-white border-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                Showing {{ orders.start_index }} to {{ orders.end_index }} of {{ orders.paginator.count }} orders
+                            </div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    {% if orders.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ orders.previous_page_number }}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in orders.paginator.page_range %}
+                                    {% if orders.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if orders.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ orders.next_page_number }}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-shopping-cart text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="text-muted">No Orders Found</h5>
+                        <p class="text-muted">There are currently no orders in the system.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+function bulkUpdateStatus() {
+    const selectedOrders = getSelectedOrders();
+    if (selectedOrders.length === 0) {
+        alert('Please select orders to update');
+        return;
+    }
+    // Implement bulk status update
+    alert(`Bulk update for ${selectedOrders.length} orders`);
+}
+
+function bulkAssignEmployee() {
+    const selectedOrders = getSelectedOrders();
+    if (selectedOrders.length === 0) {
+        alert('Please select orders to assign');
+        return;
+    }
+    // Implement bulk employee assignment
+    alert(`Bulk assign employee for ${selectedOrders.length} orders`);
+}
+
+function assignEmployee(orderId) {
+    // Implement single order employee assignment
+    alert(`Assign employee for order ${orderId}`);
+}
+
+function printInvoice(orderId) {
+    window.open(`/orders/${orderId}/invoice/`, '_blank');
+}
+
+function exportOrders() {
+    alert('Export functionality will be implemented');
+}
+
+function getSelectedOrders() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// Select all functionality
+document.getElementById('selectAllAdmin').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.order-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+</script>
+{% endblock %}

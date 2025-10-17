@@ -1,0 +1,462 @@
+{% extends "base/base.html"%} 
+{% block start %}
+<style>
+  /* Carce-style Mobile App Design */
+  body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  .mobile-app-container {
+    max-width: 414px;
+    margin: 0 auto;
+    background: white;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  }
+  
+  /* Mobile Header - Carce Style */
+  .mobile-header {
+    background: white;
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  .mobile-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  
+  .mobile-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  .mobile-cart-icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    background: #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .mobile-cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Search Bar - Carce Style */
+  .mobile-search {
+    position: relative;
+  }
+  
+  .mobile-search input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 25px;
+    font-size: 16px;
+    background: #f8f9fa;
+  }
+  
+  .mobile-search input:focus {
+    outline: none;
+    border-color: #007bff;
+    background: white;
+  }
+  
+  .mobile-search .search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+  }
+  
+  .mobile-filter-btn {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    background: #dc3545;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border: none;
+  }
+  
+  /* Promotional Banner - Carce Style */
+  .mobile-banner {
+    margin: 1rem;
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .mobile-banner h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-banner p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+  
+  /* Category Icons - Carce Style */
+  .mobile-categories {
+    padding: 1rem;
+    background: white;
+  }
+  
+  .mobile-categories h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+  
+  .category-item {
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .category-icon {
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+    font-size: 1.2rem;
+    color: #007bff;
+    transition: all 0.3s ease;
+  }
+  
+  .category-item:hover .category-icon {
+    background: #007bff;
+    color: white;
+    transform: scale(1.1);
+  }
+  
+  .category-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  /* Products Section - Carce Style */
+  .mobile-products {
+    padding: 1rem;
+    background: white;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .view-all {
+    color: #007bff;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .product-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .product-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+  }
+  
+  .product-info {
+    padding: 0.75rem;
+  }
+  
+  .product-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #333;
+  }
+  
+  .product-price {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+  }
+  
+  .product-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+  }
+  
+  .product-heart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc3545;
+    border: none;
+  }
+  
+  /* Mobile Navigation */
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 414px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    padding: 0.5rem 0;
+    z-index: 1000;
+  }
+  
+  .nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  
+  .nav-item {
+    text-align: center;
+    text-decoration: none;
+    color: #6c757d;
+    font-size: 0.7rem;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-item.active {
+    color: #007bff;
+  }
+  
+  .nav-icon {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Back Button */
+  .back-button {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1001;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #007bff;
+    text-decoration: none;
+  }
+</style>
+
+<div class="mobile-app-container">
+  <!-- Back Button -->
+  <a href="{% url 'redirect_homepage' %}" class="back-button">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <div class="mobile-header-top">
+      <div class="mobile-logo">A2Z Mart</div>
+      <a href="{% url 'cart' %}" class="mobile-cart-icon">
+        <i class="fas fa-shopping-cart"></i>
+        {% if user.is_authenticated and request.user.profile.get_cart_count > 0 %}
+        <span class="mobile-cart-badge">{{request.user.profile.get_cart_count}}</span>
+        {% endif %}
+      </a>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="mobile-search">
+      <form method="GET" action="{% url 'product_search' %}">
+        <input type="text" name="q" placeholder="Search products..." value="{{ query|default:'' }}">
+        <i class="fas fa-search search-icon"></i>
+        <button type="button" class="mobile-filter-btn">
+          <i class="fas fa-filter"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Promotional Banner -->
+  <div class="mobile-banner">
+    <h3>Summer Sale</h3>
+    <p>Up to 70% OFF on all products</p>
+  </div>
+  
+  <!-- Categories -->
+  <div class="mobile-categories">
+    <h5>Categories</h5>
+    <div class="category-grid">
+      {% for category in categories|slice:":8" %}
+      <a href="?category={{ category.category_name }}" class="category-item">
+        <div class="category-icon">
+          <i class="fas fa-{{ category.category_name|lower|slice:':1' }}"></i>
+        </div>
+        <div class="category-name">{{ category.category_name|truncatechars:8 }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Products Section -->
+  <div class="mobile-products">
+    <div class="section-header">
+      <h5 class="section-title">Popular Products</h5>
+      <a href="#" class="view-all">View All</a>
+    </div>
+    
+    <div class="products-grid">
+      {% for product in products %}
+      <div class="product-card">
+        <a href="{% url 'get_product' product.slug %}">
+          <img src="/media/{{product.product_images.first.image}}" 
+               class="product-image" 
+               loading="lazy"
+               alt="{{ product.product_name }}">
+          <button class="product-heart">
+            <i class="fas fa-heart"></i>
+          </button>
+        </a>
+        <div class="product-info">
+          <div class="product-name">{{ product.product_name|truncatechars:20 }}</div>
+          <div class="product-price">${{product.price}}</div>
+          <div class="product-rating">
+            <i class="fas fa-star"></i>
+            <span>4.5</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav">
+    <div class="nav-items">
+      <a href="{% url 'products_only' %}" class="nav-item active">
+        <div class="nav-icon"><i class="fas fa-home"></i></div>
+        <div>Home</div>
+      </a>
+      <a href="{% url 'wishlist' %}" class="nav-item">
+        <div class="nav-icon"><i class="fas fa-heart"></i></div>
+        <div>Wishlist</div>
+      </a>
+      <a href="{% url 'cart' %}" class="nav-item">
+        <div class="nav-icon"><i class="fas fa-shopping-cart"></i></div>
+        <div>Cart</div>
+      </a>
+      <a href="{% url 'profile' username=user.username %}" class="nav-item">
+        <div class="nav-icon"><i class="fas fa-user"></i></div>
+        <div>Profile</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Mobile app-like interactions
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+    
+    // Add touch feedback
+    document.querySelectorAll('.category-item, .product-card').forEach(item => {
+      item.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.95)';
+      });
+      
+      item.addEventListener('touchend', function() {
+        this.style.transform = 'scale(1)';
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,316 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Store Locator{% endblock %}
+
+{% block start %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  .map-container {
+    height: 500px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .store-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+  }
+  
+  .store-card.selected {
+    border-color: #007bff;
+    background-color: #f8f9ff;
+  }
+  
+  .store-hours {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+  
+  .btn-locate {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-locate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-map-marker-alt"></i> Store Locator</h4>
+        </div>
+        <div class="card-body">
+          <!-- Map -->
+          <div id="map" class="map-container mb-4"></div>
+          
+          <!-- Location Controls -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <button class="btn btn-locate btn-block" onclick="locateUser()">
+                <i class="fas fa-crosshairs"></i> Use My Location
+              </button>
+            </div>
+            <div class="col-md-6">
+              <div class="input-group">
+                <input type="text" class="form-control" id="search-location" placeholder="Search for a location...">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-primary" onclick="searchLocation()">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <!-- Store List -->
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-store"></i> Our Stores</h5>
+        </div>
+        <div class="card-body">
+          <div id="store-list">
+            {% for store in store_locations %}
+            <div class="store-card" data-store-id="{{ store.uid }}" 
+                 data-lat="{{ store.latitude|default:0 }}" 
+                 data-lng="{{ store.longitude|default:0 }}"
+                 onclick="selectStore('{{ store.uid }}')">
+              <h6>{{ store.name }}</h6>
+              <p class="text-muted mb-1">{{ store.address }}</p>
+              <p class="text-muted mb-1">{{ store.city }}, {{ store.state }} {{ store.zip_code }}</p>
+              <p class="text-muted mb-1">
+                <i class="fas fa-phone"></i> {{ store.phone }}
+              </p>
+              <p class="text-muted mb-1">
+                <i class="fas fa-envelope"></i> {{ store.email }}
+              </p>
+              {% if store.store_hours %}
+              <div class="store-hours">
+                <strong>Hours:</strong>
+                {% for day, hours in store.store_hours.items %}
+                  <br>{{ day|title }}: {{ hours }}
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let map;
+let markers = [];
+let selectedStore = null;
+
+// Initialize map
+function initMap() {
+  // Default to center of US if no stores have coordinates
+  let centerLat = 39.8283;
+  let centerLng = -98.5795;
+  
+  // Try to get center from first store with coordinates
+  {% for store in store_locations %}
+    {% if store.latitude and store.longitude %}
+      centerLat = {{ store.latitude }};
+      centerLng = {{ store.longitude }};
+      break;
+    {% endif %}
+  {% endfor %}
+  
+  map = L.map('map').setView([centerLat, centerLng], 10);
+  
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  
+  // Add store markers
+  addStoreMarkers();
+}
+
+// Add store markers to map
+function addStoreMarkers() {
+  {% for store in store_locations %}
+    {% if store.latitude and store.longitude %}
+      const marker = L.marker([{{ store.latitude }}, {{ store.longitude }}])
+        .addTo(map)
+        .bindPopup(`
+          <div>
+            <h6>{{ store.name }}</h6>
+            <p class="mb-1">{{ store.address }}</p>
+            <p class="mb-1">{{ store.city }}, {{ store.state }} {{ store.zip_code }}</p>
+            <p class="mb-1"><i class="fas fa-phone"></i> {{ store.phone }}</p>
+            <p class="mb-0"><i class="fas fa-envelope"></i> {{ store.email }}</p>
+          </div>
+        `);
+      
+      markers.push(marker);
+    {% endif %}
+  {% endfor %}
+}
+
+// Locate user's current position
+function locateUser() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        // Update map
+        map.setView([lat, lng], 15);
+        
+        // Add user marker
+        const userMarker = L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup('Your Location')
+          .openPopup();
+        
+        // Find nearest store
+        findNearestStore(lat, lng);
+      },
+      function(error) {
+        alert('Error getting location: ' + error.message);
+      }
+    );
+  } else {
+    alert('Geolocation is not supported by this browser.');
+  }
+}
+
+// Search for location
+function searchLocation() {
+  const query = document.getElementById('search-location').value;
+  
+  if (!query.trim()) {
+    alert('Please enter a location to search.');
+    return;
+  }
+  
+  // Use Nominatim API for geocoding
+  fetch('{% url "geocode_address" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ address: query })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const lat = data.latitude;
+      const lng = data.longitude;
+      
+      // Update map
+      map.setView([lat, lng], 15);
+      
+      // Add search marker
+      const searchMarker = L.marker([lat, lng])
+        .addTo(map)
+        .bindPopup('Searched Location')
+        .openPopup();
+      
+      // Find nearest store
+      findNearestStore(lat, lng);
+    } else {
+      alert('Location not found: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error searching location.');
+  });
+}
+
+// Find nearest store to given coordinates
+function findNearestStore(lat, lng) {
+  let nearestStore = null;
+  let minDistance = Infinity;
+  
+  // Calculate distance to each store
+  document.querySelectorAll('.store-card').forEach(card => {
+    const storeLat = parseFloat(card.dataset.lat);
+    const storeLng = parseFloat(card.dataset.lng);
+    
+    if (storeLat && storeLng) {
+      const distance = calculateDistance(lat, lng, storeLat, storeLng);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestStore = card;
+      }
+    }
+  });
+  
+  // Highlight nearest store
+  if (nearestStore) {
+    selectStore(nearestStore.dataset.storeId);
+  }
+}
+
+// Select a store
+function selectStore(storeId) {
+  // Remove previous selection
+  document.querySelectorAll('.store-card').forEach(card => {
+    card.classList.remove('selected');
+  });
+  
+  // Add selection to clicked store
+  const storeCard = document.querySelector(`[data-store-id="${storeId}"]`);
+  if (storeCard) {
+    storeCard.classList.add('selected');
+    selectedStore = storeId;
+    
+    // Center map on selected store
+    const lat = parseFloat(storeCard.dataset.lat);
+    const lng = parseFloat(storeCard.dataset.lng);
+    
+    if (lat && lng) {
+      map.setView([lat, lng], 15);
+    }
+  }
+}
+
+// Calculate distance between two points
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initMap();
+});
+</script>
+{% endblock %}

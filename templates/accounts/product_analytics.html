@@ -1,0 +1,190 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Product Analytics{% endblock %}
+
+{% block start %}
+<style>
+/* Force color fixes for product analytics */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-info,
+.card.bg-warning {
+    color: #ffffff !important;
+}
+
+.card.bg-primary *,
+.card.bg-success *,
+.card.bg-info *,
+.card.bg-warning * {
+    color: #ffffff !important;
+}
+
+.card.bg-primary h3,
+.card.bg-primary h5,
+.card.bg-success h3,
+.card.bg-success h5,
+.card.bg-info h3,
+.card.bg-info h5,
+.card.bg-warning h3,
+.card.bg-warning h5 {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+</style>
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Product Analytics</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Product Performance Analytics</h4>
+                    <p>Analyze product performance, sales, and inventory metrics.</p>
+                    
+                    <!-- Product Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Products</h5>
+                                    <h3>{{ total_products|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Top Selling</h5>
+                                    <h3>{{ top_selling_count|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>Low Stock</h5>
+                                    <h3>{{ low_stock_count|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Categories</h5>
+                                    <h3>{{ total_categories|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Products -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Top Selling Products</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if top_products %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Sales</th>
+                                                    <th>Revenue</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for product in top_products %}
+                                                <tr>
+                                                    <td>{{ product.product_name }}</td>
+                                                    <td>{{ product.sales_count|default:"0" }}</td>
+                                                    <td>${{ product.revenue|default:"0"|floatformat:2 }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No product sales data available.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Product Categories</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if categories %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Category</th>
+                                                    <th>Products</th>
+                                                    <th>Sales</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for category in categories %}
+                                                <tr>
+                                                    <td>{{ category.category_name }}</td>
+                                                    <td>{{ category.product_count|default:"0" }}</td>
+                                                    <td>{{ category.sales_count|default:"0" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No category data available.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'analytics_dashboard' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-chart-bar"></i> Analytics Dashboard
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'product_management' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-box"></i> Manage Products
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'inventory_dashboard' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-warehouse"></i> Inventory
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'export_analytics' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-download"></i> Export Data
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Choose Your Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .platforms {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .platform-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .platform-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .platform-card.a2z-mart::before {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+        }
+
+        .platform-card.a2z-bar::before {
+            background: linear-gradient(90deg, #FF6B6B, #ee5a52);
+        }
+
+        .platform-card.rayan-brayan::before {
+            background: linear-gradient(90deg, #4ECDC4, #44a08d);
+        }
+
+        .platform-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .platform-card.a2z-mart .platform-icon {
+            color: #4CAF50;
+        }
+
+        .platform-card.a2z-bar .platform-icon {
+            color: #FF6B6B;
+        }
+
+        .platform-card.rayan-brayan .platform-icon {
+            color: #4ECDC4;
+        }
+
+        .platform-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .platform-description {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .platform-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        .platform-card.a2z-mart .platform-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+
+        .platform-card.a2z-bar .platform-button {
+            background: linear-gradient(45deg, #FF6B6B, #ee5a52);
+        }
+
+        .platform-card.rayan-brayan .platform-button {
+            background: linear-gradient(45deg, #4ECDC4, #44a08d);
+        }
+
+        .platform-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .platforms {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .platform-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Our Platform</h1>
+            <p>Choose the service that best fits your needs</p>
+        </div>
+
+        <div class="platforms">
+            <!-- A2Z Mart - Current E-commerce Website -->
+            <div class="platform-card a2z-mart" onclick="window.location.href='/a2z-mart/'">
+                <span class="platform-icon">🛒</span>
+                <h2 class="platform-title">A2Z Mart</h2>
+                <p class="platform-description">
+                    Your one-stop online shopping destination. Browse through our extensive collection of products, 
+                    enjoy secure payments, and get fast delivery to your doorstep.
+                </p>
+                <a href="/a2z-mart/" class="platform-button">Enter A2Z Mart</a>
+            </div>
+
+            <!-- A2Z Bar - Premium Drinks & Beverages -->
+            <div class="platform-card a2z-bar" onclick="window.location.href='/products/bar/'">
+                <span class="platform-icon">🍻</span>
+                <h2 class="platform-title">A2Z Bar</h2>
+                <p class="platform-description">
+                    Premium drinks and beverages delivered to your doorstep. From craft beers to fine wines, 
+                    premium spirits to artisanal cocktails - everything for your perfect night in.
+                </p>
+                <a href="/products/bar/" class="platform-button">Enter A2Z Bar</a>
+            </div>
+
+            <!-- Rayan O Brayan - New Service -->
+            <div class="platform-card rayan-brayan" onclick="window.location.href='/rayan-brayan/'">
+                <span class="platform-icon">👥</span>
+                <h2 class="platform-title">Rayan O Brayan</h2>
+                <p class="platform-description">
+                    Connect with our community platform. Share experiences, 
+                    get support, and be part of our growing community network.
+                </p>
+                <a href="/rayan-brayan/" class="platform-button">Enter Rayan O Brayan</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 All Rights Reserved</p>
+        </div>
+    </div>
+</body>
+</html>

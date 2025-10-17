@@ -1,0 +1,428 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Click & Collect{% endblock %}
+
+{% block start %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  .map-container {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .store-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+  }
+  
+  .store-card.selected {
+    border-color: #28a745;
+    background-color: #f8fff8;
+  }
+  
+  .pickup-info {
+    background: #e8f5e8;
+    border: 1px solid #28a745;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  
+  .btn-select {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-select:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+  }
+  
+  .btn-select:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-shopping-bag"></i> Click & Collect - Order Online, Pickup In-Store</h4>
+        </div>
+        <div class="card-body">
+          <!-- Map -->
+          <div id="map" class="map-container mb-4"></div>
+          
+          <!-- Location Controls -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <button class="btn btn-primary btn-block" onclick="locateUser()">
+                <i class="fas fa-crosshairs"></i> Use My Location
+              </button>
+            </div>
+            <div class="col-md-6">
+              <div class="input-group">
+                <input type="text" class="form-control" id="search-location" placeholder="Search for a location...">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-primary" onclick="searchLocation()">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Selected Store Info -->
+          <div id="selected-store-info" class="pickup-info" style="display: none;">
+            <h5><i class="fas fa-store"></i> Selected Pickup Location</h5>
+            <div id="store-details"></div>
+            <div class="mt-3">
+              <button class="btn btn-select" onclick="confirmPickupLocation()">
+                <i class="fas fa-check"></i> Confirm Pickup Location
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <!-- Store List -->
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-store"></i> Available Pickup Locations</h5>
+        </div>
+        <div class="card-body">
+          <div id="store-list">
+            {% for store in stores %}
+            <div class="store-card" data-store-id="{{ store.uid }}" 
+                 data-lat="{{ store.latitude|default:0 }}" 
+                 data-lng="{{ store.longitude|default:0 }}"
+                 onclick="selectStore('{{ store.uid }}', '{{ store.name }}', '{{ store.address }}', '{{ store.city }}', '{{ store.state }}', '{{ store.zip_code }}', '{{ store.phone }}', '{{ store.email }}')">
+              <h6>{{ store.name }}</h6>
+              <p class="text-muted mb-1">{{ store.address }}</p>
+              <p class="text-muted mb-1">{{ store.city }}, {{ store.state }} {{ store.zip_code }}</p>
+              <p class="text-muted mb-1">
+                <i class="fas fa-phone"></i> {{ store.phone }}
+              </p>
+              <p class="text-muted mb-1">
+                <i class="fas fa-envelope"></i> {{ store.email }}
+              </p>
+              {% if store.store_hours %}
+              <div class="store-hours">
+                <strong>Hours:</strong>
+                {% for day, hours in store.store_hours.items %}
+                  <br>{{ day|title }}: {{ hours }}
+                {% endfor %}
+              </div>
+              {% endif %}
+              <div class="mt-2">
+                <span class="badge badge-success">Available for Pickup</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Pickup Benefits -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h5><i class="fas fa-gift"></i> Click & Collect Benefits</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Free pickup (no delivery fees)</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Same-day pickup available</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Secure order storage</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Easy returns and exchanges</li>
+            <li class="mb-0"><i class="fas fa-check text-success"></i> Personal assistance from staff</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let map;
+let markers = [];
+let selectedStore = null;
+let selectedStoreData = null;
+
+// Initialize map
+function initMap() {
+  // Default to center of US if no stores have coordinates
+  let centerLat = 39.8283;
+  let centerLng = -98.5795;
+  
+  // Try to get center from first store with coordinates
+  {% for store in stores %}
+    {% if store.latitude and store.longitude %}
+      centerLat = {{ store.latitude }};
+      centerLng = {{ store.longitude }};
+      break;
+    {% endif %}
+  {% endfor %}
+  
+  map = L.map('map').setView([centerLat, centerLng], 10);
+  
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  
+  // Add store markers
+  addStoreMarkers();
+}
+
+// Add store markers to map
+function addStoreMarkers() {
+  {% for store in stores %}
+    {% if store.latitude and store.longitude %}
+      const marker = L.marker([{{ store.latitude }}, {{ store.longitude }}])
+        .addTo(map)
+        .bindPopup(`
+          <div>
+            <h6>{{ store.name }}</h6>
+            <p class="mb-1">{{ store.address }}</p>
+            <p class="mb-1">{{ store.city }}, {{ store.state }} {{ store.zip_code }}</p>
+            <p class="mb-1"><i class="fas fa-phone"></i> {{ store.phone }}</p>
+            <p class="mb-0"><i class="fas fa-envelope"></i> {{ store.email }}</p>
+            <button class="btn btn-sm btn-success mt-2" onclick="selectStore('{{ store.uid }}', '{{ store.name }}', '{{ store.address }}', '{{ store.city }}', '{{ store.state }}', '{{ store.zip_code }}', '{{ store.phone }}', '{{ store.email }}')">
+              Select for Pickup
+            </button>
+          </div>
+        `);
+      
+      markers.push(marker);
+    {% endif %}
+  {% endfor %}
+}
+
+// Locate user's current position
+function locateUser() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        // Update map
+        map.setView([lat, lng], 15);
+        
+        // Add user marker
+        const userMarker = L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup('Your Location')
+          .openPopup();
+        
+        // Find nearest store
+        findNearestStore(lat, lng);
+      },
+      function(error) {
+        alert('Error getting location: ' + error.message);
+      }
+    );
+  } else {
+    alert('Geolocation is not supported by this browser.');
+  }
+}
+
+// Search for location
+function searchLocation() {
+  const query = document.getElementById('search-location').value;
+  
+  if (!query.trim()) {
+    alert('Please enter a location to search.');
+    return;
+  }
+  
+  // Use Nominatim API for geocoding
+  fetch('{% url "geocode_address" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ address: query })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const lat = data.latitude;
+      const lng = data.longitude;
+      
+      // Update map
+      map.setView([lat, lng], 15);
+      
+      // Add search marker
+      const searchMarker = L.marker([lat, lng])
+        .addTo(map)
+        .bindPopup('Searched Location')
+        .openPopup();
+      
+      // Find nearest store
+      findNearestStore(lat, lng);
+    } else {
+      alert('Location not found: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error searching location.');
+  });
+}
+
+// Find nearest store to given coordinates
+function findNearestStore(lat, lng) {
+  let nearestStore = null;
+  let minDistance = Infinity;
+  
+  // Calculate distance to each store
+  document.querySelectorAll('.store-card').forEach(card => {
+    const storeLat = parseFloat(card.dataset.lat);
+    const storeLng = parseFloat(card.dataset.lng);
+    
+    if (storeLat && storeLng) {
+      const distance = calculateDistance(lat, lng, storeLat, storeLng);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestStore = card;
+      }
+    }
+  });
+  
+  // Highlight nearest store
+  if (nearestStore) {
+    const storeId = nearestStore.dataset.storeId;
+    const storeName = nearestStore.querySelector('h6').textContent;
+    const storeAddress = nearestStore.querySelector('p').textContent;
+    const storeCity = nearestStore.querySelectorAll('p')[1].textContent;
+    const storePhone = nearestStore.querySelectorAll('p')[2].textContent.replace('📞 ', '');
+    const storeEmail = nearestStore.querySelectorAll('p')[3].textContent.replace('✉️ ', '');
+    
+    selectStore(storeId, storeName, storeAddress, storeCity, '', '', storePhone, storeEmail);
+  }
+}
+
+// Select a store
+function selectStore(storeId, name, address, city, state, zipCode, phone, email) {
+  // Remove previous selection
+  document.querySelectorAll('.store-card').forEach(card => {
+    card.classList.remove('selected');
+  });
+  
+  // Add selection to clicked store
+  const storeCard = document.querySelector(`[data-store-id="${storeId}"]`);
+  if (storeCard) {
+    storeCard.classList.add('selected');
+    selectedStore = storeId;
+    selectedStoreData = {
+      id: storeId,
+      name: name,
+      address: address,
+      city: city,
+      state: state,
+      zipCode: zipCode,
+      phone: phone,
+      email: email
+    };
+    
+    // Center map on selected store
+    const lat = parseFloat(storeCard.dataset.lat);
+    const lng = parseFloat(storeCard.dataset.lng);
+    
+    if (lat && lng) {
+      map.setView([lat, lng], 15);
+    }
+    
+    // Show selected store info
+    showSelectedStoreInfo();
+  }
+}
+
+// Show selected store information
+function showSelectedStoreInfo() {
+  if (selectedStoreData) {
+    const storeDetails = document.getElementById('store-details');
+    storeDetails.innerHTML = `
+      <div class="row">
+        <div class="col-md-6">
+          <h6>${selectedStoreData.name}</h6>
+          <p class="mb-1">${selectedStoreData.address}</p>
+          <p class="mb-1">${selectedStoreData.city}, ${selectedStoreData.state} ${selectedStoreData.zipCode}</p>
+        </div>
+        <div class="col-md-6">
+          <p class="mb-1"><i class="fas fa-phone"></i> ${selectedStoreData.phone}</p>
+          <p class="mb-1"><i class="fas fa-envelope"></i> ${selectedStoreData.email}</p>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('selected-store-info').style.display = 'block';
+  }
+}
+
+// Confirm pickup location
+function confirmPickupLocation() {
+  if (!selectedStore) {
+    alert('Please select a pickup location first.');
+    return;
+  }
+  
+  // Submit form to set pickup location
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '{% url "click_and_collect" %}';
+  
+  const csrfToken = document.createElement('input');
+  csrfToken.type = 'hidden';
+  csrfToken.name = 'csrfmiddlewaretoken';
+  csrfToken.value = '{{ csrf_token }}';
+  form.appendChild(csrfToken);
+  
+  const storeIdInput = document.createElement('input');
+  storeIdInput.type = 'hidden';
+  storeIdInput.name = 'store_id';
+  storeIdInput.value = selectedStore;
+  form.appendChild(storeIdInput);
+  
+  document.body.appendChild(form);
+  form.submit();
+}
+
+// Calculate distance between two points
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initMap();
+});
+</script>
+{% endblock %}

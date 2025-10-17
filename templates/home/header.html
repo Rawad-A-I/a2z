@@ -1,0 +1,161 @@
+{% load static %}
+{% load cart_tags %}
+
+<!-- Main Header with Account Icon -->
+<div class="header-main">
+  <div class="container">
+    <div class="row align-items-center">
+      <!-- Logo -->
+      <div class="col-lg-10">
+        <a href="{% url 'index' %}" class="navbar-brand">
+          <img src="{% static 'images/logo.png' %}" alt="A2Z Mart" height="40">
+        </a>
+      </div>
+      
+      <!-- Mobile Menu Button (for mobile navigation) -->
+      <div class="col-lg-2 d-flex justify-content-end align-items-center">
+        <button class="mobile-menu-btn d-lg-none" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Header Styles */
+.header-main {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-main .navbar-brand {
+  text-decoration: none;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-main .navbar-brand:hover {
+  color: #007bff;
+}
+
+
+/* Widget Icons */
+.header-main .widgets-wrap {
+  gap: 1rem;
+}
+
+.header-main .widget-header {
+  position: relative;
+}
+
+.header-main .widget-header .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 50%;
+  color: #495057;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.header-main .widget-header .icon:hover {
+  background: #e9ecef;
+  color: #007bff;
+  transform: scale(1.05);
+}
+
+.header-main .widget-header .icon i {
+  font-size: 1.2rem;
+}
+
+.header-main .widget-header .badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 0.7rem;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .header-main .row {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .header-main .col-lg-10,
+  .header-main .col-lg-2 {
+    width: auto;
+  }
+  
+  .header-main .col-lg-10 {
+    flex: 1;
+  }
+  
+  .header-main .widgets-wrap {
+    justify-content: center;
+    gap: 2rem;
+  }
+  
+  .header-main .widget-header .icon {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Account Icon Specific Styles */
+.header-main .widget-header:first-child .icon {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.header-main .widget-header:first-child .icon:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+/* User Authentication States */
+.header-main .widget-header .icon[href*="account_settings"] {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.header-main .widget-header .icon[href*="account_settings"]:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: #495057;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.mobile-menu-btn:hover {
+  color: #007bff;
+}
+
+.mobile-menu-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+</style>

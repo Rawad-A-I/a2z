@@ -1,0 +1,143 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Fulfillment Center{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Fulfillment Center</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Order Fulfillment Management</h4>
+                    <p>Track and manage order fulfillment process from picking to delivery.</p>
+                    
+                    <!-- Fulfillment Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Pending Fulfillment</h5>
+                                    <h3>{{ pending_fulfillment|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>Picked</h5>
+                                    <h3>{{ picked_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Packed</h5>
+                                    <h3>{{ packed_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Shipped</h5>
+                                    <h3>{{ shipped_orders|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fulfillment Queue -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Fulfillment Queue</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if fulfillment_orders %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Order ID</th>
+                                                    <th>Customer</th>
+                                                    <th>Status</th>
+                                                    <th>Assigned To</th>
+                                                    <th>Priority</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for order in fulfillment_orders %}
+                                                <tr>
+                                                    <td>{{ order.order_id }}</td>
+                                                    <td>{{ order.user.username }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ order.fulfillment.status|lower }}">
+                                                            {{ order.fulfillment.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ order.assigned_employee.user.username|default:"Unassigned" }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ order.priority|lower }}">
+                                                            {{ order.get_priority_display|default:"Normal" }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{% url 'pick_list' order.order_id %}" class="btn btn-sm btn-info">Pick List</a>
+                                                        <a href="{% url 'update_fulfillment_status' order.order_id %}" class="btn btn-sm btn-warning">Update</a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No orders in fulfillment queue.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'order_management_dashboard' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-shopping-cart"></i> Order Management
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'bulk_order_actions' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-tasks"></i> Bulk Actions
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'order_analytics' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-chart-bar"></i> Fulfillment Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'employee_management' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-user-tie"></i> Employee Management
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

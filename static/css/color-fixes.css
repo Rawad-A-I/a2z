@@ -1,0 +1,377 @@
+/* 
+ * Color Fixes CSS
+ * Ensures proper color contrast for Bootstrap background classes
+ * Prevents invisible text on colored backgrounds
+ */
+
+/* Solid colored cards with visible text - High specificity to override base styles */
+.bg-primary,
+.bg-primary.text-white,
+.card.bg-primary,
+.card.bg-primary .card-body {
+    color: #ffffff !important;
+    background-color: #007bff !important;
+    background: #007bff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2) !important;
+}
+
+.bg-success,
+.bg-success.text-white,
+.card.bg-success,
+.card.bg-success .card-body {
+    color: #ffffff !important;
+    background-color: #28a745 !important;
+    background: #28a745 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2) !important;
+}
+
+.bg-warning,
+.bg-warning.text-white,
+.card.bg-warning,
+.card.bg-warning .card-body {
+    color: #ffffff !important;
+    background-color: #ffc107 !important;
+    background: #ffc107 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2) !important;
+}
+
+.bg-danger,
+.bg-danger.text-white,
+.card.bg-danger,
+.card.bg-danger .card-body {
+    color: #ffffff !important;
+    background-color: #dc3545 !important;
+    background: #dc3545 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2) !important;
+}
+
+.bg-info,
+.bg-info.text-white,
+.card.bg-info,
+.card.bg-info .card-body {
+    color: #ffffff !important;
+    background-color: #17a2b8 !important;
+    background: #17a2b8 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.2) !important;
+}
+
+.bg-secondary,
+.bg-secondary.text-white,
+.card.bg-secondary,
+.card.bg-secondary .card-body {
+    color: #ffffff !important;
+    background-color: #6c757d !important;
+    background: #6c757d !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2) !important;
+}
+
+/* Ensure all text elements inside colored cards are white */
+.bg-primary *,
+.bg-success *,
+.bg-warning *,
+.bg-danger *,
+.bg-info *,
+.bg-secondary *,
+.card.bg-primary *,
+.card.bg-success *,
+.card.bg-warning *,
+.card.bg-danger *,
+.card.bg-info *,
+.card.bg-secondary * {
+    color: #ffffff !important;
+}
+
+/* Specific fixes for common elements */
+.bg-primary h1,
+.bg-primary h2,
+.bg-primary h3,
+.bg-primary h4,
+.bg-primary h5,
+.bg-primary h6,
+.bg-primary p,
+.bg-primary span,
+.bg-primary div,
+.bg-success h1,
+.bg-success h2,
+.bg-success h3,
+.bg-success h4,
+.bg-success h5,
+.bg-success h6,
+.bg-success p,
+.bg-success span,
+.bg-success div,
+.bg-warning h1,
+.bg-warning h2,
+.bg-warning h3,
+.bg-warning h4,
+.bg-warning h5,
+.bg-warning h6,
+.bg-warning p,
+.bg-warning span,
+.bg-warning div,
+.bg-danger h1,
+.bg-danger h2,
+.bg-danger h3,
+.bg-danger h4,
+.bg-danger h5,
+.bg-danger h6,
+.bg-danger p,
+.bg-danger span,
+.bg-danger div,
+.bg-info h1,
+.bg-info h2,
+.bg-info h3,
+.bg-info h4,
+.bg-info h5,
+.bg-info h6,
+.bg-info p,
+.bg-info span,
+.bg-info div,
+.bg-secondary h1,
+.bg-secondary h2,
+.bg-secondary h3,
+.bg-secondary h4,
+.bg-secondary h5,
+.bg-secondary h6,
+.bg-secondary p,
+.bg-secondary span,
+.bg-secondary div {
+    color: #ffffff !important;
+}
+
+/* Fix for FontAwesome icons */
+.bg-primary i,
+.bg-success i,
+.bg-warning i,
+.bg-danger i,
+.bg-info i,
+.bg-secondary i,
+.card.bg-primary i,
+.card.bg-success i,
+.card.bg-warning i,
+.card.bg-danger i,
+.card.bg-info i,
+.card.bg-secondary i {
+    color: #ffffff !important;
+}
+
+/* Ensure badges maintain their colors but text is visible */
+.badge.bg-primary,
+.badge.bg-success,
+.badge.bg-warning,
+.badge.bg-danger,
+.badge.bg-info,
+.badge.bg-secondary {
+    color: #ffffff !important;
+}
+
+/* Override any conflicting styles */
+.card-body.bg-primary,
+.card-body.bg-success,
+.card-body.bg-warning,
+.card-body.bg-danger,
+.card-body.bg-info,
+.card-body.bg-secondary {
+    color: #ffffff !important;
+}
+
+/* Additional specificity for analytics and dashboard pages */
+.container .card.bg-primary,
+.container .card.bg-success,
+.container .card.bg-warning,
+.container .card.bg-danger,
+.container .card.bg-info,
+.container .card.bg-secondary {
+    color: #ffffff !important;
+}
+
+.container .card.bg-primary *,
+.container .card.bg-success *,
+.container .card.bg-warning *,
+.container .card.bg-danger *,
+.container .card.bg-info *,
+.container .card.bg-secondary * {
+    color: #ffffff !important;
+}
+
+/* Force text visibility with text shadow for better contrast */
+.bg-primary h1,
+.bg-primary h2,
+.bg-primary h3,
+.bg-primary h4,
+.bg-primary h5,
+.bg-primary h6,
+.bg-success h1,
+.bg-success h2,
+.bg-success h3,
+.bg-success h4,
+.bg-success h5,
+.bg-success h6,
+.bg-warning h1,
+.bg-warning h2,
+.bg-warning h3,
+.bg-warning h4,
+.bg-warning h5,
+.bg-warning h6,
+.bg-danger h1,
+.bg-danger h2,
+.bg-danger h3,
+.bg-danger h4,
+.bg-danger h5,
+.bg-danger h6,
+.bg-info h1,
+.bg-info h2,
+.bg-info h3,
+.bg-info h4,
+.bg-info h5,
+.bg-info h6,
+.bg-secondary h1,
+.bg-secondary h2,
+.bg-secondary h3,
+.bg-secondary h4,
+.bg-secondary h5,
+.bg-secondary h6 {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    color: #ffffff !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .bg-primary,
+    .bg-success,
+    .bg-warning,
+    .bg-danger,
+    .bg-info,
+    .bg-secondary {
+        color: #ffffff !important;
+    }
+    
+    .container .card.bg-primary,
+    .container .card.bg-success,
+    .container .card.bg-warning,
+    .container .card.bg-danger,
+    .container .card.bg-info,
+    .container .card.bg-secondary {
+        color: #ffffff !important;
+    }
+}
+
+/* Enhanced card styling with hover effects */
+.card.bg-primary:hover,
+.card.bg-success:hover,
+.card.bg-warning:hover,
+.card.bg-danger:hover,
+.card.bg-info:hover,
+.card.bg-secondary:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Enhanced icon styling */
+.bg-primary i,
+.bg-success i,
+.bg-warning i,
+.bg-danger i,
+.bg-info i,
+.bg-secondary i {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) !important;
+}
+
+/* Enhanced badge styling */
+.badge.bg-primary,
+.badge.bg-success,
+.badge.bg-warning,
+.badge.bg-danger,
+.badge.bg-info,
+.badge.bg-secondary {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Enhanced text styling */
+.bg-primary h1, .bg-primary h2, .bg-primary h3, .bg-primary h4, .bg-primary h5, .bg-primary h6,
+.bg-success h1, .bg-success h2, .bg-success h3, .bg-success h4, .bg-success h5, .bg-success h6,
+.bg-warning h1, .bg-warning h2, .bg-warning h3, .bg-warning h4, .bg-warning h5, .bg-warning h6,
+.bg-danger h1, .bg-danger h2, .bg-danger h3, .bg-danger h4, .bg-danger h5, .bg-danger h6,
+.bg-info h1, .bg-info h2, .bg-info h3, .bg-info h4, .bg-info h5, .bg-info h6,
+.bg-secondary h1, .bg-secondary h2, .bg-secondary h3, .bg-secondary h4, .bg-secondary h5, .bg-secondary h6 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Additional colorful enhancements */
+.card {
+    border-radius: 15px !important;
+    overflow: hidden !important;
+}
+
+.card-body {
+    padding: 1.5rem !important;
+}
+
+/* Force card-body backgrounds to inherit from parent card */
+.card.bg-primary .card-body,
+.card.bg-success .card-body,
+.card.bg-warning .card-body,
+.card.bg-danger .card-body,
+.card.bg-info .card-body,
+.card.bg-secondary .card-body {
+    background-color: inherit !important;
+    background: inherit !important;
+    color: #ffffff !important;
+}
+
+/* Override any conflicting base styles with maximum specificity */
+.container .card.bg-primary .card-body,
+.container .card.bg-success .card-body,
+.container .card.bg-warning .card-body,
+.container .card.bg-danger .card-body,
+.container .card.bg-info .card-body,
+.container .card.bg-secondary .card-body,
+div.card.bg-primary .card-body,
+div.card.bg-success .card-body,
+div.card.bg-warning .card-body,
+div.card.bg-danger .card-body,
+div.card.bg-info .card-body,
+div.card.bg-secondary .card-body {
+    background-color: inherit !important;
+    background: inherit !important;
+    color: #ffffff !important;
+}
+
+/* Force override for any remaining conflicts */
+.card.bg-primary .card-body,
+.card.bg-success .card-body,
+.card.bg-warning .card-body,
+.card.bg-danger .card-body,
+.card.bg-info .card-body,
+.card.bg-secondary .card-body {
+    background-color: inherit !important;
+    background: inherit !important;
+    color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* Mobile hover effects disabled */
+@media (max-width: 768px) {
+    .card.bg-primary:hover,
+    .card.bg-success:hover,
+    .card.bg-warning:hover,
+    .card.bg-danger:hover,
+    .card.bg-info:hover,
+    .card.bg-secondary:hover {
+        transform: none !important;
+    }
+}

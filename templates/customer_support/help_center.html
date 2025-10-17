@@ -1,0 +1,292 @@
+{% extends "base/base.html" %}
+{% block title %}Help Center - A2Z Mart{% endblock %}
+{% block start %}
+
+<style>
+    .help-center {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    .search-box {
+        background: white;
+        border-radius: 50px;
+        padding: 1rem 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    .category-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+    }
+    .category-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    .faq-item {
+        background: white;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .faq-question {
+        padding: 1.5rem;
+        cursor: pointer;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    .faq-answer {
+        padding: 1.5rem;
+        color: #4a5568;
+        display: none;
+    }
+    .contact-methods {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+    .contact-method {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        text-align: center;
+    }
+</style>
+
+<div class="help-center">
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 font-weight-bold text-primary mb-3">
+                <i class="fas fa-question-circle"></i> Help Center
+            </h1>
+            <p class="lead text-muted">Find answers to your questions or get in touch with our support team</p>
+        </div>
+
+        <!-- Search Box -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="search-box">
+                    <div class="input-group">
+                        <input type="text" class="form-control form-control-lg border-0" 
+                               placeholder="Search for help articles, FAQs, or topics..." 
+                               id="helpSearch">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary btn-lg px-4" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Help Categories -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3 class="text-center mb-4">Quick Help</h3>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="category-card text-center">
+                    <div class="category-icon text-primary">🛒</div>
+                    <h5>Orders & Shipping</h5>
+                    <p class="text-muted">Track orders, shipping info, delivery times</p>
+                    <a href="#orders" class="btn btn-outline-primary">Get Help</a>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="category-card text-center">
+                    <div class="category-icon text-success">💳</div>
+                    <h5>Payments & Billing</h5>
+                    <p class="text-muted">Payment methods, refunds, billing questions</p>
+                    <a href="#payments" class="btn btn-outline-success">Get Help</a>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="category-card text-center">
+                    <div class="category-icon text-warning">🔄</div>
+                    <h5>Returns & Exchanges</h5>
+                    <p class="text-muted">Return policy, exchange process, refunds</p>
+                    <a href="#returns" class="btn btn-outline-warning">Get Help</a>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="category-card text-center">
+                    <div class="category-icon text-info">👤</div>
+                    <h5>Account & Profile</h5>
+                    <p class="text-muted">Account settings, profile management</p>
+                    <a href="#account" class="btn btn-outline-info">Get Help</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frequently Asked Questions -->
+        <div class="row">
+            <div class="col-12">
+                <h3 class="text-center mb-4">Frequently Asked Questions</h3>
+            </div>
+            <div class="col-md-8 mx-auto">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-chevron-down float-right"></i>
+                        How do I track my order?
+                    </div>
+                    <div class="faq-answer">
+                        You can track your order by logging into your account and going to "Order History" or by using the tracking number sent to your email. We'll also send you updates when your order status changes.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-chevron-down float-right"></i>
+                        What payment methods do you accept?
+                    </div>
+                    <div class="faq-answer">
+                        We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and Cash on Delivery (COD) for local orders. All payments are processed securely.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-chevron-down float-right"></i>
+                        What is your return policy?
+                    </div>
+                    <div class="faq-answer">
+                        We offer a 30-day return policy for most items. Items must be in original condition with tags attached. Some items like electronics have a 14-day return window. Contact us to initiate a return.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-chevron-down float-right"></i>
+                        How long does shipping take?
+                    </div>
+                    <div class="faq-answer">
+                        Standard shipping takes 3-5 business days. Express shipping (1-2 days) is available for an additional fee. We also offer same-day delivery in select areas.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-chevron-down float-right"></i>
+                        Can I change or cancel my order?
+                    </div>
+                    <div class="faq-answer">
+                        You can modify or cancel your order within 1 hour of placing it, as long as it hasn't been processed for shipping. Contact our support team immediately for assistance.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-chevron-down float-right"></i>
+                        Do you offer international shipping?
+                    </div>
+                    <div class="faq-answer">
+                        Currently, we ship within Lebanon and select Middle Eastern countries. International shipping is available for certain products. Contact us for specific shipping options to your country.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Methods -->
+        <div class="contact-methods">
+            <div class="row">
+                <div class="col-12 text-center mb-4">
+                    <h3>Still Need Help?</h3>
+                    <p>Get in touch with our support team</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-method">
+                        <i class="fas fa-phone fa-2x mb-3"></i>
+                        <h5>Call Us</h5>
+                        <p>+961 1 234 567</p>
+                        <small>Mon-Fri: 9AM-6PM</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-method">
+                        <i class="fas fa-envelope fa-2x mb-3"></i>
+                        <h5>Email Us</h5>
+                        <p>support@a2zmart.com</p>
+                        <small>Response within 24 hours</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="contact-method">
+                        <i class="fab fa-whatsapp fa-2x mb-3"></i>
+                        <h5>WhatsApp</h5>
+                        <p>+961 1 234 567</p>
+                        <small>Quick responses</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Chat -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6 text-center">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-comments text-primary"></i> Live Chat</h5>
+                        <p class="text-muted">Chat with our support team in real-time</p>
+                        <button class="btn btn-primary btn-lg" onclick="startLiveChat()">
+                            Start Chat
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFAQ(element) {
+    const answer = element.nextElementSibling;
+    const icon = element.querySelector('i');
+    
+    if (answer.style.display === 'block') {
+        answer.style.display = 'none';
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+    } else {
+        answer.style.display = 'block';
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+    }
+}
+
+function startLiveChat() {
+    // Implement live chat functionality
+    alert('Live chat feature will be implemented soon!');
+}
+
+// Search functionality
+document.getElementById('helpSearch').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question').textContent.toLowerCase();
+        const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+        
+        if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+</script>
+
+{% endblock %}

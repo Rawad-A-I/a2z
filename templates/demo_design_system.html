@@ -1,0 +1,418 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Design System Demo{% endblock %}
+
+{% block start %}
+<style>
+/* Force color fixes for demo design system */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-warning,
+.card.bg-error,
+.card.bg-secondary {
+    color: #ffffff !important;
+}
+
+.card.bg-primary *,
+.card.bg-success *,
+.card.bg-warning *,
+.card.bg-error *,
+.card.bg-secondary * {
+    color: #ffffff !important;
+}
+
+.card.bg-primary div,
+.card.bg-success div,
+.card.bg-warning div,
+.card.bg-error div,
+.card.bg-secondary div {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+</style>
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="text-3xl font-bold text-primary">🎨 Modern Design System Demo</h1>
+          <p class="text-secondary mt-2">See the new responsive, accessible, and performant design system in action!</p>
+        </div>
+        <div class="card-body">
+          
+          <!-- Color System -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">🎨 Color System</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div class="card bg-primary text-white text-center p-4">
+                <div class="font-bold">Primary</div>
+                <div class="text-sm opacity-90">#6366f1</div>
+              </div>
+              <div class="card bg-success text-white text-center p-4">
+                <div class="font-bold">Success</div>
+                <div class="text-sm opacity-90">#10b981</div>
+              </div>
+              <div class="card bg-warning text-white text-center p-4">
+                <div class="font-bold">Warning</div>
+                <div class="text-sm opacity-90">#f59e0b</div>
+              </div>
+              <div class="card bg-error text-white text-center p-4">
+                <div class="font-bold">Error</div>
+                <div class="text-sm opacity-90">#ef4444</div>
+              </div>
+              <div class="card bg-secondary text-white text-center p-4">
+                <div class="font-bold">Secondary</div>
+                <div class="text-sm opacity-90">#d946ef</div>
+              </div>
+              <div class="card bg-gray-100 text-gray-900 text-center p-4">
+                <div class="font-bold">Gray</div>
+                <div class="text-sm opacity-90">#f3f4f6</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Typography -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">📝 Typography</h2>
+            <div class="space-y-4">
+              <h1 class="text-4xl font-bold">Heading 1 - 4xl</h1>
+              <h2 class="text-3xl font-bold">Heading 2 - 3xl</h2>
+              <h3 class="text-2xl font-semibold">Heading 3 - 2xl</h3>
+              <h4 class="text-xl font-semibold">Heading 4 - xl</h4>
+              <h5 class="text-lg font-semibold">Heading 5 - lg</h5>
+              <h6 class="text-base font-semibold">Heading 6 - base</h6>
+              <p class="text-base">Body text - base size with good line height for readability</p>
+              <p class="text-sm text-secondary">Small text - sm size for captions and metadata</p>
+              <p class="text-xs text-tertiary">Extra small text - xs size for fine print</p>
+            </div>
+          </section>
+
+          <!-- Buttons -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">🔘 Buttons</h2>
+            <div class="flex flex-wrap gap-4">
+              <button class="btn btn-primary">
+                <i class="fas fa-star"></i>
+                Primary Button
+              </button>
+              <button class="btn btn-secondary">
+                <i class="fas fa-heart"></i>
+                Secondary Button
+              </button>
+              <button class="btn btn-outline">
+                <i class="fas fa-eye"></i>
+                Outline Button
+              </button>
+              <button class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+                Danger Button
+              </button>
+              <button class="btn btn-sm">
+                <i class="fas fa-plus"></i>
+                Small Button
+              </button>
+              <button class="btn btn-lg">
+                <i class="fas fa-download"></i>
+                Large Button
+              </button>
+            </div>
+          </section>
+
+          <!-- Cards -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">🃏 Cards</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="font-semibold">Basic Card</h3>
+                </div>
+                <div class="card-body">
+                  <p>This is a basic card with header and body content.</p>
+                </div>
+              </div>
+              
+              <div class="card bg-primary text-white">
+                <div class="card-body">
+                  <h3 class="font-semibold mb-2">Primary Card</h3>
+                  <p>This card uses the primary color scheme.</p>
+                </div>
+              </div>
+              
+              <div class="card">
+                <div class="card-body">
+                  <h3 class="font-semibold mb-2">Simple Card</h3>
+                  <p>This card has no header, just body content.</p>
+                  <div class="mt-4">
+                    <button class="btn btn-primary btn-sm">Action</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Forms -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">📝 Forms</h2>
+            <div class="card">
+              <div class="card-body">
+                <form class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="Enter your name">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="category" class="form-label">Category</label>
+                    <select id="category" class="form-control">
+                      <option value="">Select a category</option>
+                      <option value="electronics">Electronics</option>
+                      <option value="clothing">Clothing</option>
+                      <option value="books">Books</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="message" class="form-label">Message</label>
+                    <textarea id="message" class="form-control" rows="3" placeholder="Enter your message"></textarea>
+                  </div>
+                  
+                  <div class="form-group sm:col-span-2">
+                    <div class="form-check">
+                      <input type="checkbox" id="newsletter" class="form-check-input">
+                      <label for="newsletter" class="form-check-label">Subscribe to newsletter</label>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group sm:col-span-2">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-paper-plane"></i>
+                      Submit Form
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <!-- Product Grid Demo -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">🛍️ Product Grid</h2>
+            <div class="responsive-product-grid">
+              <!-- Demo Product 1 -->
+              <div class="product-card-mobile">
+                <div class="product-image-container">
+                  <div class="product-image-placeholder">
+                    <i class="fas fa-image"></i>
+                  </div>
+                  <div class="product-badges">
+                    <span class="badge badge-featured">Featured</span>
+                  </div>
+                </div>
+                <div class="product-info-mobile">
+                  <h3 class="product-title-mobile">Sample Product 1</h3>
+                  <div class="product-category">
+                    <span class="category-badge">Electronics</span>
+                  </div>
+                  <div class="product-price-container">
+                    <span class="product-price-mobile">$99.99</span>
+                  </div>
+                  <div class="product-actions">
+                    <button class="btn btn-outline">
+                      <i class="fas fa-eye"></i>
+                      <span>View</span>
+                    </button>
+                    <button class="btn btn-primary">
+                      <i class="fas fa-shopping-cart"></i>
+                      <span>Add to Cart</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Demo Product 2 -->
+              <div class="product-card-mobile">
+                <div class="product-image-container">
+                  <div class="product-image-placeholder">
+                    <i class="fas fa-image"></i>
+                  </div>
+                  <div class="product-badges">
+                    <span class="badge badge-new">New</span>
+                  </div>
+                </div>
+                <div class="product-info-mobile">
+                  <h3 class="product-title-mobile">Sample Product 2</h3>
+                  <div class="product-category">
+                    <span class="category-badge">Clothing</span>
+                  </div>
+                  <div class="product-price-container">
+                    <span class="product-price-mobile">$49.99</span>
+                  </div>
+                  <div class="product-actions">
+                    <button class="btn btn-outline">
+                      <i class="fas fa-eye"></i>
+                      <span>View</span>
+                    </button>
+                    <button class="btn btn-primary">
+                      <i class="fas fa-shopping-cart"></i>
+                      <span>Add to Cart</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Demo Product 3 -->
+              <div class="product-card-mobile">
+                <div class="product-image-container">
+                  <div class="product-image-placeholder">
+                    <i class="fas fa-image"></i>
+                  </div>
+                  <div class="product-badges">
+                    <span class="badge badge-out-of-stock">Out of Stock</span>
+                  </div>
+                </div>
+                <div class="product-info-mobile">
+                  <h3 class="product-title-mobile">Sample Product 3</h3>
+                  <div class="product-category">
+                    <span class="category-badge">Books</span>
+                  </div>
+                  <div class="product-price-container">
+                    <span class="product-price-mobile">$19.99</span>
+                  </div>
+                  <div class="product-actions">
+                    <button class="btn btn-outline">
+                      <i class="fas fa-eye"></i>
+                      <span>View</span>
+                    </button>
+                    <button class="btn btn-secondary" disabled>
+                      <i class="fas fa-times"></i>
+                      <span>Out of Stock</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Responsive Grid Demo -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">📱 Responsive Grid</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="card bg-primary text-white text-center p-4">
+                <div class="text-2xl font-bold">1</div>
+                <div class="text-sm">Mobile</div>
+              </div>
+              <div class="card bg-success text-white text-center p-4">
+                <div class="text-2xl font-bold">2</div>
+                <div class="text-sm">Tablet</div>
+              </div>
+              <div class="card bg-warning text-white text-center p-4">
+                <div class="text-2xl font-bold">3</div>
+                <div class="text-sm">Desktop</div>
+              </div>
+              <div class="card bg-error text-white text-center p-4">
+                <div class="text-2xl font-bold">4</div>
+                <div class="text-sm">Large</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Accessibility Features -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">♿ Accessibility Features</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div class="card">
+                <div class="card-body">
+                  <h3 class="font-semibold mb-2">Focus Management</h3>
+                  <p class="text-sm text-secondary mb-4">All interactive elements have visible focus indicators</p>
+                  <button class="btn btn-primary" onclick="this.focus()">Try Focus</button>
+                </div>
+              </div>
+              
+              <div class="card">
+                <div class="card-body">
+                  <h3 class="font-semibold mb-2">Touch Targets</h3>
+                  <p class="text-sm text-secondary mb-4">All buttons are 44px+ for mobile accessibility</p>
+                  <button class="btn btn-outline">Touch Friendly</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Performance Features -->
+          <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">⚡ Performance Features</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="card text-center p-4">
+                <i class="fas fa-rocket text-3xl text-primary mb-2"></i>
+                <h3 class="font-semibold">Fast Loading</h3>
+                <p class="text-sm text-secondary">Optimized CSS and JavaScript</p>
+              </div>
+              
+              <div class="card text-center p-4">
+                <i class="fas fa-mobile-alt text-3xl text-success mb-2"></i>
+                <h3 class="font-semibold">Mobile First</h3>
+                <p class="text-sm text-secondary">Responsive design from 320px+</p>
+              </div>
+              
+              <div class="card text-center p-4">
+                <i class="fas fa-eye text-3xl text-warning mb-2"></i>
+                <h3 class="font-semibold">Lazy Loading</h3>
+                <p class="text-sm text-secondary">Images load as needed</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Demo interactions
+document.addEventListener('DOMContentLoaded', function() {
+  // Add hover effects to demo cards
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px)';
+      this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.15)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+      this.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+    });
+  });
+
+  // Add click animations to buttons
+  const buttons = document.querySelectorAll('.btn');
+  buttons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.classList.add('ripple');
+      
+      this.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  });
+});
+</script>
+{% endblock %}

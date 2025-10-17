@@ -1,0 +1,415 @@
+{% extends 'base/base.html' %}
+{% block title %}Order Details - #{{ order.order_id }}{% endblock title%}
+{% load static %} 
+
+{% block start %}
+<div class="container-fluid py-4">
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="mb-1 text-dark fw-bold">Order Details</h2>
+          <p class="text-muted mb-0">Order #{{ order.order_id }} - {{ order.get_status_display }}</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary" onclick="printOrder()">
+            <i class="fas fa-print me-2"></i>Print
+          </button>
+          <a href="{% url 'download_invoice' order.order_id %}" class="btn btn-success">
+            <i class="fas fa-download me-2"></i>Download Invoice
+          </a>
+          <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Orders
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Order Items -->
+    <div class="col-lg-8 mb-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+          <h5 class="mb-0 fw-bold text-dark">
+            <i class="fas fa-shopping-cart me-2 text-primary"></i>Order Items
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="border-0 py-3 px-4">Product</th>
+                  <th class="border-0 py-3">Size</th>
+                  <th class="border-0 py-3">Color</th>
+                  <th class="border-0 py-3">Quantity</th>
+                  <th class="border-0 py-3 text-end">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order_items.all %}
+                <tr class="border-bottom">
+                  <td class="py-3 px-4">
+                    <div class="d-flex align-items-center">
+                      <div class="bg-light rounded me-3" style="width: 50px; height: 50px;">
+                        {% if item.product.product_image %}
+                        <img src="{{ item.product.product_image.url }}" class="w-100 h-100 rounded" style="object-fit: cover;">
+                        {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                          <i class="fas fa-image text-muted"></i>
+                        </div>
+                        {% endif %}
+                      </div>
+                      <div>
+                        <a href="{% url 'get_product' item.product.slug %}" class="fw-medium text-dark text-decoration-none">
+                          {{ item.product.product_name }}
+                        </a>
+                        <br><small class="text-muted">SKU: {{ item.product.sku|default:"N/A" }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3">
+                    <span class="badge bg-light text-dark">{{ item.size_variant.size_name|default:"N/A" }}</span>
+                  </td>
+                  <td class="py-3">
+                    {% if item.size_variant %}
+                      {% for color in item.product.color_variant.all %}
+                        <span class="badge bg-light text-dark">{{ color.color_name|default:"N/A" }}</span>
+                      {% endfor %}
+                    {% else %}
+                      <span class="text-muted">N/A</span>
+                    {% endif %}
+                  </td>
+                  <td class="py-3">
+                    <span class="fw-medium">{{ item.quantity }}</span>
+                  </td>
+                  <td class="py-3 text-end">
+                    <span class="fw-bold">${{ item.product_price }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Order Items End -->
+
+
+    <!-- Order Information & Progress -->
+    <div class="col-lg-4">
+      <!-- Order Status Progress -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 py-3">
+          <h5 class="mb-0 fw-bold text-dark">
+            <i class="fas fa-truck me-2 text-primary"></i>Order Progress
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="order-tracking">
+            <div class="tracking-steps">
+              <div class="tracking-step {% if order.status == 'pending' or order.status == 'confirmed' or order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                <div class="step-icon">
+                  <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Order Placed</div>
+                  <div class="step-date">{{ order.order_date|date:"M d, Y H:i" }}</div>
+                </div>
+              </div>
+              
+              <div class="tracking-step {% if order.status == 'confirmed' or order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                <div class="step-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Order Confirmed</div>
+                  <div class="step-date">
+                    {% if order.confirmed_date %}
+                      {{ order.confirmed_date|date:"M d, Y H:i" }}
+                    {% else %}
+                      Pending
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="tracking-step {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                <div class="step-icon">
+                  <i class="fas fa-cogs"></i>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Processing</div>
+                  <div class="step-date">
+                    {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}
+                      In Progress
+                    {% else %}
+                      Pending
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="tracking-step {% if order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                <div class="step-icon">
+                  <i class="fas fa-shipping-fast"></i>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Shipped</div>
+                  <div class="step-date">
+                    {% if order.status == 'shipped' or order.status == 'delivered' %}
+                      On the way
+                    {% else %}
+                      Pending
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="tracking-step {% if order.status == 'delivered' %}active{% endif %}">
+                <div class="step-icon">
+                  <i class="fas fa-home"></i>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Delivered</div>
+                  <div class="step-date">
+                    {% if order.status == 'delivered' %}
+                      Delivered
+                    {% else %}
+                      Pending
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Order Information -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 py-3">
+          <h5 class="mb-0 fw-bold text-dark">
+            <i class="fas fa-info-circle me-2 text-info"></i>Order Information
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-hashtag text-muted me-2"></i>
+                <div>
+                  <small class="text-muted">Order ID</small>
+                  <div class="fw-bold">#{{ order.order_id }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-calendar text-muted me-2"></i>
+                <div>
+                  <small class="text-muted">Order Date</small>
+                  <div class="fw-bold">{{ order.order_date|date:"M d, Y" }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-user text-muted me-2"></i>
+                <div>
+                  <small class="text-muted">Customer</small>
+                  <div class="fw-bold">{{ order.user.get_full_name|default:order.user.username }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-tag text-muted me-2"></i>
+                <div>
+                  <small class="text-muted">Status</small>
+                  <div>
+                    <span class="badge bg-{% if order.status == 'pending' %}warning{% elif order.status == 'confirmed' %}info{% elif order.status == 'processing' %}primary{% elif order.status == 'shipped' %}success{% elif order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %} px-3 py-2">
+                      {{ order.get_status_display }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-credit-card text-muted me-2"></i>
+                <div>
+                  <small class="text-muted">Payment Status</small>
+                  <div class="fw-bold">{{ order.payment_status }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-money-bill text-muted me-2"></i>
+                <div>
+                  <small class="text-muted">Payment Mode</small>
+                  <div class="fw-bold">{{ order.payment_mode }}</div>
+                </div>
+              </div>
+            </div>
+            {% if order.assigned_employee %}
+            <div class="col-12">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-user-tie text-muted me-2"></i>
+                <div>
+                  <small class="text-muted">Assigned Employee</small>
+                  <div class="fw-bold">{{ order.assigned_employee.get_full_name|default:order.assigned_employee.username }}</div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if order.notes %}
+            <div class="col-12">
+              <div class="d-flex align-items-start">
+                <i class="fas fa-sticky-note text-muted me-2 mt-1"></i>
+                <div>
+                  <small class="text-muted">Notes</small>
+                  <div class="fw-bold">{{ order.notes }}</div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Summary -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+          <h5 class="mb-0 fw-bold text-dark">
+            <i class="fas fa-receipt me-2 text-success"></i>Payment Summary
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">Item(s) Subtotal:</span>
+            <span class="fw-bold">${{ order.order_total_price }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">Coupon Applied:</span>
+            <span class="fw-bold text-success">-${{ order.coupon.discount_amount|default:"0" }}</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Grand Total:</span>
+            <span class="fw-bold text-primary h5 mb-0">${{ order.grand_total }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function printOrder() {
+  window.print();
+}
+</script>
+
+<style>
+.order-tracking {
+  position: relative;
+}
+
+.tracking-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tracking-step {
+  display: flex;
+  align-items: center;
+  position: relative;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.tracking-step.active {
+  opacity: 1;
+}
+
+.tracking-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 40px;
+  width: 2px;
+  height: 20px;
+  background: #e9ecef;
+  z-index: 1;
+}
+
+.tracking-step.active:not(:last-child)::after {
+  background: #28a745;
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.tracking-step.active .step-icon {
+  background: #28a745;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: #333;
+}
+
+.step-date {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.tracking-step.active .step-title {
+  color: #28a745;
+}
+
+.tracking-step.active .step-date {
+  color: #28a745;
+}
+
+@media (max-width: 768px) {
+  .tracking-steps {
+    gap: 15px;
+  }
+  
+  .step-icon {
+    width: 35px;
+    height: 35px;
+    margin-right: 12px;
+  }
+  
+  .tracking-step:not(:last-child)::after {
+    left: 17px;
+    top: 35px;
+  }
+}
+</style>
+{% endblock %}

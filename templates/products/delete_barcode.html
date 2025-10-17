@@ -1,0 +1,51 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Delete Barcode - Employee Dashboard{% endblock %}
+
+{% block start %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-trash"></i> Delete Barcode</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Warning:</strong> This action cannot be undone.
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Product:</strong> {{ product.product_name }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Barcode:</strong> <code class="bg-light p-2 rounded">{{ barcode.barcode_value }}</code>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Type:</strong> {{ barcode.get_barcode_type_display }}
+                    </div>
+                    {% if barcode.is_primary %}
+                    <div class="mb-3">
+                        <span class="badge bg-danger">Primary Barcode</span>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'product_barcode_management' product.uid %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Barcode
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

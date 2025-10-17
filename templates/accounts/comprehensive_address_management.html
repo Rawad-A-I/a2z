@@ -1,0 +1,220 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Address Management{% endblock %}
+
+{% block start %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  .map-container {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .address-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .address-card.default {
+    border-color: #28a745;
+    background-color: #f8fff8;
+  }
+  
+  .address-actions {
+    margin-top: 10px;
+  }
+  
+  .address-actions .btn {
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+  
+  .btn-locate {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-locate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+  }
+  
+  .profile-address {
+    background: #e3f2fd;
+    border: 1px solid #2196f3;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .shipping-addresses {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <!-- Profile Address Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h4><i class="fas fa-user"></i> Profile Address</h4>
+        </div>
+        <div class="card-body">
+          <div class="profile-address">
+            <h5>Your Primary Address</h5>
+            {% if profile.shipping_address %}
+              <p class="mb-2">{{ profile.shipping_address }}</p>
+              {% if profile.phone_number %}
+                <p class="mb-2"><i class="fas fa-phone"></i> {{ profile.phone_number }}</p>
+              {% endif %}
+              <div class="address-actions">
+                <a href="{% url 'update_profile_address' %}" class="btn btn-primary btn-sm">
+                  <i class="fas fa-edit"></i> Edit Address
+                </a>
+                <a href="{% url 'address_management' %}" class="btn btn-info btn-sm">
+                  <i class="fas fa-map"></i> View on Map
+                </a>
+              </div>
+            {% else %}
+              <p class="text-muted">No address set</p>
+              <a href="{% url 'update_profile_address' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-plus"></i> Add Address
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Shipping Addresses Section -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4><i class="fas fa-shipping-fast"></i> Shipping Addresses</h4>
+          <a href="{% url 'add_shipping_address' %}" class="btn btn-success btn-sm">
+            <i class="fas fa-plus"></i> Add New Address
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="shipping-addresses">
+            {% if shipping_addresses %}
+              {% for address in shipping_addresses %}
+              <div class="address-card {% if address.current_address %}default{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6>
+                      {{ address.first_name }} {{ address.last_name }}
+                      {% if address.current_address %}
+                        <span class="badge badge-success">Default</span>
+                      {% endif %}
+                    </h6>
+                    <p class="mb-1">{{ address.street }} {{ address.street_number }}</p>
+                    <p class="mb-1">{{ address.city }}, {{ address.state }} {{ address.zip_code }}</p>
+                    <p class="mb-1">{{ address.country.name }}</p>
+                    <p class="mb-1"><i class="fas fa-phone"></i> {{ address.phone }}</p>
+                  </div>
+                  <div class="address-actions">
+                    {% if not address.current_address %}
+                      <a href="{% url 'set_default_address' address.uid %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-star"></i> Set Default
+                      </a>
+                    {% endif %}
+                    <a href="{% url 'edit_shipping_address' address.uid %}" class="btn btn-primary btn-sm">
+                      <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'delete_shipping_address' address.uid %}" class="btn btn-danger btn-sm" 
+                       onclick="return confirm('Are you sure you want to delete this address?')">
+                      <i class="fas fa-trash"></i> Delete
+                    </a>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="text-center text-muted">
+                <i class="fas fa-shipping-fast fa-3x mb-3"></i>
+                <p>No shipping addresses added yet.</p>
+                <a href="{% url 'add_shipping_address' %}" class="btn btn-success">
+                  <i class="fas fa-plus"></i> Add Your First Address
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <!-- Quick Actions -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{% url 'update_profile_address' %}" class="btn btn-primary">
+              <i class="fas fa-user-edit"></i> Update Profile Address
+            </a>
+            <a href="{% url 'add_shipping_address' %}" class="btn btn-success">
+              <i class="fas fa-plus"></i> Add Shipping Address
+            </a>
+            <a href="{% url 'address_management' %}" class="btn btn-info">
+              <i class="fas fa-map"></i> View on Map
+            </a>
+            <a href="{% url 'store_locator' %}" class="btn btn-warning">
+              <i class="fas fa-store"></i> Find Stores
+            </a>
+            <a href="{% url 'click_and_collect' %}" class="btn btn-secondary">
+              <i class="fas fa-shopping-bag"></i> Click & Collect
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Address Tips -->
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-lightbulb"></i> Address Tips</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Keep your profile address updated</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Add multiple addresses for convenience</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Set a default address for faster checkout</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Use accurate ZIP codes for delivery estimates</li>
+            <li class="mb-0"><i class="fas fa-check text-success"></i> Include phone numbers for delivery coordination</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Add some interactive features
+document.addEventListener('DOMContentLoaded', function() {
+  // Address card functionality without hover effects
+  
+  // Add confirmation for delete actions
+  const deleteButtons = document.querySelectorAll('a[href*="delete"]');
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      if (!confirm('Are you sure you want to delete this address?')) {
+        e.preventDefault();
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

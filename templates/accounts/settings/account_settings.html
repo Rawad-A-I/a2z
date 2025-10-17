@@ -1,0 +1,212 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Account Settings - A2Z Mart{% endblock %}
+
+{% block extra_css %}
+<!-- Tailwind CSS (CDN for now) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="{% static 'css/account-settings-mobile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="mobile-account-settings">
+    <!-- Header -->
+    <div class="mobile-header">
+        <div class="flex items-center justify-between p-4 bg-white border-b border-gray-200">
+            <button onclick="goBack()" class="text-gray-600 hover:text-gray-900 p-2">
+                <i class="fas fa-arrow-left text-lg"></i>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">Account Settings</h1>
+            <div class="w-10"></div> <!-- Spacer for centering -->
+        </div>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="profile-section bg-white mx-4 mt-4 rounded-lg shadow-sm overflow-hidden">
+        <div class="p-6 text-center">
+            <!-- Profile Picture -->
+            <div class="relative inline-block mb-4">
+                <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mx-auto">
+                    {% if user.preferences.profile_picture %}
+                        <img id="profile-picture" src="{{ user.preferences.profile_picture.url }}" alt="Profile" class="w-full h-full object-cover">
+                    {% else %}
+                        <i class="fas fa-user text-gray-400 text-2xl"></i>
+                    {% endif %}
+                </div>
+                <button onclick="editProfilePicture()" class="absolute bottom-0 right-1/2 transform translate-x-1/2 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700">
+                    <i class="fas fa-camera text-xs"></i>
+                </button>
+            </div>
+
+            <!-- User Name -->
+            <h2 class="text-xl font-semibold text-gray-900">{{ user.get_full_name|default:user.username }}</h2>
+            <p class="text-sm text-gray-500 mt-1">{{ user.email }}</p>
+        </div>
+    </div>
+
+    <!-- Account Menu -->
+    <div class="account-menu mx-4 mt-4 space-y-2">
+        <!-- My Account Section Header -->
+        <div class="px-4 py-2">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">My Account</h3>
+        </div>
+
+        <!-- Notification -->
+        <div class="menu-item" onclick="openSection('notifications')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-bell text-blue-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Notification</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- My Order -->
+        <div class="menu-item" onclick="openSection('orders')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-box text-green-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">My Order</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="menu-item" onclick="openSection('payment')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-credit-card text-purple-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Payment</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Cart -->
+        <div class="menu-item" onclick="openSection('cart')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-shopping-cart text-orange-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Cart</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Wish List -->
+        <div class="menu-item" onclick="openSection('wishlist')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-heart text-red-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Wish List</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Password -->
+        <div class="menu-item" onclick="openSection('password')">
+            <div class="flex items-center justify-between p-4 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-lock text-gray-600"></i>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">Password</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-pages/Modals -->
+    <div id="section-content" class="hidden">
+        <!-- Notification Settings -->
+        <div id="notifications-page" class="section-page">
+            <div class="section-header">
+                <button onclick="goBackToMenu()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Notification Settings</h2>
+            </div>
+            <div class="section-content">
+                <div class="space-y-4 p-4">
+                    <div class="flex items-center justify-between p-4 bg-white rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-bell text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Order Updates</p>
+                                <p class="text-sm text-gray-500">Get notified when your order status changes</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-white rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-truck text-green-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Delivery Updates</p>
+                                <p class="text-sm text-gray-500">Get notified when your order is out for delivery</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-white rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-gift text-purple-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Promotions</p>
+                                <p class="text-sm text-gray-500">Receive special offers and promotions</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other sections would be implemented similarly -->
+        <div id="orders-page" class="section-page">
+            <div class="section-header">
+                <button onclick="goBackToMenu()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>My Orders</h2>
+            </div>
+            <div class="section-content">
+                <div class="p-4 text-center text-gray-500">
+                    <i class="fas fa-box text-4xl mb-4"></i>
+                    <p>Order history will be displayed here</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add similar sections for payment, cart, wishlist, password -->
+    </div>
+</div>
+
+<script src="{% static 'js/account-settings-mobile.js' %}"></script>
+{% endblock %}

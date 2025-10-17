@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to A2Z Mart</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .email-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .welcome-title {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        .features {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .feature-icon {
+            color: #667eea;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">🛒 A2Z Mart</div>
+            <h1 class="welcome-title">Welcome, {{ user.first_name|default:user.username }}!</h1>
+            <p>Thank you for joining our community. We're excited to have you on board!</p>
+        </div>
+
+        <div class="features">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">What you get as a member:</h3>
+            
+            <div class="feature-item">
+                <span class="feature-icon">🎯</span>
+                <span>Personalized product recommendations</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">💝</span>
+                <span>Exclusive deals and discounts</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">📦</span>
+                <span>Order tracking and history</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">❤️</span>
+                <span>Wishlist and favorites</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">🏆</span>
+                <span>Loyalty rewards program</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon">🚚</span>
+                <span>Fast and reliable delivery</span>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ site_url }}" class="cta-button">Start Shopping Now</a>
+        </div>
+
+        <div class="social-links" style="text-align: center;">
+            <p>Follow us for updates and special offers:</p>
+            <a href="#">Facebook</a> |
+            <a href="#">Instagram</a> |
+            <a href="#">Twitter</a>
+        </div>
+
+        <div class="footer">
+            <p>Need help? Contact us at support@a2zmart.com</p>
+            <p>© 2024 A2Z Mart. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

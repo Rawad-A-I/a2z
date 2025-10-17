@@ -1,0 +1,69 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Barcode Search - Employee Dashboard{% endblock %}
+
+{% block start %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-barcode"></i> Barcode Search</h4>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="barcode" class="form-control" 
+                                   placeholder="Enter barcode to search..." value="{{ barcode_value }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if product %}
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check-circle"></i> Product Found!</h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6><strong>{{ product.product_name }}</strong></h6>
+                                <p class="text-muted">{{ product.product_desription|truncatechars:100 }}</p>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <strong>Category:</strong> {{ product.category.category_name }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Price:</strong> ${{ product.price }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Stock:</strong> {{ product.stock_quantity }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a href="{% url 'product_barcode_management' product.uid %}" 
+                                   class="btn btn-info">
+                                    <i class="fas fa-barcode"></i> Manage Barcodes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif barcode_value %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        No product found with barcode: <code>{{ barcode_value }}</code>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <a href="{% url 'employee_product_management' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,249 @@
+{% comment %}
+Mobile-First Navigation Component
+Usage: {% include 'base/mobile_nav.html' %}
+{% endcomment %}
+
+{% load static %}
+
+<!-- Mobile Navigation -->
+<nav class="nav-mobile" role="navigation" aria-label="Main navigation">
+  <div class="nav-mobile-header">
+    <a href="{% url 'products_only' %}" class="nav-mobile-brand">
+      <img src="{% static 'images/logo.png' %}" alt="A2Z Mart" height="32">
+    </a>
+    
+    <button class="nav-mobile-toggle" 
+            onclick="toggleMobileMenu()" 
+            aria-expanded="false" 
+            aria-controls="mobile-menu"
+            aria-label="Toggle navigation menu">
+      <i class="fas fa-bars" id="menu-icon"></i>
+    </button>
+  </div>
+  
+  <div class="nav-mobile-menu" id="mobile-menu" role="menu">
+    <!-- Navigation Links -->
+    <div class="nav-mobile-links">
+      <a href="{% url 'index' %}" 
+         class="nav-mobile-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}"
+         role="menuitem">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      
+      <a href="{% url 'products_only' %}" 
+         class="nav-mobile-link {% if request.resolver_match.url_name == 'products_only' %}active{% endif %}"
+         role="menuitem">
+        <i class="fas fa-th-large"></i>
+        <span>Products</span>
+      </a>
+      
+      {% if user.is_authenticated %}
+        <a href="{% url 'wishlist' %}" 
+           class="nav-mobile-link {% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}"
+           role="menuitem">
+          <i class="fas fa-heart"></i>
+          <span>Wishlist ({{ request.user.wishlist.count }})</span>
+        </a>
+      {% else %}
+        <a href="{% url 'wishlist' %}" 
+           class="nav-mobile-link {% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}"
+           role="menuitem">
+          <i class="fas fa-heart"></i>
+          <span>Wishlist</span>
+        </a>
+      {% endif %}
+      
+      <a href="{% url 'order_history' %}" 
+         class="nav-mobile-link {% if request.resolver_match.url_name == 'order_history' %}active{% endif %}"
+         role="menuitem">
+        <i class="fas fa-shopping-bag"></i>
+        <span>Your Orders</span>
+      </a>
+      
+      <a href="{% url 'product_reviews' %}" 
+         class="nav-mobile-link {% if request.resolver_match.url_name == 'product_reviews' %}active{% endif %}"
+         role="menuitem">
+        <i class="fas fa-star"></i>
+        <span>Your Reviews</span>
+      </a>
+      
+      <a href="{% url 'contact' %}" 
+         class="nav-mobile-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"
+         role="menuitem">
+        <i class="fas fa-envelope"></i>
+        <span>Contact Us</span>
+      </a>
+      
+      <a href="{% url 'about' %}" 
+         class="nav-mobile-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
+         role="menuitem">
+        <i class="fas fa-info-circle"></i>
+        <span>About Us</span>
+      </a>
+      
+      {% if user.is_authenticated %}
+        <hr class="my-3">
+        {% if user.is_staff %}
+          <a href="{% url 'employee_hub' %}" 
+             class="nav-mobile-link"
+             role="menuitem">
+            <i class="fas fa-briefcase"></i>
+            <span>Account Hub</span>
+          </a>
+        {% endif %}
+        
+        <a href="{% url 'logout' %}" 
+           class="nav-mobile-link text-danger"
+           role="menuitem">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+      {% else %}
+        <hr class="my-3">
+        <a href="{% url 'login' %}" 
+           class="nav-mobile-link"
+           role="menuitem">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Sign In</span>
+        </a>
+        
+        <a href="{% url 'register' %}" 
+           class="nav-mobile-link"
+           role="menuitem">
+          <i class="fas fa-user-plus"></i>
+          <span>Register</span>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Bottom Navigation -->
+<div class="bottom-nav-mobile" role="navigation" aria-label="Bottom navigation">
+  <div class="bottom-nav-mobile-items">
+    <a href="{% url 'index' %}" 
+       class="bottom-nav-mobile-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}"
+       role="menuitem"
+       aria-label="Home">
+      <i class="fas fa-home bottom-nav-mobile-icon"></i>
+      <span class="bottom-nav-mobile-label">Home</span>
+    </a>
+    
+    <a href="{% url 'products_only' %}" 
+       class="bottom-nav-mobile-item {% if request.resolver_match.url_name == 'products_only' %}active{% endif %}"
+       role="menuitem"
+       aria-label="Products">
+      <i class="fas fa-th-large bottom-nav-mobile-icon"></i>
+      <span class="bottom-nav-mobile-label">Products</span>
+    </a>
+    
+    <a href="{% url 'wishlist' %}" 
+       class="bottom-nav-mobile-item {% if request.resolver_match.url_name == 'wishlist' %}active{% endif %}"
+       role="menuitem"
+       aria-label="Wishlist">
+      <i class="fas fa-heart bottom-nav-mobile-icon"></i>
+      <span class="bottom-nav-mobile-label">Wishlist</span>
+      {% if user.is_authenticated and request.user.wishlist.count > 0 %}
+        <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
+          {{ request.user.wishlist.count }}
+        </span>
+      {% endif %}
+    </a>
+    
+    <a href="{% url 'cart' %}" 
+       class="bottom-nav-mobile-item {% if request.resolver_match.url_name == 'cart' %}active{% endif %}"
+       role="menuitem"
+       aria-label="Shopping Cart">
+      <i class="fas fa-shopping-cart bottom-nav-mobile-icon"></i>
+      <span class="bottom-nav-mobile-label">Cart</span>
+      {% if user.is_authenticated and request.user.profile.get_cart_count > 0 %}
+        <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">
+          {{ request.user.profile.get_cart_count }}
+        </span>
+      {% endif %}
+    </a>
+    
+    {% if user.is_authenticated %}
+      <a href="{% url 'profile' username=user.username %}" 
+         class="bottom-nav-mobile-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
+         role="menuitem"
+         aria-label="Profile">
+        <i class="fas fa-user bottom-nav-mobile-icon"></i>
+        <span class="bottom-nav-mobile-label">Profile</span>
+      </a>
+    {% else %}
+      <a href="{% url 'login' %}" 
+         class="bottom-nav-mobile-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}"
+         role="menuitem"
+         aria-label="Sign In">
+        <i class="fas fa-sign-in-alt bottom-nav-mobile-icon"></i>
+        <span class="bottom-nav-mobile-label">Sign In</span>
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+// Mobile menu toggle functionality
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const button = document.querySelector('.nav-mobile-toggle');
+  const icon = document.getElementById('menu-icon');
+  
+  const isOpen = menu.classList.contains('open');
+  
+  if (isOpen) {
+    menu.classList.remove('open');
+    button.setAttribute('aria-expanded', 'false');
+    icon.classList.remove('fa-times');
+    icon.classList.add('fa-bars');
+  } else {
+    menu.classList.add('open');
+    button.setAttribute('aria-expanded', 'true');
+    icon.classList.remove('fa-bars');
+    icon.classList.add('fa-times');
+  }
+}
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', function(event) {
+  const menu = document.getElementById('mobile-menu');
+  const button = document.querySelector('.nav-mobile-toggle');
+  
+  if (!menu.contains(event.target) && !button.contains(event.target)) {
+    menu.classList.remove('open');
+    button.setAttribute('aria-expanded', 'false');
+    document.getElementById('menu-icon').classList.remove('fa-times');
+    document.getElementById('menu-icon').classList.add('fa-bars');
+  }
+});
+
+// Close mobile menu on escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    const menu = document.getElementById('mobile-menu');
+    const button = document.querySelector('.nav-mobile-toggle');
+    
+    if (menu.classList.contains('open')) {
+      menu.classList.remove('open');
+      button.setAttribute('aria-expanded', 'false');
+      document.getElementById('menu-icon').classList.remove('fa-times');
+      document.getElementById('menu-icon').classList.add('fa-bars');
+    }
+  }
+});
+
+// Handle window resize
+window.addEventListener('resize', function() {
+  const menu = document.getElementById('mobile-menu');
+  const button = document.querySelector('.nav-mobile-toggle');
+  
+  if (window.innerWidth >= 768) {
+    menu.classList.remove('open');
+    button.setAttribute('aria-expanded', 'false');
+    document.getElementById('menu-icon').classList.remove('fa-times');
+    document.getElementById('menu-icon').classList.add('fa-bars');
+  }
+});
+</script>

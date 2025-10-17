@@ -1,0 +1,1288 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- PWA Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Force no caching for development -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <!-- PWA Theme Colors -->
+    <meta name="theme-color" content="#667eea" />
+    <meta name="msapplication-TileColor" content="#667eea" />
+    <meta name="msapplication-navbutton-color" content="#667eea" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'manifest.webmanifest' %}" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" />
+    <link rel="apple-touch-icon" href="{% static 'images/icon-192x192.png' %}" />
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'images/icon-192x192.png' %}" />
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'images/icon-512x512.png' %}" />
+
+    <title>{% block title %}Home | Django Ecommerce Site{% endblock %}</title>
+
+    <!-- Critical CSS - Load immediately -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    
+    <!-- Mobile-optimized CSS - Load immediately for mobile -->
+    <link href="{% static 'css/mobile-nav.css' %}" rel="stylesheet" />
+    
+        <!-- Color fixes CSS - Ensure proper color contrast -->
+        <link href="{% static 'css/color-fixes.css' %}" rel="stylesheet" />
+        
+        <!-- Color fixes JavaScript - Dynamic enforcement -->
+        <script>
+            // Load color fixes script asynchronously
+            if (typeof loadScript === 'function') {
+                loadScript('{% static "js/color-fixes.js" %}');
+            } else {
+                // Fallback for when loadScript is not available
+                const script = document.createElement('script');
+                script.src = '{% static "js/color-fixes.js" %}';
+                script.async = true;
+                document.head.appendChild(script);
+            }
+        </script>
+    
+    <!-- Non-critical CSS - Load asynchronously -->
+    <link rel="preload" href="/media/css/ui.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/media/css/bootstrap.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/media/fonts/fontawesome/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/media/css/responsive.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/media/css/footer.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/media/css/register.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/media/css/contact.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- Fallback for browsers that don't support preload -->
+    <noscript>
+      <link href="/media/css/bootstrap.css" rel="stylesheet" />
+      <link href="/media/fonts/fontawesome/css/all.min.css" rel="stylesheet" />
+      <link href="{% static 'css/color-fixes.css' %}" rel="stylesheet" />
+      <link href="/media/css/responsive.css" rel="stylesheet" />
+      <link href="{% static 'css/mobile-nav.css' %}" rel="stylesheet" />
+      <link href="/media/css/footer.css" rel="stylesheet" />
+      <link href="/media/css/register.css" rel="stylesheet" />
+      <link href="/media/css/contact.css" rel="stylesheet" />
+      <script src="{% static 'js/color-fixes.js' %}"></script>
+    </noscript>
+
+    <!-- Critical JavaScript - Load immediately -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    
+    <!-- Non-critical JavaScript - Load asynchronously -->
+    <script>
+      // Load non-critical scripts asynchronously
+      function loadScript(src, callback) {
+        var script = document.createElement('script');
+        script.src = src;
+        script.onload = callback;
+        document.head.appendChild(script);
+      }
+      
+      // Load scripts after DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        loadScript('https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js', function() {
+          loadScript('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js', function() {
+            loadScript('/media/js/script.js', function() {
+              // Load mobile navigation script for mobile devices
+              if (window.innerWidth < 768) {
+                loadScript('{% static "js/mobile-nav.js" %}');
+              }
+            });
+          });
+        });
+      });
+    </script>
+    
+    <!-- Modern Interactive Features -->
+    <script>
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+
+      // Add loading animation to product cards
+      document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.card-product-grid');
+        cards.forEach((card, index) => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(30px)';
+          
+          setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, index * 100);
+        });
+      });
+
+      // Add hover effects to navigation
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-2px)';
+        });
+        
+        link.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0)';
+        });
+      });
+
+
+      // Add click animation to buttons
+      document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+          const ripple = document.createElement('span');
+          const rect = this.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          const x = e.clientX - rect.left - size / 2;
+          const y = e.clientY - rect.top - size / 2;
+          
+          ripple.style.width = ripple.style.height = size + 'px';
+          ripple.style.left = x + 'px';
+          ripple.style.top = y + 'px';
+          ripple.classList.add('ripple');
+          
+          this.appendChild(ripple);
+          
+          setTimeout(() => {
+            ripple.remove();
+          }, 600);
+        });
+      });
+
+      // Add CSS for ripple effect
+      const style = document.createElement('style');
+      style.textContent = `
+        .btn {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .ripple {
+          position: absolute;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.3);
+          transform: scale(0);
+          animation: ripple-animation 0.6s linear;
+          pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+          to {
+            transform: scale(4);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Side Panel functionality
+      function toggleSidePanel() {
+        const sidePanel = document.getElementById('sidePanel');
+        const overlay = document.getElementById('sidePanelOverlay');
+        
+        if (sidePanel.classList.contains('open')) {
+          sidePanel.classList.remove('open');
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        } else {
+          sidePanel.classList.add('open');
+          overlay.classList.add('show');
+          document.body.style.overflow = 'hidden';
+        }
+      }
+
+      // Close side panel when clicking outside
+      document.addEventListener('click', function(e) {
+        const sidePanel = document.getElementById('sidePanel');
+        const overlay = document.getElementById('sidePanelOverlay');
+        const menuBtn = document.querySelector('.account-menu-btn');
+        
+        if (sidePanel.classList.contains('open') && 
+            !sidePanel.contains(e.target) && 
+            !menuBtn.contains(e.target)) {
+          sidePanel.classList.remove('open');
+          overlay.classList.remove('show');
+          document.body.style.overflow = '';
+        }
+      });
+
+      // Close side panel on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          const sidePanel = document.getElementById('sidePanel');
+          const overlay = document.getElementById('sidePanelOverlay');
+          
+          if (sidePanel.classList.contains('open')) {
+            sidePanel.classList.remove('open');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+          }
+        }
+      });
+
+      // PWA Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('{% static "service-worker.js" %}')
+            .then(function(registration) {
+              console.log('Service Worker registered successfully:', registration.scope);
+              
+              // Handle updates
+              registration.addEventListener('updatefound', function() {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', function() {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New content is available, prompt user to refresh
+                    if (confirm('New version available! Refresh to update?')) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
+            })
+            .catch(function(error) {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+
+      // PWA Install Prompt with Installation Detection
+      let deferredPrompt;
+      let isInstalled = false;
+
+      // Check if app is already installed
+      function checkIfInstalled() {
+        // Check if running in standalone mode (installed)
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+          isInstalled = true;
+          return true;
+        }
+        
+        // Check if app is bookmarked (iOS)
+        if (window.navigator.standalone === true) {
+          isInstalled = true;
+          return true;
+        }
+        
+        return false;
+      }
+
+      // Show install prompt
+      function showInstallPrompt() {
+        if (isInstalled || !deferredPrompt) return;
+        
+        const installButton = document.getElementById('pwa-install-button');
+        if (installButton) {
+          installButton.style.display = 'block';
+          installButton.classList.add('show');
+        }
+      }
+
+      // Hide install prompt
+      function hideInstallPrompt() {
+        const installButton = document.getElementById('pwa-install-button');
+        if (installButton) {
+          installButton.classList.remove('show');
+          setTimeout(() => {
+            installButton.style.display = 'none';
+          }, 300);
+        }
+      }
+
+      // Install app
+      function installApp() {
+        if (!deferredPrompt) return;
+        
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+            hideInstallPrompt();
+            isInstalled = true;
+          } else {
+            console.log('User dismissed the install prompt');
+          }
+          deferredPrompt = null;
+        });
+      }
+
+      // Event listeners
+      window.addEventListener('beforeinstallprompt', function(e) {
+        console.log('PWA install prompt triggered');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Check if already installed
+        if (!checkIfInstalled()) {
+          // Show install button after a delay
+          setTimeout(showInstallPrompt, 2000);
+        }
+      });
+
+      // Listen for successful installation
+      window.addEventListener('appinstalled', function(evt) {
+        console.log('PWA was installed successfully');
+        isInstalled = true;
+        hideInstallPrompt();
+        deferredPrompt = null;
+      });
+
+      // Check installation status on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        if (checkIfInstalled()) {
+          console.log('PWA is already installed');
+          return;
+        }
+        
+        // Check for install prompt availability
+        if (deferredPrompt) {
+          setTimeout(showInstallPrompt, 2000);
+        }
+      });
+
+      // Make installApp function globally available
+      window.installApp = installApp;
+    </script>
+  </head>
+
+  <style>
+    /* Base responsive styles */
+    a {
+      text-decoration: none;
+    }
+    
+    /* Ensure proper box-sizing */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    
+    /* Body responsive */
+    body {
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* Container responsive */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    
+    /* Desktop optimizations */
+    @media (min-width: 1200px) {
+      .container {
+        max-width: 1140px;
+      }
+      
+      .row {
+        margin: 0 -15px;
+      }
+      
+      .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6,
+      .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+        padding: 0 15px;
+      }
+    }
+    
+    /* Tablet optimizations */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .container {
+        max-width: 100%;
+        padding: 0 20px;
+      }
+      
+      .card {
+        margin-bottom: 1.5rem;
+      }
+      
+      .btn-group {
+        flex-wrap: wrap;
+      }
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 767px) {
+      body {
+        font-size: 14px;
+      }
+      
+      .container {
+        padding: 0 10px;
+      }
+      
+      .card {
+        margin-bottom: 1rem;
+      }
+      
+      .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+      
+      .table-responsive {
+        border: none;
+      }
+      
+      .table-responsive table {
+        margin-bottom: 0;
+      }
+    }
+    
+    /* Extra small devices */
+    @media (max-width: 575px) {
+      .container {
+        padding: 0 5px;
+      }
+      
+      .card-body {
+        padding: 0.75rem;
+      }
+      
+      .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+      }
+    }
+    
+    /* Clean card styling */
+    .card {
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .card-body {
+      position: relative;
+      border-radius: 0.5rem;
+    }
+    
+    /* Only apply white background to non-colored cards */
+    .card:not(.bg-primary):not(.bg-success):not(.bg-warning):not(.bg-danger):not(.bg-info):not(.bg-secondary) .card-body {
+      background: #fff;
+    }
+    
+    /* Order management specific styling */
+    .order-management-container {
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+    
+    .order-card {
+      background: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      transition: box-shadow 0.15s ease-in-out;
+    }
+    
+    .order-card:hover {
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    /* Modern Premium Design */
+    :root {
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+      --accent-color: #f093fb;
+      --success-color: #4facfe;
+      --warning-color: #ffecd2;
+      --danger-color: #ff6b6b;
+      --dark-color: #2d3748;
+      --light-color: #f7fafc;
+      --border-radius: 20px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: var(--dark-color);
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+
+    /* Modern Navigation */
+    .navbar {
+      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-link {
+      font-weight: 600;
+      color: var(--dark-color) !important;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--primary-color) !important;
+      transform: translateY(-2px);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -5px;
+      left: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    /* Products Section */
+    #products {
+      background: white !important;
+      position: relative;
+      z-index: 1;
+      margin-top: 0;
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+
+    /* Enhanced Product Cards */
+    .card-product-grid {
+      border: none;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      background: white;
+      position: relative;
+    }
+
+    .card-product-grid::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card-product-grid:hover::after {
+      opacity: 1;
+    }
+
+    .card-product-grid:hover {
+      transform: translateY(-12px) scale(1.03);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .img-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .img-wrap img {
+      transition: transform 0.6s ease;
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+    }
+
+    .card-product-grid:hover .img-wrap img {
+      transform: scale(1.15);
+    }
+
+    .info-wrap {
+      padding: 25px;
+      background: white;
+      position: relative;
+      z-index: 2;
+    }
+
+    .info-wrap .title {
+      color: var(--dark-color);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      line-height: 1.4;
+    }
+
+    .info-wrap .title:hover {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .price {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--success-color), #00d4aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+    }
+
+    /* Modern Buttons */
+    .btn {
+      border-radius: 50px;
+      padding: 12px 30px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success-color), #00d4aa);
+      color: white;
+    }
+
+    /* Enhanced Badges */
+    .badge {
+      border-radius: 25px;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-danger {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white;
+    }
+
+    .badge-warning {
+      background: linear-gradient(135deg, #ffc107, #ff8c00);
+      color: white;
+    }
+
+    .badge-success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    /* Loading States */
+    .loading {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* Hero Section */
+    .hero-section {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 80px 0;
+      position: relative;
+      overflow: hidden;
+      z-index: 2;
+      margin-bottom: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+      opacity: 0.1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-subtitle {
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .btn-outline-light {
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      background: transparent;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-light:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.1rem;
+      }
+      
+      .hero-buttons {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .hero-buttons .btn {
+        width: 100%;
+        margin: 0;
+      }
+      
+      .card-product-grid:hover {
+        transform: translateY(-5px) scale(1.01);
+      }
+      
+      .btn {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      
+      .container {
+        padding: 0 10px;
+      }
+      
+      .row {
+        margin: 0 -5px;
+      }
+      
+      .col-lg-3, .col-md-4, .col-sm-6 {
+        padding: 0 5px;
+        margin-bottom: 15px;
+      }
+      
+      .filter-section .row {
+        margin: 0;
+      }
+      
+      .form-group {
+        margin-bottom: 15px;
+      }
+      
+      .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 12px 15px;
+      }
+      
+      .navbar-nav {
+        text-align: center;
+      }
+      
+      .nav-link {
+        padding: 15px 10px;
+        font-size: 1.1rem;
+      }
+      
+      .hero-section {
+        padding: 40px 0;
+      }
+      
+      .hero-image img {
+        max-height: 300px;
+        margin-top: 20px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+      
+      .btn {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+      }
+      
+      .card-product-grid {
+        margin-bottom: 20px;
+      }
+      
+      .info-wrap {
+        padding: 15px;
+      }
+      
+      .price {
+        font-size: 1.2rem;
+      }
+      
+      .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .page-link {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* Side Panel Styles */
+    .side-panel {
+      position: fixed;
+      top: 0;
+      right: -350px;
+      width: 350px;
+      height: 100vh;
+      background: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      z-index: 99999;
+      transition: right 0.3s ease;
+      overflow-y: auto;
+    }
+    
+    .side-panel.open {
+      right: 0;
+    }
+    
+    .side-panel-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99998;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .side-panel-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .side-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+    }
+    
+    .side-panel-header h5 {
+      margin: 0;
+      font-weight: 600;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+    
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .side-panel-content {
+      padding: 20px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    
+    .profile-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+    
+    .profile-placeholder {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-size: 20px;
+    }
+    
+    .user-details h6 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--dark-color);
+    }
+    
+    .user-details small {
+      color: #6c757d;
+    }
+    
+    .menu-items {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      color: var(--dark-color);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .menu-item:hover {
+      background: #f8f9fa;
+      color: var(--primary-color);
+      text-decoration: none;
+      transform: translateX(5px);
+    }
+    
+    .menu-item i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .menu-item.logout {
+      color: #dc3545;
+    }
+    
+    .menu-item.logout:hover {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .menu-item hr {
+      margin: 10px 0;
+      border: none;
+      border-top: 1px solid #eee;
+    }
+    
+    /* Account Menu Button */
+    .account-menu-btn {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 40px !important;
+      height: 40px !important;
+      border-radius: 50% !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    .account-menu-btn:hover {
+      background: #f8f9fa !important;
+      transform: scale(1.05) !important;
+    }
+    
+    .account-menu-btn i {
+      margin: 0 !important;
+      font-size: 16px !important;
+    }
+
+    /* Mobile Performance Optimizations */
+    @media (max-width: 768px) {
+      /* Reduce animations on mobile for better performance */
+      * {
+        animation-duration: 0.3s !important;
+        transition-duration: 0.3s !important;
+      }
+      
+      /* Disable heavy animations on mobile */
+      .card {
+        animation: none !important;
+      }
+      
+      /* Optimize images for mobile */
+      img {
+        max-width: 100%;
+        height: auto;
+        loading: lazy;
+      }
+      
+      /* Simplify hover effects on mobile */
+      .btn:hover {
+        transform: none !important;
+      }
+      
+      /* Reduce shadow complexity */
+      .shadow-lg {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+      }
+      
+      /* Mobile Side Panel */
+      .side-panel {
+        width: 100%;
+        right: -100%;
+      }
+      
+      .side-panel.open {
+        right: 0;
+      }
+      
+      .side-panel-content {
+        padding: 15px;
+      }
+      
+      .menu-item {
+        padding: 15px;
+        font-size: 1.1rem;
+      }
+      
+      .user-info {
+        padding: 20px;
+      }
+      
+      .profile-img, .profile-placeholder {
+        width: 60px;
+        height: 60px;
+      }
+      
+      /* Mobile-specific hero optimizations */
+      .hero-section {
+        padding: 2rem 0 !important;
+        min-height: auto !important;
+      }
+      
+      .hero-title {
+        font-size: 1.8rem !important;
+        line-height: 1.3 !important;
+      }
+      
+      .hero-subtitle {
+        font-size: 1rem !important;
+        margin-bottom: 1.5rem !important;
+      }
+      
+      /* Optimize product grid for mobile */
+      .card-product-grid {
+        margin-bottom: 1rem !important;
+      }
+      
+      .card-product-grid .img-wrap {
+        height: 200px !important;
+        overflow: hidden;
+      }
+      
+      .card-product-grid .img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  </style>
+  <body>
+    <!-- PWA Install Button -->
+    <div id="pwa-install-button" class="pwa-install-button" style="display: none;">
+      <button onclick="installApp()" class="install-btn">
+        <i class="fas fa-download"></i>
+        <span>Install App</span>
+      </button>
+    </div>
+
+    {% block start %} {% endblock %}
+    {% include 'home/footer.html' %}
+    
+    <!-- Mobile Bottom Navigation -->
+    {% include 'base/mobile_nav.html' %}
+    
+    <!-- Side Panel -->
+    <div id="sidePanel" class="side-panel">
+      <div class="side-panel-header">
+        <h5>Account Menu</h5>
+        <button class="close-btn" onclick="toggleSidePanel()">&times;</button>
+      </div>
+      <div class="side-panel-content">
+        {% if user.is_authenticated %}
+          <div class="user-info">
+            {% if user.profile.profile_image %}
+              <img src="{{ user.profile.profile_image.url }}" alt="Profile" class="profile-img">
+            {% else %}
+              <div class="profile-placeholder">
+                <i class="fas fa-user"></i>
+              </div>
+            {% endif %}
+            <div class="user-details">
+              <h6>{{ user.username }}</h6>
+              <small class="text-muted">{{ user.email }}</small>
+            </div>
+          </div>
+          
+          <div class="menu-items">
+            <a href="{% url 'profile' username=user.username %}" class="menu-item">
+              <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="{% url 'wishlist' %}" class="menu-item">
+              <i class="fas fa-heart"></i> Wishlist ({{ request.user.wishlist.count }})
+            </a>
+            <a href="{% url 'order_history' %}" class="menu-item">
+              <i class="fas fa-shopping-bag"></i> Your Orders
+            </a>
+            <a href="{% url 'product_reviews' %}" class="menu-item">
+              <i class="fas fa-star"></i> Your Reviews
+            </a>
+            <a href="{% url 'address_management' %}" class="menu-item">
+              <i class="fas fa-map-marker-alt"></i> Address Management
+            </a>
+            {% if request.user.is_staff %}
+            <a href="{% url 'employee_hub' %}" class="menu-item">
+              <i class="fas fa-briefcase"></i> Account Hub
+            </a>
+            {% endif %}
+            <hr>
+            <a href="{% url 'logout' %}" class="menu-item logout">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </div>
+        {% else %}
+          <div class="menu-items">
+            <a href="{% url 'login' %}" class="menu-item">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+            <a href="{% url 'register' %}" class="menu-item">
+              <i class="fas fa-user-plus"></i> Register
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <!-- Side Panel Overlay -->
+    <div id="sidePanelOverlay" class="side-panel-overlay" onclick="toggleSidePanel()"></div>
+  </body>
+</html>

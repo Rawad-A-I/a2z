@@ -1,0 +1,269 @@
+{% extends "base/bar_base.html" %}
+{% load static %}
+
+{% block title %}A2Z Bar - Premium Drinks & Beverages{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-5">
+        <div class="hero-content">
+          <h1 class="hero-title text-4xl font-bold text-white mb-4">
+            Shop Beer, Wine & Liquor
+          </h1>
+          <p class="hero-subtitle text-lg text-white opacity-90 mb-6">
+            Premium drinks and beverages delivered to your doorstep. From craft beers to fine wines, 
+            premium spirits to artisanal cocktails - everything for your perfect night in.
+          </p>
+          <div class="hero-buttons">
+            <a href="{% url 'bar_products' %}" class="btn btn-primary btn-lg me-3 mb-3">
+              <i class="fas fa-glass-cheers"></i> Browse Drinks
+            </a>
+            <a href="{% url 'bar_categories' %}" class="btn btn-outline btn-lg mb-3">
+              <i class="fas fa-list"></i> Categories
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="text-center">
+          <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+               alt="Premium Drinks" 
+               class="img-fluid rounded shadow-lg" 
+               style="max-height: 500px; object-fit: cover;"
+               loading="eager">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What'll you have? Section -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <h2 class="text-center mb-6">
+      <strong>What'll you have?</strong>
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <a href="{% url 'bar_products' %}?category=beer" class="category-card">
+        <div class="card hover:shadow-lg transition-all duration-300">
+          <div class="card-body text-center">
+            <div class="category-icon text-4xl mb-3">🍺</div>
+            <h4 class="category-title font-semibold">Beer</h4>
+            <p class="category-description text-sm text-gray-600">Craft beers, lagers, ales</p>
+          </div>
+        </div>
+      </a>
+      
+      <a href="{% url 'bar_products' %}?category=wine" class="category-card">
+        <div class="card hover:shadow-lg transition-all duration-300">
+          <div class="card-body text-center">
+            <div class="category-icon text-4xl mb-3">🍷</div>
+            <h4 class="category-title font-semibold">Wine</h4>
+            <p class="category-description text-sm text-gray-600">Red, white, sparkling wines</p>
+          </div>
+        </div>
+      </a>
+      
+      <a href="{% url 'bar_products' %}?category=spirits" class="category-card">
+        <div class="card hover:shadow-lg transition-all duration-300">
+          <div class="card-body text-center">
+            <div class="category-icon text-4xl mb-3">🥃</div>
+            <h4 class="category-title font-semibold">Spirits</h4>
+            <p class="category-description text-sm text-gray-600">Whiskey, vodka, rum, gin</p>
+          </div>
+        </div>
+      </a>
+      
+      <a href="{% url 'bar_products' %}?category=cocktails" class="category-card">
+        <div class="card hover:shadow-lg transition-all duration-300">
+          <div class="card-body text-center">
+            <div class="category-icon text-4xl mb-3">🍹</div>
+            <h4 class="category-title font-semibold">Cocktails</h4>
+            <p class="category-description text-sm text-gray-600">Ready-to-drink cocktails</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5 bg-gray-50">
+  <div class="container">
+    <h2 class="text-center mb-6">
+      <strong>Featured Drinks</strong>
+    </h2>
+    <div class="responsive-product-grid">
+      {% for product in featured_products %}
+      <div class="product-card-mobile">
+        <div class="product-image-container">
+          <a href="{% url 'bar_product_detail' product.slug %}" class="product-image-link">
+            {% if product.product_images.first %}
+              <img src="/media/{{product.product_images.first.image}}" 
+                   class="product-image-mobile"
+                   loading="lazy" 
+                   alt="{{ product.product_name }}"
+                   width="280" height="280" />
+            {% else %}
+              <div class="product-image-placeholder">
+                <i class="fas fa-wine-bottle"></i>
+              </div>
+            {% endif %}
+          </a>
+          
+          <!-- Product Badges -->
+          <div class="product-badges">
+            {% if product.is_new_arrival %}
+              <span class="badge badge-new">New</span>
+            {% endif %}
+            {% if product.is_bestseller %}
+              <span class="badge badge-bestseller">Popular</span>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="product-info-mobile">
+          <h3 class="product-title-mobile">
+            <a href="{% url 'bar_product_detail' product.slug %}" class="product-title-link">
+              {{ product.product_name|truncatechars:50 }}
+            </a>
+          </h3>
+          
+          <div class="product-category">
+            <span class="category-badge">{{ product.category.category_name }}</span>
+          </div>
+          
+          <div class="product-price-container">
+            <span class="product-price-mobile">${{ product.price }}</span>
+          </div>
+          
+          <div class="product-actions">
+            <a href="{% url 'bar_product_detail' product.slug %}" class="btn btn-outline">
+              <i class="fas fa-eye"></i>
+              <span>View Details</span>
+            </a>
+            
+            {% if product.is_in_stock %}
+              <a href="{% url 'add_to_bar_cart' product.uid %}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Add to Cart</span>
+              </a>
+            {% else %}
+              <button class="btn btn-secondary" disabled>
+                <i class="fas fa-times"></i>
+                <span>Out of Stock</span>
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="text-center py-8">
+          <i class="fas fa-wine-bottle text-6xl text-gray-300 mb-4"></i>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No featured drinks yet</h3>
+          <p class="text-gray-500">Check back soon for featured beverages!</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose A2Z Bar -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <h2 class="text-center mb-6">
+      <strong>Why Choose A2Z Bar?</strong>
+    </h2>
+    <div class="row">
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <i class="fas fa-shipping-fast text-primary text-3xl mb-3"></i>
+            <h5 class="card-title">Fast Delivery</h5>
+            <p class="card-text">Same-day delivery for orders placed before 6 PM</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <i class="fas fa-shield-alt text-success text-3xl mb-3"></i>
+            <h5 class="card-title">Age Verification</h5>
+            <p class="card-text">Secure age verification for all alcohol purchases</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <i class="fas fa-star text-warning text-3xl mb-3"></i>
+            <h5 class="card-title">Premium Selection</h5>
+            <p class="card-text">Curated selection of premium drinks and beverages</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Back to Platform -->
+<section class="py-4 bg-gray-100">
+  <div class="container">
+    <div class="text-center">
+      <a href="{% url 'redirect_homepage' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Platform
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4rem 0;
+    color: white;
+  }
+  
+  .category-card {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .category-card:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .category-card .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  @media (max-width: 768px) {
+    .hero-section {
+      padding: 2rem 0;
+    }
+    
+    .hero-title {
+      font-size: 2rem !important;
+    }
+    
+    .hero-subtitle {
+      font-size: 1rem !important;
+    }
+    
+    .btn {
+      min-height: 44px;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+    }
+  }
+</style>
+{% endblock %}

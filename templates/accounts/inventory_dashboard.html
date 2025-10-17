@@ -1,0 +1,252 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Inventory Dashboard{% endblock %}
+
+{% block start %}
+<style>
+/* Enhanced colorful styling for inventory dashboard */
+.card.bg-primary {
+    background-color: #007bff !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2) !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+}
+
+.card.bg-success {
+    background-color: #28a745 !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2) !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+}
+
+.card.bg-info {
+    background-color: #17a2b8 !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.2) !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+}
+
+.card.bg-warning {
+    background-color: #ffc107 !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2) !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+}
+
+.card.bg-danger {
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2) !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+}
+
+.card.bg-primary *,
+.card.bg-success *,
+.card.bg-info *,
+.card.bg-warning *,
+.card.bg-danger * {
+    color: #ffffff !important;
+}
+
+.card.bg-primary h3,
+.card.bg-primary h5,
+.card.bg-success h3,
+.card.bg-success h5,
+.card.bg-info h3,
+.card.bg-info h5,
+.card.bg-warning h3,
+.card.bg-warning h5,
+.card.bg-danger h3,
+.card.bg-danger h5 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    font-weight: 600 !important;
+}
+
+.card.bg-primary:hover,
+.card.bg-success:hover,
+.card.bg-info:hover,
+.card.bg-warning:hover,
+.card.bg-danger:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Enhanced card styling */
+.card {
+    border-radius: 15px !important;
+    overflow: hidden !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+.card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+</style>
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Inventory Dashboard</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Inventory Management</h4>
+                    <p>Manage stock levels, track movements, and monitor inventory.</p>
+                    
+                    <!-- Inventory Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Products</h5>
+                                    <h3>{{ total_products|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>In Stock</h5>
+                                    <h3>{{ in_stock_products|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>Low Stock</h5>
+                                    <h3>{{ low_stock_products_count|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h5>Out of Stock</h5>
+                                    <h3>{{ out_of_stock_products|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Stock Movements -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Recent Stock Movements</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if recent_movements %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Type</th>
+                                                    <th>Quantity</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for movement in recent_movements %}
+                                                <tr>
+                                                    <td>{{ movement.product.product_name }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ movement.movement_type|lower }}">
+                                                            {{ movement.get_movement_type_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ movement.quantity }}</td>
+                                                    <td>{{ movement.created_at|date:"M d, Y" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No recent stock movements.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Low Stock Alerts</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if low_stock_products %}
+                                    <div class="alert alert-warning">
+                                        <h6>Products with low stock:</h6>
+                                        <ul class="mb-0">
+                                            {% for product in low_stock_products %}
+                                            <li>{{ product.product_name }} ({{ product.stock_quantity }} left)</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-success">
+                                        <p>All products have adequate stock levels.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'stock_movements' %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-exchange-alt"></i> Stock Movements
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'stock_alerts' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-exclamation-triangle"></i> Stock Alerts
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'inventory_reports' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-chart-bar"></i> Inventory Reports
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'bulk_stock_update' %}" class="btn btn-success w-100">
+                                        <i class="fas fa-edit"></i> Bulk Update
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

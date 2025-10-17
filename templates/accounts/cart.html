@@ -1,0 +1,308 @@
+{% extends "base/base.html" %}
+{% block title %}Shopping Cart{% endblock %}
+{% block start %} {% load static %}
+
+<section class="section-content padding-y">
+  <div class="container">
+    {% include 'base/alert.html' %}
+    
+    <!-- Back Button -->
+    <div class="mb-4">
+      <a href="{% url 'products_only' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Continue Shopping
+      </a>
+    </div>
+
+    <div class="row">
+      <main class="col-md-9">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-shopping-cart"></i> Shopping Cart
+              {% if cart.cart_items.count > 0 %}
+                <span class="badge badge-primary">{{ cart.cart_items.count }} item{{ cart.cart_items.count|pluralize }}</span>
+              {% endif %}
+            </h3>
+          </div>
+          <div class="card-body">
+            {% if cart.cart_items.count > 0 %}
+              <!-- Desktop Cart Table -->
+              <div class="table-responsive d-none d-md-block">
+                <table class="table table-hover">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                      <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" width="120">Quantity</th>
+                      <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" width="120">Price</th>
+                      <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" width="200">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    {% for cart_item in cart.cart_items.all %}
+                    <tr class="hover:bg-gray-50">
+                      <td class="px-4 py-4">
+                        <div class="flex items-center">
+                          <div class="flex-shrink-0 h-16 w-16">
+                            <img class="h-16 w-16 rounded-lg object-cover" 
+                                 src="/media/{{ cart_item.product.product_images.first.image }}" 
+                                 alt="{{ cart_item.product.product_name }}">
+                          </div>
+                          <div class="ml-4">
+                            <div class="text-sm font-medium text-gray-900">
+                              <a href="{% url 'get_product' cart_item.product.slug %}" class="hover:text-primary">
+                                {{ cart_item.product.product_name }}
+                              </a>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                              {% if cart_item.size_variant %}
+                                Size: {{ cart_item.size_variant.size_name }}
+                              {% else %}
+                                Size: N/A
+                              {% endif %}
+                              {% if cart_item.product.color_variant.exists %}
+                                {% for color in cart_item.product.color_variant.all %}
+                                  | Color: {{ color.color_name }}
+                                {% endfor %}
+                              {% else %}
+                                | Color: N/A
+                              {% endif %}
+                            </div>
+                            
+                            <!-- Stock Status -->
+                            {% if not cart_item.product.is_in_stock %}
+                            <div class="mt-1">
+                              <span class="badge badge-out-of-stock">
+                                <i class="fas fa-times"></i> Out of Stock
+                              </span>
+                            </div>
+                            {% elif cart_item.product.stock_quantity > 0 and cart_item.product.is_low_stock %}
+                            <div class="mt-1">
+                              <span class="badge badge-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Low Stock ({{ cart_item.product.stock_quantity }} left)
+                              </span>
+                            </div>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-4 py-4 text-center">
+                        <div class="flex items-center justify-center">
+                          <form method="POST" action="{% url 'update_cart' cart_item.uid %}" class="flex items-center">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="mx-3 font-medium">{{ cart_item.quantity }}</span>
+                            <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline">
+                              <i class="fas fa-plus"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                      <td class="px-4 py-4 text-right">
+                        <div class="text-sm font-medium text-gray-900">
+                          ${{ cart_item.get_total_price|floatformat:2 }}
+                        </div>
+                        <div class="text-sm text-gray-500">
+                          ${{ cart_item.product.price|floatformat:2 }} each
+                        </div>
+                      </td>
+                      <td class="px-4 py-4 text-right">
+                        <div class="flex justify-end space-x-2">
+                          <a href="{% url 'get_product' cart_item.product.slug %}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                          <form method="POST" action="{% url 'remove_from_cart' cart_item.uid %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger" 
+                                    onclick="return confirm('Remove this item from cart?')">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile Cart Cards -->
+              <div class="d-md-none">
+                {% for cart_item in cart.cart_items.all %}
+                <div class="card mb-4">
+                  <div class="card-body">
+                    <div class="flex items-start space-x-4">
+                      <div class="flex-shrink-0">
+                        <img class="h-20 w-20 rounded-lg object-cover" 
+                             src="/media/{{ cart_item.product.product_images.first.image }}" 
+                             alt="{{ cart_item.product.product_name }}">
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-medium text-gray-900 truncate">
+                          <a href="{% url 'get_product' cart_item.product.slug %}" class="hover:text-primary">
+                            {{ cart_item.product.product_name }}
+                          </a>
+                        </h4>
+                        <p class="text-sm text-gray-500 mt-1">
+                          {% if cart_item.size_variant %}
+                            Size: {{ cart_item.size_variant.size_name }}
+                          {% else %}
+                            Size: N/A
+                          {% endif %}
+                          {% if cart_item.product.color_variant.exists %}
+                            {% for color in cart_item.product.color_variant.all %}
+                              | Color: {{ color.color_name }}
+                            {% endfor %}
+                          {% else %}
+                            | Color: N/A
+                          {% endif %}
+                        </p>
+                        
+                        <!-- Stock Status -->
+                        {% if not cart_item.product.is_in_stock %}
+                        <div class="mt-2">
+                          <span class="badge badge-out-of-stock">
+                            <i class="fas fa-times"></i> Out of Stock
+                          </span>
+                        </div>
+                        {% elif cart_item.product.stock_quantity > 0 and cart_item.product.is_low_stock %}
+                        <div class="mt-2">
+                          <span class="badge badge-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Low Stock
+                          </span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mt-3 flex items-center justify-between">
+                          <div class="flex items-center space-x-2">
+                            <form method="POST" action="{% url 'update_cart' cart_item.uid %}" class="flex items-center">
+                              {% csrf_token %}
+                              <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline">
+                                <i class="fas fa-minus"></i>
+                              </button>
+                              <span class="mx-3 font-medium">{{ cart_item.quantity }}</span>
+                              <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline">
+                                <i class="fas fa-plus"></i>
+                              </button>
+                            </form>
+                          </div>
+                          <div class="text-right">
+                            <div class="text-sm font-medium text-gray-900">
+                              ${{ cart_item.get_total_price|floatformat:2 }}
+                            </div>
+                            <div class="text-sm text-gray-500">
+                              ${{ cart_item.product.price|floatformat:2 }} each
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="mt-3 flex space-x-2">
+                          <a href="{% url 'get_product' cart_item.product.slug %}" class="btn btn-sm btn-outline flex-1">
+                            <i class="fas fa-eye"></i> View Details
+                          </a>
+                          <form method="POST" action="{% url 'remove_from_cart' cart_item.uid %}" class="flex-1">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger w-full" 
+                                    onclick="return confirm('Remove this item from cart?')">
+                              <i class="fas fa-trash"></i> Remove
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <!-- Empty Cart -->
+              <div class="text-center py-8">
+                <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
+                <p class="text-gray-500 mb-4">Looks like you haven't added any items to your cart yet.</p>
+                <a href="{% url 'products_only' %}" class="btn btn-primary">
+                  <i class="fas fa-shopping-bag"></i> Start Shopping
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </main>
+
+      <!-- Cart Summary Sidebar -->
+      <aside class="col-md-3">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Order Summary</h4>
+          </div>
+          <div class="card-body">
+            {% if cart.cart_items.count > 0 %}
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Subtotal ({{ cart.cart_items.count }} item{{ cart.cart_items.count|pluralize }}):</span>
+                  <span class="font-medium">${{ cart.get_total_price|floatformat:2 }}</span>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Shipping:</span>
+                  <span class="font-medium">${{ cart.shipping_cost|floatformat:2 }}</span>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Tax:</span>
+                  <span class="font-medium">${{ cart.tax_amount|floatformat:2 }}</span>
+                </div>
+                
+                <hr class="my-3">
+                
+                <div class="flex justify-between text-lg font-bold">
+                  <span>Total:</span>
+                  <span class="text-primary">${{ cart.get_final_total|floatformat:2 }}</span>
+                </div>
+              </div>
+              
+              <div class="mt-6 space-y-3">
+                <a href="{% url 'checkout' %}" class="btn btn-primary w-full">
+                  <i class="fas fa-credit-card"></i> Proceed to Checkout
+                </a>
+                
+                <a href="{% url 'products_only' %}" class="btn btn-outline w-full">
+                  <i class="fas fa-arrow-left"></i> Continue Shopping
+                </a>
+              </div>
+              
+              <!-- User Info Display -->
+              {% if user.is_authenticated %}
+              <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                <h5 class="font-medium text-gray-900 mb-2">Delivery Information</h5>
+                <div class="text-sm text-gray-600">
+                  <div class="mb-1">
+                    <strong>Address:</strong> {{ user.profile.shipping_address|default:"Not set" }}
+                  </div>
+                  <div class="mb-1">
+                    <strong>Phone:</strong> 
+                    {% if user.profile.phone_country_code %}{{ user.profile.phone_country_code }}{% else %}+961{% endif %} 
+                    {{ user.profile.phone_number|default:"Not set" }}
+                  </div>
+                  <div>
+                    <strong>City:</strong> {{ user.profile.city|default:"Not set" }}
+                  </div>
+                </div>
+                <a href="{% url 'address_management' %}" class="btn btn-sm btn-outline mt-2">
+                  <i class="fas fa-edit"></i> Update Address
+                </a>
+              </div>
+              {% endif %}
+            {% else %}
+              <div class="text-center py-4">
+                <p class="text-gray-500">Add items to see order summary</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends "base/base.html"%}
+{% load static %}
+{% block title %}Search Results{% endblock %}
+{% block start %}
+
+<!-- Header Section with Back Button -->
+<div class="container mt-4 mb-4">
+  <div class="row">
+    <div class="col-12">
+      <a href="{% url 'products_only' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Products
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Search Results Section -->
+<section id="search-results" class="py-5" style="background: white; margin-top: 0; min-height: 100vh; position: relative; z-index: 0;">
+  <div class="container mt-3 pt-3">
+    {% include 'base/alert.html' %}
+    
+    <!-- Search Header -->
+    <div class="mb-6">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          {% if query %}
+            <h2 class="mb-2">Search Results for "{{ query }}"</h2>
+            <p class="text-muted mb-0">{{ products|length }} product{{ products|length|pluralize }} found</p>
+          {% else %}
+            <h2 class="mb-2">Search Products</h2>
+            <p class="text-muted mb-0">Enter a search term to find products</p>
+          {% endif %}
+        </div>
+        <div class="col-md-4">
+          <!-- Search Box -->
+          <form method="GET" action="{% url 'product_search' %}" class="search">
+            <div class="input-group">
+              <input type="text" class="form-control" name="q" 
+                     placeholder="Search products..." value="{{ query|default:'' }}"
+                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+              <button class="btn btn-primary" type="submit" aria-label="Search">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Search Filters -->
+      {% if query %}
+      <div class="row mb-4">
+        <div class="col-12">
+          <form method="GET" action="{% url 'product_search' %}" class="row g-3">
+            <input type="hidden" name="q" value="{{ query }}">
+            
+            <div class="col-md-3">
+              <label for="category" class="form-label">Category:</label>
+              <select id="category" name="category" class="form-control" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                  <option value="{{ category.category_name }}" 
+                          {% if selected_category == category.category_name %}selected{% endif %}>
+                    {{ category.category_name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div class="col-md-3">
+              <label for="sort" class="form-label">Sort by:</label>
+              <select id="sort" name="sort" class="form-control" onchange="this.form.submit()">
+                <option value="">Relevance</option>
+                <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                <option value="name_asc" {% if selected_sort == 'name_asc' %}selected{% endif %}>Name: A to Z</option>
+                <option value="name_desc" {% if selected_sort == 'name_desc' %}selected{% endif %}>Name: Z to A</option>
+                <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest First</option>
+              </select>
+            </div>
+            
+            <div class="col-md-3">
+              <label class="form-label">&nbsp;</label>
+              <div>
+                <a href="{% url 'product_search' %}?q={{ query }}" class="btn btn-outline">
+                  <i class="fas fa-times"></i> Clear Filters
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Products Grid -->
+    {% if products %}
+      <div class="row">
+        {% for product in products %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+          <div class="card card-product-grid h-100">
+            <div class="img-wrap">
+              {% if product.product_images.first %}
+                <img src="/media/{{product.product_images.first.image}}" 
+                     alt="{{ product.product_name }}"
+                     class="card-img-top"
+                     loading="lazy"
+                     style="height: 200px; object-fit: cover;">
+              {% else %}
+                <img src="{% static 'images/placeholder.png' %}" 
+                     alt="No image available"
+                     class="card-img-top"
+                     style="height: 200px; object-fit: cover;">
+              {% endif %}
+              
+              {% if product.is_in_stock %}
+                <div class="badge bg-success position-absolute top-0 end-0 m-2">In Stock</div>
+              {% else %}
+                <div class="badge bg-danger position-absolute top-0 end-0 m-2">Out of Stock</div>
+              {% endif %}
+            </div>
+            
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">
+                <a href="{% url 'get_product' product.slug %}" class="text-decoration-none">
+                  {{ product.product_name|truncatechars:50 }}
+                </a>
+              </h5>
+              
+              <div class="mt-auto">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="h5 text-primary mb-0">${{ product.price }}</span>
+                  {% if product.discount_price %}
+                    <span class="text-muted text-decoration-line-through">${{ product.discount_price }}</span>
+                  {% endif %}
+                </div>
+                
+                <div class="d-flex gap-2">
+                  <a href="{% url 'get_product' product.slug %}" class="btn btn-outline flex-fill">
+                    <i class="fas fa-eye"></i>
+                    <span>View Details</span>
+                  </a>
+                  
+                  {% if product.is_in_stock %}
+                    <a href="{% url 'add_to_cart' product.uid %}" class="btn btn-primary flex-fill">
+                      <i class="fas fa-shopping-cart"></i>
+                      <span>Add to Cart</span>
+                    </a>
+                  {% else %}
+                    <button class="btn btn-secondary flex-fill" disabled>
+                      <i class="fas fa-times"></i>
+                      <span>Out of Stock</span>
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% elif query %}
+      <div class="text-center py-5">
+        <div class="mb-4">
+          <i class="fas fa-search fa-3x text-muted"></i>
+        </div>
+        <h3>No products found</h3>
+        <p class="text-muted mb-4">Try searching with different keywords or browse our categories</p>
+        <a href="{% url 'products_only' %}" class="btn btn-primary">
+          <i class="fas fa-th-large"></i> Browse All Products
+        </a>
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <div class="mb-4">
+          <i class="fas fa-search fa-3x text-muted"></i>
+        </div>
+        <h3>Search Products</h3>
+        <p class="text-muted mb-4">Enter a search term to find products</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+/* Mobile Search Optimizations */
+@media (max-width: 768px) {
+  .search .input-group {
+    margin-bottom: 1rem;
+  }
+  
+  .card-product-grid {
+    margin-bottom: 1rem;
+  }
+  
+  .card-product-grid .img-wrap {
+    height: 200px;
+    overflow: hidden;
+  }
+  
+  .card-product-grid .img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .btn i {
+    margin-right: 0.25rem;
+  }
+}
+</style>
+
+{% endblock %}

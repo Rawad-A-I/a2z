@@ -1,0 +1,383 @@
+/* Mobile Navigation Styles for A2Z Mart Webapp */
+
+/* Mobile Navigation Bar */
+.nav-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  min-height: 60px;
+}
+
+.nav-mobile-brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.nav-mobile-brand img {
+  height: 32px;
+  width: auto;
+}
+
+.nav-mobile-toggle {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: #495057;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-mobile-toggle:hover {
+  color: #007bff;
+}
+
+.nav-mobile-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Mobile Menu */
+.nav-mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.nav-mobile-menu.open {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Search Bar in Mobile Menu */
+.search-mobile {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.search-mobile-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 25px;
+  font-size: 16px;
+  background: #f8f9fa;
+  transition: all 0.2s ease;
+}
+
+.search-mobile-input:focus {
+  outline: none;
+  border-color: #007bff;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Mobile Navigation Links */
+.nav-mobile-links {
+  padding: 0.5rem 0;
+}
+
+.nav-mobile-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: #495057;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.nav-mobile-link:hover {
+  background: #f8f9fa;
+  color: #007bff;
+  border-left-color: #007bff;
+}
+
+.nav-mobile-link.active {
+  background: #e3f2fd;
+  color: #007bff;
+  border-left-color: #007bff;
+  font-weight: 500;
+}
+
+.nav-mobile-link i {
+  width: 20px;
+  margin-right: 0.75rem;
+  text-align: center;
+}
+
+.nav-mobile-link.text-danger {
+  color: #dc3545 !important;
+}
+
+.nav-mobile-link.text-danger:hover {
+  background: #f8d7da;
+  color: #721c24 !important;
+}
+
+/* Bottom Navigation */
+.bottom-nav-mobile {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #fff;
+  border-top: 1px solid #e9ecef;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+  padding: 0.5rem 0;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+}
+
+.bottom-nav-mobile-items {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  max-width: 100%;
+  gap: 0.25rem;
+}
+
+.bottom-nav-mobile-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.4rem;
+  color: #6c757d;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 50px;
+  flex: 1;
+}
+
+.bottom-nav-mobile-item:hover {
+  color: #007bff;
+  transform: translateY(-1px);
+}
+
+.bottom-nav-mobile-item.active {
+  color: #007bff;
+}
+
+.bottom-nav-mobile-icon {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.bottom-nav-mobile-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Badge for notifications */
+.bottom-nav-mobile-item .badge {
+  font-size: 0.6rem;
+  min-width: 16px;
+  height: 16px;
+  padding: 0.2rem 0.3rem;
+  top: 0.25rem;
+  right: 0.25rem;
+}
+
+/* Body padding for fixed navigation */
+body {
+  padding-top: 60px;
+  padding-bottom: 80px;
+}
+
+/* Desktop adjustments - Hide mobile navigation */
+@media (min-width: 768px) {
+  .nav-mobile {
+    display: none !important;
+  }
+  
+  .bottom-nav-mobile {
+    display: none !important;
+  }
+  
+  /* Remove body padding on desktop */
+  body {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+/* Large mobile devices */
+@media (max-width: 767px) and (min-width: 576px) {
+  .bottom-nav-mobile-item {
+    min-width: 60px;
+    padding: 0.5rem;
+  }
+  
+  .bottom-nav-mobile-icon {
+    font-size: 1.3rem;
+  }
+  
+  .bottom-nav-mobile-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 575px) {
+  .nav-mobile-header {
+    padding: 0.5rem 0.75rem;
+    min-height: 56px;
+  }
+  
+  .nav-mobile-brand img {
+    height: 28px;
+  }
+  
+  .bottom-nav-mobile-item {
+    min-width: 45px;
+    padding: 0.3rem;
+  }
+  
+  .bottom-nav-mobile-icon {
+    font-size: 1rem;
+  }
+  
+  .bottom-nav-mobile-label {
+    font-size: 0.65rem;
+  }
+  
+  body {
+    padding-top: 56px;
+    padding-bottom: 70px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .nav-mobile {
+    background: #1a1a1a;
+    border-bottom-color: #333;
+  }
+  
+  .nav-mobile-menu {
+    background: #1a1a1a;
+    border-bottom-color: #333;
+  }
+  
+  .nav-mobile-toggle {
+    color: #e9ecef;
+  }
+  
+  .nav-mobile-toggle:hover {
+    color: #007bff;
+  }
+  
+  .search-mobile-input {
+    background: #2d2d2d;
+    border-color: #444;
+    color: #e9ecef;
+  }
+  
+  .search-mobile-input:focus {
+    background: #333;
+    border-color: #007bff;
+  }
+  
+  .nav-mobile-link {
+    color: #e9ecef;
+  }
+  
+  .nav-mobile-link:hover {
+    background: #2d2d2d;
+    color: #007bff;
+  }
+  
+  .nav-mobile-link.active {
+    background: #1e3a5f;
+    color: #007bff;
+  }
+  
+  .bottom-nav-mobile {
+    background: #1a1a1a;
+    border-top-color: #333;
+  }
+  
+  .bottom-nav-mobile-item {
+    color: #6c757d;
+  }
+  
+  .bottom-nav-mobile-item:hover {
+    color: #007bff;
+  }
+  
+  .bottom-nav-mobile-item.active {
+    color: #007bff;
+  }
+}
+
+/* Accessibility improvements */
+.nav-mobile-link:focus,
+.bottom-nav-mobile-item:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Animation for menu toggle */
+.nav-mobile-toggle i {
+  transition: transform 0.2s ease;
+}
+
+.nav-mobile-toggle[aria-expanded="true"] i {
+  transform: rotate(90deg);
+}
+
+/* Smooth scrolling for mobile menu */
+.nav-mobile-menu {
+  scroll-behavior: smooth;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .nav-mobile {
+    border-bottom-width: 2px;
+  }
+  
+  .nav-mobile-link {
+    border-left-width: 4px;
+  }
+  
+  .bottom-nav-mobile {
+    border-top-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .nav-mobile-menu,
+  .nav-mobile-toggle i,
+  .bottom-nav-mobile-item {
+    transition: none;
+  }
+  
+  .nav-mobile-menu {
+    scroll-behavior: auto;
+  }
+}

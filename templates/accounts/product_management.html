@@ -1,0 +1,131 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Product Management{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Product Management</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Product Management Dashboard</h4>
+                    <p>Manage products, categories, and inventory.</p>
+                    
+                    <!-- Product Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Products</h5>
+                                    <h3>{{ total_products|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>In Stock</h5>
+                                    <h3>{{ in_stock_products|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5>Low Stock</h5>
+                                    <h3>{{ low_stock_products|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5>Categories</h5>
+                                    <h3>{{ total_categories|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Products Table -->
+                    {% if products %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr>
+                                    <td>{{ product.product_name }}</td>
+                                    <td>{{ product.category.category_name }}</td>
+                                    <td>${{ product.price }}</td>
+                                    <td>{{ product.stock_quantity }}</td>
+                                    <td>
+                                        {% if product.is_in_stock %}
+                                            <span class="badge bg-success">In Stock</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Out of Stock</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'product_detail_admin' product.uid %}" class="btn btn-sm btn-info">View</a>
+                                        <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <h5>No products found</h5>
+                        <p>There are currently no products in the system.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="/admin/products/product/add/" class="btn btn-primary w-100">
+                                        <i class="fas fa-plus"></i> Add Product
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="/admin/products/category/add/" class="btn btn-success w-100">
+                                        <i class="fas fa-tags"></i> Add Category
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'inventory_dashboard' %}" class="btn btn-info w-100">
+                                        <i class="fas fa-warehouse"></i> Inventory
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="{% url 'product_analytics' %}" class="btn btn-warning w-100">
+                                        <i class="fas fa-chart-bar"></i> Analytics
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,435 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Add Product - Employee Dashboard{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/image-optimization.css' %}" rel="stylesheet" />
+{% endblock %}
+
+{% block start %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-plus"></i> Add New Product</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.product_name.id_for_label }}" class="form-label">Product Name *</label>
+                                {{ form.product_name }}
+                                {% if form.product_name.errors %}
+                                    <div class="text-danger">{{ form.product_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">Category *</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.parent.id_for_label }}" class="form-label">Parent Product</label>
+                                {{ form.parent }}
+                                {% if form.parent.errors %}
+                                    <div class="text-danger">{{ form.parent.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Select a parent product for product hierarchy</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.newest_product.id_for_label }}" class="form-label">Product Status</label>
+                                <div class="form-check">
+                                    {{ form.newest_product }}
+                                    <label class="form-check-label" for="{{ form.newest_product.id_for_label }}">
+                                        Newest Product
+                                    </label>
+                                </div>
+                                {% if form.newest_product.errors %}
+                                    <div class="text-danger">{{ form.newest_product.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.price.id_for_label }}" class="form-label">Price *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.price }}
+                                </div>
+                                {% if form.price.errors %}
+                                    <div class="text-danger">{{ form.price.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.stock_quantity.id_for_label }}" class="form-label">Stock Quantity</label>
+                                {{ form.stock_quantity }}
+                                {% if form.stock_quantity.errors %}
+                                    <div class="text-danger">{{ form.stock_quantity.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.product_desription.id_for_label }}" class="form-label">Product Description *</label>
+                            {{ form.product_desription }}
+                            {% if form.product_desription.errors %}
+                                <div class="text-danger">{{ form.product_desription.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Product Variants Section -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5><i class="fas fa-palette"></i> Product Variants</h5>
+                                <small class="text-muted">Select available colors and sizes for this product. If no variants are available, contact admin to add them.</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Available Colors</label>
+                                        <div class="form-check-container" style="max-height: 150px; overflow-y: auto; border: 1px solid #dee2e6; padding: 10px; border-radius: 5px;">
+                                            {% for choice in form.color_variant %}
+                                                <div class="form-check">
+                                                    {{ choice.tag }}
+                                                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                        {{ choice.choice_label }}
+                                                    </label>
+                                                </div>
+                                            {% empty %}
+                                                <div class="text-muted text-center py-3">
+                                                    <i class="fas fa-palette"></i>
+                                                    <p class="mb-1">No color variants available</p>
+                                                    <small>Contact admin to add color variants</small>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if form.color_variant.errors %}
+                                            <div class="text-danger">{{ form.color_variant.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Select available colors for this product</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Available Sizes</label>
+                                        <div class="form-check-container" style="max-height: 150px; overflow-y: auto; border: 1px solid #dee2e6; padding: 10px; border-radius: 5px;">
+                                            {% for choice in form.size_variant %}
+                                                <div class="form-check">
+                                                    {{ choice.tag }}
+                                                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                        {{ choice.choice_label }}
+                                                    </label>
+                                                </div>
+                                            {% empty %}
+                                                <div class="text-muted text-center py-3">
+                                                    <i class="fas fa-ruler"></i>
+                                                    <p class="mb-1">No size variants available</p>
+                                                    <small>Contact admin to add size variants</small>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if form.size_variant.errors %}
+                                            <div class="text-danger">{{ form.size_variant.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Select available sizes for this product</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.low_stock_threshold.id_for_label }}" class="form-label">Low Stock Threshold</label>
+                                {{ form.low_stock_threshold }}
+                                {% if form.low_stock_threshold.errors %}
+                                    <div class="text-danger">{{ form.low_stock_threshold.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.weight.id_for_label }}" class="form-label">Weight (kg)</label>
+                                {{ form.weight }}
+                                {% if form.weight.errors %}
+                                    <div class="text-danger">{{ form.weight.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.dimensions.id_for_label }}" class="form-label">Dimensions</label>
+                                {{ form.dimensions }}
+                                {% if form.dimensions.errors %}
+                                    <div class="text-danger">{{ form.dimensions.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.section.id_for_label }}" class="form-label">Section</label>
+                                {{ form.section }}
+                                {% if form.section.errors %}
+                                    <div class="text-danger">{{ form.section.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Marketing Flags -->
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Marketing Flags</label>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.is_in_stock }}
+                                            <label class="form-check-label" for="{{ form.is_in_stock.id_for_label }}">
+                                                In Stock
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.is_featured }}
+                                            <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                                Featured
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.is_bestseller }}
+                                            <label class="form-check-label" for="{{ form.is_bestseller.id_for_label }}">
+                                                Bestseller
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            {{ form.is_new_arrival }}
+                                            <label class="form-check-label" for="{{ form.is_new_arrival.id_for_label }}">
+                                                New Arrival
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.meta_title.id_for_label }}" class="form-label">SEO Title</label>
+                                {{ form.meta_title }}
+                                {% if form.meta_title.errors %}
+                                    <div class="text-danger">{{ form.meta_title.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.keywords.id_for_label }}" class="form-label">Keywords</label>
+                                {{ form.keywords }}
+                                {% if form.keywords.errors %}
+                                    <div class="text-danger">{{ form.keywords.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.meta_description.id_for_label }}" class="form-label">SEO Description</label>
+                            {{ form.meta_description }}
+                            {% if form.meta_description.errors %}
+                                <div class="text-danger">{{ form.meta_description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Product Relationships Section -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5><i class="fas fa-link"></i> Product Relationships</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Related Products</label>
+                                        <div class="form-check-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; padding: 10px; border-radius: 5px;">
+                                            {% for choice in form.related_products %}
+                                                <div class="form-check">
+                                                    {{ choice.tag }}
+                                                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                        {{ choice.choice_label }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if form.related_products.errors %}
+                                            <div class="text-danger">{{ form.related_products.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Select products that are related to this one</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Bundle Products</label>
+                                        <div class="form-check-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; padding: 10px; border-radius: 5px;">
+                                            {% for choice in form.bundle_products %}
+                                                <div class="form-check">
+                                                    {{ choice.tag }}
+                                                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                        {{ choice.choice_label }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if form.bundle_products.errors %}
+                                            <div class="text-danger">{{ form.bundle_products.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Select products to bundle with this one</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Images Section -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5><i class="fas fa-images"></i> Product Images</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="product_images" class="form-label">Upload Product Images</label>
+                                    <input type="file" class="form-control" name="product_images" id="product_images" 
+                                           multiple accept="image/*">
+                                    <small class="form-text text-muted">You can select multiple images. The first image will be set as primary.</small>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Note:</strong> Product images can be managed after creating the product. You can upload multiple images and set primary images later.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barcode Section -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5><i class="fas fa-barcode"></i> Barcode Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="barcode_value" class="form-label">Barcode Value</label>
+                                        <input type="text" class="form-control" name="barcode_value" id="barcode_value" 
+                                               placeholder="Enter barcode or leave empty for auto-generation">
+                                        <small class="form-text text-muted">Leave empty to auto-generate a barcode</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="barcode_type" class="form-label">Barcode Type</label>
+                                        <select class="form-control" name="barcode_type" id="barcode_type">
+                                            <option value="EAN13">EAN-13</option>
+                                            <option value="UPC">UPC</option>
+                                            <option value="CODE128">Code 128</option>
+                                            <option value="CUSTOM">Custom</option>
+                                            <option value="GENERATED" selected>Auto-Generated</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="is_primary" id="is_primary" checked>
+                                            <label class="form-check-label" for="is_primary">
+                                                Primary Barcode
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked>
+                                            <label class="form-check-label" for="is_active">
+                                                Active
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="barcode_notes" class="form-label">Barcode Notes</label>
+                                    <textarea class="form-control" name="barcode_notes" id="barcode_notes" rows="2" 
+                                              placeholder="Optional notes about this barcode"></textarea>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Note:</strong> If no barcode is provided, a unique 13-digit EAN-13 compatible barcode will be automatically generated for this product.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'employee_product_management' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Products
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Add Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/image-optimization.js' %}"></script>
+<script>
+// Additional form validation and image handling
+document.addEventListener('DOMContentLoaded', function() {
+    // Add image optimization info to the form
+    const imageSection = document.querySelector('#product-images-section');
+    if (imageSection) {
+        const infoAlert = document.createElement('div');
+        infoAlert.className = 'alert alert-info';
+        infoAlert.innerHTML = `
+            <h6><i class="fas fa-info-circle"></i> Image Optimization</h6>
+            <p class="mb-0">
+                <strong>Automatic Optimization:</strong> All uploaded images will be automatically optimized for web use.
+                <br>
+                <strong>Supported Formats:</strong> JPG, PNG, WebP, AVIF, GIF, BMP
+                <br>
+                <strong>Minimum Dimensions:</strong> 400x400px (will be upscaled if smaller)
+                <br>
+                <strong>Output Format:</strong> WebP (best compression and quality)
+            </p>
+        `;
+        imageSection.insertBefore(infoAlert, imageSection.firstChild);
+    }
+    
+    // Add file size validation
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file && file.size > 10 * 1024 * 1024) { // 10MB
+                alert('File size is too large. Maximum size is 10MB.');
+                this.value = '';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

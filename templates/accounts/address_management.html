@@ -1,0 +1,971 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Address Management{% endblock %}
+
+{% block start %}
+<!-- Back Button -->
+{% include 'base/back_button.html' with back_text='Back' %}
+
+<!-- Mapbox GL CSS -->
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+<style>
+  .map-container {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .address-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  
+  .btn-locate {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-locate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 10px;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .btn-group .btn {
+      width: 100%;
+    }
+    
+    .map-container {
+      height: 300px;
+    }
+    
+    
+    .address-form {
+      padding: 15px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .container {
+      padding: 0 5px;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .map-container {
+      height: 250px;
+    }
+    
+    .btn {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .form-control {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-map-marker-alt"></i> Address Management</h4>
+        </div>
+        <div class="card-body">
+          <!-- Current Address -->
+          <div class="mb-4">
+            <h5>Current Shipping Address</h5>
+            {% if profile.shipping_address %}
+              <p class="text-muted">{{ profile.shipping_address }}</p>
+            {% else %}
+              <p class="text-muted">No shipping address set</p>
+            {% endif %}
+          </div>
+          
+          <!-- Address Form -->
+          <div class="address-form">
+            <h5>Update Address</h5>
+            <form method="POST" action="{% url 'update_shipping_address' %}">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label for="address">Street Address</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="address" name="address" 
+                             value="{{ profile.street_address|default:'' }}"
+                             placeholder="Enter street address" required>
+                      <button type="button" class="btn btn-outline-primary" onclick="searchAddress()" title="Search for this address on the map">
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" class="form-control" id="city" name="city" 
+                           value="{{ profile.city|default:'' }}"
+                           placeholder="Enter city" required>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="state">State/Governorate</label>
+                    <input type="text" class="form-control" id="state" name="state" 
+                           value="{{ profile.state|default:'' }}"
+                           placeholder="Enter state or governorate" required>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="zip_code">ZIP/Postal Code</label>
+                    <input type="text" class="form-control" id="zip_code" name="zip_code" 
+                           value="{{ profile.zip_code|default:'' }}"
+                           placeholder="Enter postal code" required>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label for="country">Country</label>
+                    <select class="form-control" id="country" name="country">
+                      <option value="LB" {% if profile.country == 'LB' %}selected{% endif %}>Lebanon</option>
+                      <option value="US" {% if profile.country == 'US' %}selected{% endif %}>United States</option>
+                      <option value="CA" {% if profile.country == 'CA' %}selected{% endif %}>Canada</option>
+                      <option value="UK" {% if profile.country == 'UK' %}selected{% endif %}>United Kingdom</option>
+                      <option value="FR" {% if profile.country == 'FR' %}selected{% endif %}>France</option>
+                      <option value="DE" {% if profile.country == 'DE' %}selected{% endif %}>Germany</option>
+                      <option value="IT" {% if profile.country == 'IT' %}selected{% endif %}>Italy</option>
+                      <option value="ES" {% if profile.country == 'ES' %}selected{% endif %}>Spain</option>
+                      <option value="AU" {% if profile.country == 'AU' %}selected{% endif %}>Australia</option>
+                      <option value="JP" {% if profile.country == 'JP' %}selected{% endif %}>Japan</option>
+                      <option value="CN" {% if profile.country == 'CN' %}selected{% endif %}>China</option>
+                      <option value="IN" {% if profile.country == 'IN' %}selected{% endif %}>India</option>
+                      <option value="BR" {% if profile.country == 'BR' %}selected{% endif %}>Brazil</option>
+                      <option value="MX" {% if profile.country == 'MX' %}selected{% endif %}>Mexico</option>
+                      <option value="RU" {% if profile.country == 'RU' %}selected{% endif %}>Russia</option>
+                      <option value="SA" {% if profile.country == 'SA' %}selected{% endif %}>Saudi Arabia</option>
+                      <option value="AE" {% if profile.country == 'AE' %}selected{% endif %}>United Arab Emirates</option>
+                      <option value="EG" {% if profile.country == 'EG' %}selected{% endif %}>Egypt</option>
+                      <option value="JO" {% if profile.country == 'JO' %}selected{% endif %}>Jordan</option>
+                      <option value="SY" {% if profile.country == 'SY' %}selected{% endif %}>Syria</option>
+                      <option value="TR" {% if profile.country == 'TR' %}selected{% endif %}>Turkey</option>
+                      <option value="IR" {% if profile.country == 'IR' %}selected{% endif %}>Iran</option>
+                      <option value="IQ" {% if profile.country == 'IQ' %}selected{% endif %}>Iraq</option>
+                      <option value="KW" {% if profile.country == 'KW' %}selected{% endif %}>Kuwait</option>
+                      <option value="QA" {% if profile.country == 'QA' %}selected{% endif %}>Qatar</option>
+                      <option value="BH" {% if profile.country == 'BH' %}selected{% endif %}>Bahrain</option>
+                      <option value="OM" {% if profile.country == 'OM' %}selected{% endif %}>Oman</option>
+                      <option value="YE" {% if profile.country == 'YE' %}selected{% endif %}>Yemen</option>
+                      <option value="PS" {% if profile.country == 'PS' %}selected{% endif %}>Palestine</option>
+                      <option value="IL" {% if profile.country == 'IL' %}selected{% endif %}>Israel</option>
+                      <option value="CY" {% if profile.country == 'CY' %}selected{% endif %}>Cyprus</option>
+                      <option value="GR" {% if profile.country == 'GR' %}selected{% endif %}>Greece</option>
+                      <option value="OTHER" {% if profile.country == 'OTHER' %}selected{% endif %}>Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Hidden fields for coordinates -->
+              <input type="hidden" id="latitude" name="latitude">
+              <input type="hidden" id="longitude" name="longitude">
+              
+              <div class="text-center">
+                <div class="btn-group-vertical w-100 d-md-none">
+                  <button type="button" class="btn btn-locate mb-2" onclick="getCurrentLocation()">
+                    <i class="fas fa-crosshairs"></i> Use My Current Location
+                  </button>
+                  <button type="button" class="btn btn-outline-primary mb-2" onclick="openLocationPicker()">
+                    <i class="fas fa-map-marker-alt"></i> Pick on Map
+                  </button>
+                  <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Save Address
+                  </button>
+                </div>
+                <div class="d-none d-md-block">
+                  <button type="button" class="btn btn-locate" onclick="getCurrentLocation()">
+                    <i class="fas fa-crosshairs"></i> Use My Current Location
+                  </button>
+                  <button type="button" class="btn btn-outline-primary ml-2" onclick="openLocationPicker()">
+                    <i class="fas fa-map-marker-alt"></i> Pick on Map
+                  </button>
+                  <button type="submit" class="btn btn-success ml-2">
+                    <i class="fas fa-save"></i> Save Address
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          
+          <!-- Map View -->
+          <div class="mt-4">
+            <h5>Map View</h5>
+            <div id="map" class="map-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <!-- Delivery Information -->
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-truck"></i> Delivery Information</h5>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-info">
+            <i class="fas fa-clock"></i>
+            <strong>Standard Delivery Time:</strong><br>
+            <span class="h5 text-primary">30-40 minutes</span>
+            <br>
+            <small class="text-muted">From order confirmation to your doorstep</small>
+          </div>
+          
+          <div class="alert alert-success">
+            <i class="fas fa-map-marker-alt"></i>
+            <strong>Delivery Area:</strong><br>
+            <small>We deliver to all areas within Beirut</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Location Picker Modal -->
+<div class="modal fade" id="locationPickerModal" tabindex="-1" aria-labelledby="locationPickerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="locationPickerModalLabel">
+          <i class="fas fa-map-marker-alt"></i> Pick Your Location
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="locationPickerMap" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+        <div class="mt-3">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Instructions:</strong> Click on the map to select your exact location. 
+            The marker will show your selected position.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="confirmLocation()">
+          <i class="fas fa-check"></i> Use This Location
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Location Accuracy Modal -->
+<div class="modal fade" id="locationAccuracyModal" tabindex="-1" aria-labelledby="locationAccuracyModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="locationAccuracyModalLabel">
+          <i class="fas fa-crosshairs"></i> Location Accuracy
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <h6>Getting your precise location...</h6>
+          <p class="text-muted">This may take a few seconds for better accuracy.</p>
+          <div class="progress mb-3">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+          </div>
+          <div id="locationAccuracyInfo" class="small text-muted"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mapbox GL JS -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script>
+let map;
+let marker;
+let locationPickerMap;
+let locationPickerMarker;
+let geocoder;
+let selectedLocation = null;
+let locationAccuracy = null;
+let lastKnownLocation = null;
+
+// Set your Mapbox access token here
+mapboxgl.accessToken = 'pk.eyJ1IjoiYTJ6bWFydCIsImEiOiJjbWdka2twOTUxZ25wMmxzaGo4YmxtZGJoIn0.lCB72pJ1agzDaWPSocmdsg';
+
+// Initialize Mapbox GL JS
+function initMap() {
+  // Use user's coordinates if available, otherwise default to Beirut, Lebanon
+  let centerLat = 33.8938;
+  let centerLng = 35.5018;
+  
+  {% if profile.latitude and profile.longitude %}
+    centerLat = {{ profile.latitude }};
+    centerLng = {{ profile.longitude }};
+  {% endif %}
+  
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [centerLng, centerLat],
+    zoom: 15
+  });
+  
+  // Add navigation controls
+  map.addControl(new mapboxgl.NavigationControl());
+  
+  // Add geolocate control
+  map.addControl(new mapboxgl.GeolocateControl({
+    positionOptions: {
+      enableHighAccuracy: true
+    },
+    trackUserLocation: true,
+    showUserHeading: true
+  }));
+  
+  // Add user's current location marker if coordinates exist
+  {% if profile.latitude and profile.longitude %}
+    marker = new mapboxgl.Marker()
+      .setLngLat([{{ profile.longitude }}, {{ profile.latitude }}])
+      .setPopup(new mapboxgl.Popup().setHTML('Your Current Address'))
+      .addTo(map);
+    marker.getPopup().addTo(map);
+  {% endif %}
+  
+  // Add click listener to map
+  map.on('click', function(event) {
+    const lng = event.lngLat.lng;
+    const lat = event.lngLat.lat;
+    
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+    
+    // Update marker
+    if (marker) {
+      marker.remove();
+    }
+    
+    marker = new mapboxgl.Marker({ draggable: true })
+      .setLngLat([lng, lat])
+      .addTo(map);
+    
+    // Add drag event listener for manual correction
+    marker.on('dragend', function() {
+      const lngLat = marker.getLngLat();
+      document.getElementById('latitude').value = lngLat.lat;
+      document.getElementById('longitude').value = lngLat.lng;
+      reverseGeocode(lngLat.lat, lngLat.lng);
+    });
+    
+    // Reverse geocode to get address
+    reverseGeocode(lat, lng);
+  });
+}
+
+// Device detection for optimized location services
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+         (window.innerWidth <= 768);
+}
+
+// Improved HTML5 Geolocation with device-specific optimization
+function getCurrentLocation() {
+  if (!navigator.geolocation) {
+    showNotification('Geolocation is not supported by this browser.', 'error');
+    return;
+  }
+
+  // Show loading indicator
+  const button = event.target;
+  const originalText = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location...';
+  button.disabled = true;
+
+  const isMobile = isMobileDevice();
+  
+  // Device-specific options for optimal performance
+  const options = {
+    enableHighAccuracy: true, // Force high accuracy GPS
+    timeout: isMobile ? 15000 : 30000, // Longer timeout for desktop
+    maximumAge: isMobile ? 30000 : 0 // Force fresh location on desktop
+  };
+  
+  // Try to get the most accurate location
+  let locationAttempts = 0;
+  const maxAttempts = isMobile ? 2 : 3; // More attempts for desktop
+  let bestLocation = null;
+  let bestAccuracy = Infinity;
+  
+  function attemptLocation() {
+    locationAttempts++;
+    
+    // For desktop, try to get a fresh location if we have cached data
+    if (!isMobile && lastKnownLocation && locationAttempts === 1) {
+      options.maximumAge = 0; // Force fresh location on first attempt
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+        
+        // Check for location stability (prevent large jumps)
+        if (lastKnownLocation) {
+          const distance = calculateDistance(
+            lastKnownLocation.lat, lastKnownLocation.lng,
+            lat, lng
+          );
+          
+          // If location jumped more than 100m, it might be inaccurate
+          if (distance > 100) {
+            console.log('Location jump detected:', distance, 'meters');
+            // Use the more accurate of the two locations
+            if (accuracy < lastKnownLocation.accuracy) {
+              bestLocation = { lat, lng, accuracy };
+              bestAccuracy = accuracy;
+            } else {
+              bestLocation = lastKnownLocation;
+              bestAccuracy = lastKnownLocation.accuracy;
+            }
+          } else {
+            // Keep the most accurate location
+            if (accuracy < bestAccuracy) {
+              bestLocation = { lat, lng, accuracy };
+              bestAccuracy = accuracy;
+            }
+          }
+        } else {
+          // First location reading
+          if (accuracy < bestAccuracy) {
+            bestLocation = { lat, lng, accuracy };
+            bestAccuracy = accuracy;
+          }
+        }
+        
+          // Desktop-specific accuracy thresholds
+          const accuracyThreshold = isMobile ? 20 : 50; // More lenient for desktop
+          
+          // If we have good accuracy or tried enough times, proceed
+          if (accuracy < accuracyThreshold || locationAttempts >= maxAttempts) {
+            finalizeLocation();
+          } else {
+            // Wait longer for desktop to allow GPS to stabilize
+            const waitTime = isMobile ? 1000 : 2000;
+            setTimeout(attemptLocation, waitTime);
+          }
+      },
+      function(error) {
+        if (locationAttempts >= maxAttempts) {
+          handleLocationError(error);
+        } else {
+          // Retry on error
+          setTimeout(attemptLocation, 1000);
+        }
+      },
+      options
+    );
+  }
+  
+  function finalizeLocation() {
+    if (bestLocation) {
+      const lat = bestLocation.lat;
+      const lng = bestLocation.lng;
+      const accuracy = bestLocation.accuracy;
+      
+      // Store coordinates
+      document.getElementById('latitude').value = lat;
+      document.getElementById('longitude').value = lng;
+      
+      // Update last known location for stability
+      lastKnownLocation = { lat, lng, accuracy };
+      
+      // Update map with stable view
+      map.setCenter([lng, lat]);
+      map.setZoom(17); // Slightly lower zoom for stability
+      
+      if (marker) {
+        marker.remove();
+      }
+      
+      marker = new mapboxgl.Marker({ draggable: true })
+        .setLngLat([lng, lat])
+        .setPopup(new mapboxgl.Popup().setHTML(`Your Location<br>Accuracy: ${Math.round(accuracy)}m<br><small>Drag to adjust position</small>`))
+        .addTo(map);
+      marker.getPopup().addTo(map);
+      
+      // Add drag event listener for manual correction
+      marker.on('dragend', function() {
+        const lngLat = marker.getLngLat();
+        document.getElementById('latitude').value = lngLat.lat;
+        document.getElementById('longitude').value = lngLat.lng;
+        reverseGeocode(lngLat.lat, lngLat.lng);
+      });
+      
+      // Reverse geocode to get address
+      reverseGeocode(lat, lng);
+      
+      // Device-specific success messages
+      if (isMobile) {
+        showNotification(`Location detected with ${Math.round(accuracy)}m accuracy!`, 'success');
+      } else {
+        showNotification(`Desktop location detected with ${Math.round(accuracy)}m accuracy! For better accuracy, try the address search feature.`, 'success');
+      }
+    } else {
+      showNotification('Unable to get accurate location. Please try the map picker.', 'error');
+    }
+    
+    // Restore button
+    button.innerHTML = originalText;
+    button.disabled = false;
+  }
+  
+    function handleLocationError(error) {
+      let errorMessage = 'Error getting location: ';
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage += 'Location access denied. Please allow location access and try again.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage += 'Location information unavailable.';
+          break;
+        case error.TIMEOUT:
+          errorMessage += 'Location request timed out.';
+          break;
+        default:
+          errorMessage += error.message;
+          break;
+      }
+      
+      // For desktop, suggest using address search as fallback
+      if (!isMobile) {
+        errorMessage += ' Try using the address search feature instead.';
+      }
+      
+      showNotification(errorMessage, 'error');
+
+      // Restore button
+      button.innerHTML = originalText;
+      button.disabled = false;
+    }
+  
+  attemptLocation();
+}
+
+// Calculate distance between two coordinates in meters
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000; // Earth's radius in meters
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// Open location picker modal
+function openLocationPicker() {
+  const modal = new bootstrap.Modal(document.getElementById('locationPickerModal'));
+  modal.show();
+  
+  // Initialize location picker map
+  setTimeout(() => {
+    if (!locationPickerMap) {
+      locationPickerMap = new mapboxgl.Map({
+        container: 'locationPickerMap',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [35.5018, 33.8938],
+        zoom: 13
+      });
+      
+      // Add navigation controls
+      locationPickerMap.addControl(new mapboxgl.NavigationControl());
+      
+      // Add click listener
+      locationPickerMap.on('click', function(event) {
+        const lng = event.lngLat.lng;
+        const lat = event.lngLat.lat;
+        
+        selectedLocation = { lat, lng };
+        
+        if (locationPickerMarker) {
+          locationPickerMarker.remove();
+        }
+        
+        locationPickerMarker = new mapboxgl.Marker({ draggable: true })
+          .setLngLat([lng, lat])
+          .setPopup(new mapboxgl.Popup().setHTML('Selected Location<br><small>Drag to adjust</small>'))
+          .addTo(locationPickerMap);
+        locationPickerMarker.getPopup().addTo(locationPickerMap);
+        
+        // Add drag event listener
+        locationPickerMarker.on('dragend', function() {
+          const lngLat = locationPickerMarker.getLngLat();
+          selectedLocation = { lat: lngLat.lat, lng: lngLat.lng };
+        });
+      });
+    }
+  }, 300);
+}
+
+// Confirm selected location
+function confirmLocation() {
+  if (selectedLocation) {
+    const lat = selectedLocation.lat;
+    const lng = selectedLocation.lng;
+    
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+    
+    // Update main map
+    map.setCenter([lng, lat]);
+    map.setZoom(18);
+    
+    if (marker) {
+      marker.remove();
+    }
+    
+    marker = new mapboxgl.Marker({ draggable: true })
+      .setLngLat([lng, lat])
+      .setPopup(new mapboxgl.Popup().setHTML('Selected Location<br><small>Drag to adjust</small>'))
+      .addTo(map);
+    marker.getPopup().addTo(map);
+    
+    // Add drag event listener for manual correction
+    marker.on('dragend', function() {
+      const lngLat = marker.getLngLat();
+      document.getElementById('latitude').value = lngLat.lat;
+      document.getElementById('longitude').value = lngLat.lng;
+      reverseGeocode(lngLat.lat, lngLat.lng);
+    });
+    
+    // Reverse geocode to get address
+    reverseGeocode(lat, lng);
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('locationPickerModal'));
+    modal.hide();
+    
+    showNotification('Location selected successfully!', 'success');
+  } else {
+    showNotification('Please click on the map to select a location first.', 'warning');
+  }
+}
+
+// Enhanced reverse geocode using Mapbox Geocoding API
+function reverseGeocode(lat, lng) {
+  // Use Mapbox Geocoding API for better accuracy
+  const mapboxGeocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}&types=address`;
+  
+  fetch(mapboxGeocodingUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        const context = feature.context || [];
+        
+        // Parse Mapbox geocoding response
+        let streetNumber = '';
+        let route = '';
+        let city = '';
+        let state = '';
+        let zipCode = '';
+        let country = '';
+        
+        // Extract address components from context
+        context.forEach(item => {
+          if (item.id.startsWith('address')) {
+            streetNumber = item.text;
+          } else if (item.id.startsWith('street')) {
+            route = item.text;
+          } else if (item.id.startsWith('place')) {
+            city = item.text;
+          } else if (item.id.startsWith('region')) {
+            state = item.text;
+          } else if (item.id.startsWith('postcode')) {
+            zipCode = item.text;
+          } else if (item.id.startsWith('country')) {
+            country = item.text;
+          }
+        });
+        
+        // Also check the main feature properties for country
+        if (!country && feature.properties && feature.properties.context) {
+          const mainContext = feature.properties.context;
+          if (mainContext.country) {
+            country = mainContext.country;
+          }
+        }
+        
+        // Update form fields
+        document.getElementById('address').value = (streetNumber + ' ' + route).trim();
+        document.getElementById('city').value = city;
+        document.getElementById('state').value = state;
+        document.getElementById('zip_code').value = zipCode;
+        
+        // Update country if found
+        if (country) {
+          const countrySelect = document.getElementById('country');
+          if (countrySelect) {
+            // Map country names to country codes
+            const countryMap = {
+              'Lebanon': 'LB',
+              'لبنان': 'LB', // Arabic name for Lebanon
+              'United States': 'US',
+              'United States of America': 'US',
+              'USA': 'US',
+              'Canada': 'CA',
+              'United Kingdom': 'UK',
+              'UK': 'UK',
+              'Great Britain': 'UK',
+              'France': 'FR',
+              'Germany': 'DE',
+              'Italy': 'IT',
+              'Spain': 'ES',
+              'Australia': 'AU',
+              'Japan': 'JP',
+              'China': 'CN',
+              'India': 'IN',
+              'Brazil': 'BR',
+              'Mexico': 'MX',
+              'Russia': 'RU',
+              'Saudi Arabia': 'SA',
+              'United Arab Emirates': 'AE',
+              'UAE': 'AE',
+              'Egypt': 'EG',
+              'Jordan': 'JO',
+              'Syria': 'SY',
+              'Turkey': 'TR',
+              'Iran': 'IR',
+              'Iraq': 'IQ',
+              'Kuwait': 'KW',
+              'Qatar': 'QA',
+              'Bahrain': 'BH',
+              'Oman': 'OM',
+              'Yemen': 'YE',
+              'Palestine': 'PS',
+              'Israel': 'IL',
+              'Cyprus': 'CY',
+              'Greece': 'GR'
+            };
+            
+            const countryCode = countryMap[country] || 'LB';
+            countrySelect.value = countryCode;
+            
+            // If no country was detected, default to Lebanon
+            if (!country) {
+              countrySelect.value = 'LB';
+            }
+          }
+        }
+        
+      } else {
+        // Fallback to Django backend
+        fetch('{% url "reverse_geocode" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({ latitude: lat, longitude: lng })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const addressComponents = data.address_components;
+            
+            // Parse address components
+            let streetNumber = addressComponents.house_number || '';
+            let route = addressComponents.road || '';
+            let city = addressComponents.city || addressComponents.town || addressComponents.village || '';
+            let state = addressComponents.state || '';
+            let zipCode = addressComponents.postcode || '';
+            
+            // Update form fields
+            document.getElementById('address').value = (streetNumber + ' ' + route).trim();
+            document.getElementById('city').value = city;
+            document.getElementById('state').value = state;
+            document.getElementById('zip_code').value = zipCode;
+          }
+        })
+        .catch(error => {
+          console.error('Fallback geocoding error:', error);
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Mapbox geocoding error:', error);
+      // Fallback to Django backend
+      fetch('{% url "reverse_geocode" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ latitude: lat, longitude: lng })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const addressComponents = data.address_components;
+          
+          // Parse address components
+          let streetNumber = addressComponents.house_number || '';
+          let route = addressComponents.road || '';
+          let city = addressComponents.city || addressComponents.town || addressComponents.village || '';
+          let state = addressComponents.state || '';
+          let zipCode = addressComponents.postcode || '';
+          
+          // Update form fields
+          document.getElementById('address').value = (streetNumber + ' ' + route).trim();
+          document.getElementById('city').value = city;
+          document.getElementById('state').value = state;
+          document.getElementById('zip_code').value = zipCode;
+        }
+      })
+      .catch(error => {
+        console.error('Fallback geocoding error:', error);
+      });
+    });
+}
+
+// Forward geocoding - search for addresses using Mapbox
+function searchAddress() {
+  const addressInput = document.getElementById('address').value;
+  const cityInput = document.getElementById('city').value;
+  const stateInput = document.getElementById('state').value;
+  const countryInput = document.getElementById('country').value;
+  
+  if (!addressInput.trim()) {
+    showNotification('Please enter an address to search.', 'warning');
+    return;
+  }
+  
+  // Build search query
+  let query = addressInput;
+  if (cityInput) query += `, ${cityInput}`;
+  if (stateInput) query += `, ${stateInput}`;
+  
+  // Add country bias
+  let countryBias = '';
+  if (countryInput === 'LB') {
+    countryBias = '&country=LB';
+  } else if (countryInput === 'US') {
+    countryBias = '&country=US';
+  }
+  
+  const searchUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&types=address${countryBias}&limit=1`;
+  
+  
+  fetch(searchUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        const [lng, lat] = feature.center;
+        
+        // Update coordinates
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        
+        // Update map
+        map.setCenter([lng, lat]);
+        map.setZoom(18);
+        
+        if (marker) {
+          marker.remove();
+        }
+        
+        marker = new mapboxgl.Marker()
+          .setLngLat([lng, lat])
+          .setPopup(new mapboxgl.Popup().setHTML('Found Address'))
+          .addTo(map);
+        marker.getPopup().addTo(map);
+        
+        showNotification('Address found!', 'success');
+      } else {
+        showNotification('Address not found. Please try a different search term.', 'warning');
+      }
+    })
+    .catch(error => {
+      console.error('Address search error:', error);
+      showNotification('Error searching for address. Please try again.', 'error');
+    });
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+  notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+  notification.innerHTML = `
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  document.body.appendChild(notification);
+  
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.parentNode.removeChild(notification);
+    }
+  }, 3000);
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initMap();
+});
+</script>
+{% endblock %}

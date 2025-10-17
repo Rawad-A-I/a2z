@@ -1,0 +1,252 @@
+{% extends "base/base.html" %} 
+{% block title %}Profile{% endblock title %}
+{% load crispy_forms_tags %} {% load static %} {% block start %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <!-- Back Button -->
+      <div class="mb-4">
+        <a href="{% url 'products_only' %}" class="btn btn-outline">
+          <i class="fas fa-arrow-left"></i> Back to Shopping
+        </a>
+      </div>
+
+      <div class="row">
+        <!-- Profile Picture and Basic Info -->
+        <div class="col-lg-4 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">
+                <i class="fas fa-user"></i> Profile Picture
+              </h4>
+            </div>
+            <div class="card-body text-center">
+              {% if user.profile.profile_image %}
+                <img src="/media/{{ user.profile.profile_image }}" 
+                     class="img-account-profile rounded-circle mb-3" 
+                     alt="Profile Picture"
+                     style="width: 120px; height: 120px; object-fit: cover;">
+              {% else %}
+                <div class="img-account-profile rounded-circle mb-3 bg-gray-200 d-flex align-items-center justify-content-center" 
+                     style="width: 120px; height: 120px; margin: 0 auto;">
+                  <i class="fas fa-user text-4xl text-gray-400"></i>
+                </div>
+              {% endif %}
+              
+              <h5 class="mb-1">{{ user.get_full_name|default:user.username }}</h5>
+              <p class="text-secondary mb-3">{{ user.email }}</p>
+              
+              <div class="text-sm text-gray-600">
+                <div class="mb-1">
+                  <i class="fas fa-calendar"></i> 
+                  Member since {{ user.date_joined|date:"M Y" }}
+                </div>
+                <div class="mb-1">
+                  <i class="fas fa-shopping-cart"></i> 
+                  {{ user.profile.get_cart_count }} items in cart
+                </div>
+                {% if user.profile.shipping_address %}
+                <div>
+                  <i class="fas fa-map-marker-alt"></i> 
+                  {{ user.profile.city|default:"Location not set" }}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Form -->
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">
+                <i class="fas fa-edit"></i> Edit Profile
+              </h4>
+            </div>
+            <div class="card-body">
+              <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row">
+                  <!-- Profile Image Upload -->
+                  <div class="col-12 mb-4">
+                    <label for="id_profile_image" class="form-label">Profile Picture</label>
+                    <input type="file" class="form-control" name="profile_image" id="id_profile_image" accept="image/*">
+                    <small class="form-text text-muted">Upload a new profile picture (JPG, PNG, GIF - Max 5MB)</small>
+                  </div>
+                  
+                  <!-- Bio -->
+                  <div class="col-12 mb-4">
+                    <label for="id_bio" class="form-label">Bio</label>
+                    <textarea class="form-control" name="bio" id="id_bio" rows="3" 
+                              placeholder="Tell us about yourself...">{{ user.profile.bio|default:"" }}</textarea>
+                  </div>
+                  
+                  <!-- Phone Number -->
+                  <div class="col-md-6 mb-4">
+                    <label for="id_phone_number" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" name="phone_number" id="id_phone_number" 
+                           value="{{ user.profile.phone_number|default:"" }}" 
+                           placeholder="Enter your phone number" required>
+                    <small class="form-text text-muted">Include country code (e.g., +961 for Lebanon)</small>
+                  </div>
+                  
+                  <!-- Country Code -->
+                  <div class="col-md-6 mb-4">
+                    <label for="id_phone_country_code" class="form-label">Country Code</label>
+                    {% if profile_form.phone_country_code %}
+                      {{ profile_form.phone_country_code }}
+                    {% else %}
+                      <select class="form-control" name="phone_country_code" id="id_phone_country_code" required>
+                        <option value="+961" {% if user.profile.phone_country_code == "+961" %}selected{% endif %}>+961 (Lebanon)</option>
+                        <option value="+1" {% if user.profile.phone_country_code == "+1" %}selected{% endif %}>+1 (USA/Canada)</option>
+                        <option value="+44" {% if user.profile.phone_country_code == "+44" %}selected{% endif %}>+44 (UK)</option>
+                        <option value="+33" {% if user.profile.phone_country_code == "+33" %}selected{% endif %}>+33 (France)</option>
+                        <option value="+49" {% if user.profile.phone_country_code == "+49" %}selected{% endif %}>+49 (Germany)</option>
+                      </select>
+                    {% endif %}
+                  </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Profile
+                  </button>
+                  <a href="{% url 'address_management' %}" class="btn btn-outline">
+                    <i class="fas fa-map-marker-alt"></i> Manage Address
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Account Actions -->
+          <div class="card mt-4">
+            <div class="card-header">
+              <h4 class="card-title">
+                <i class="fas fa-cog"></i> Account Actions
+              </h4>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <a href="{% url 'change_password' %}" class="btn btn-outline w-full">
+                    <i class="fas fa-key"></i> Change Password
+                  </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <a href="{% url 'order_history' %}" class="btn btn-outline w-full">
+                    <i class="fas fa-history"></i> Order History
+                  </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <a href="{% url 'wishlist' %}" class="btn btn-outline w-full">
+                    <i class="fas fa-heart"></i> Wishlist
+                  </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <a href="{% url 'cart' %}" class="btn btn-outline w-full">
+                    <i class="fas fa-shopping-cart"></i> Shopping Cart
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Address Information -->
+          {% if user.profile.shipping_address %}
+          <div class="card mt-4">
+            <div class="card-header">
+              <h4 class="card-title">
+                <i class="fas fa-map-marker-alt"></i> Delivery Address
+              </h4>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label text-gray-600">Address</label>
+                    <p class="font-medium">{{ user.profile.shipping_address }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label text-gray-600">City</label>
+                    <p class="font-medium">{{ user.profile.city|default:"Not set" }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label text-gray-600">Country</label>
+                    <p class="font-medium">{{ user.profile.country|default:"Not set" }}</p>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label text-gray-600">Phone</label>
+                    <p class="font-medium">
+                      {% if user.profile.phone_country_code %}{{ user.profile.phone_country_code }}{% else %}+961{% endif %} 
+                      {{ user.profile.phone_number|default:"Not set" }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <a href="{% url 'address_management' %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Update Address
+              </a>
+            </div>
+          </div>
+          {% else %}
+          <div class="card mt-4">
+            <div class="card-body text-center">
+              <i class="fas fa-map-marker-alt text-4xl text-gray-300 mb-3"></i>
+              <h5 class="text-lg font-medium text-gray-900 mb-2">No delivery address set</h5>
+              <p class="text-gray-500 mb-4">Add your delivery address to complete your profile.</p>
+              <a href="{% url 'address_management' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Delivery Address
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .img-account-profile {
+    height: 10rem;
+    width: 10rem;
+    object-fit: cover;
+  }
+  
+  @media (max-width: 768px) {
+    .img-account-profile {
+      height: 8rem;
+      width: 8rem;
+    }
+    
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    .card {
+      margin-bottom: 1rem;
+    }
+    
+    .btn {
+      min-height: 44px;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+    }
+    
+    .form-control {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
+</style>
+{% endblock %}

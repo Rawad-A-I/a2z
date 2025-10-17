@@ -1,0 +1,70 @@
+# Ignore development files
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Ignore OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore large media files
+public/media/product/
+public/media/catgories/
+public/media/css/
+public/media/fonts/
+public/media/images/
+public/media/js/
+Screenshots/
+
+# Ignore test files
+tests/
+test_*.py
+*_test.py
+
+# Ignore documentation
+*.md
+LICENSE
+README.md
+USER_MANUAL.md
+ENHANCED_FEATURES.md
+RAILWAY_DEPLOYMENT*.md
+
+# Ignore development scripts
+setup_*.py
+reset_database.py
+weasyprint-test.pdf
+
+# Ignore git files
+.git/
+.gitignore
+.gitattributes

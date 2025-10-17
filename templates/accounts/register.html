@@ -1,0 +1,256 @@
+{% extends "base/base.html" %} {% load static %}
+{% block title %}Register{% endblock %}
+{% block start %}
+
+<section class="section-content padding-bottom">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-xl-4 col-lg-5 col-md-6">
+        <div class="card">
+          <div class="card-header text-center">
+            <h3 class="card-title">
+              <i class="fas fa-user-plus"></i> Create Account
+            </h3>
+            <p class="text-secondary">Join our community today</p>
+          </div>
+          <div class="card-body">
+            {% include 'base/alert.html' %}
+            
+            <form method="POST">
+              {% csrf_token %}
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-4">
+                    <label for="id_first_name" class="form-label">First Name</label>
+                    <input type="text" 
+                           class="form-control" 
+                           name="first_name" 
+                           id="id_first_name" 
+                           placeholder="Enter your first name"
+                           required
+                           autocomplete="given-name">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group mb-4">
+                    <label for="id_last_name" class="form-label">Last Name</label>
+                    <input type="text" 
+                           class="form-control" 
+                           name="last_name" 
+                           id="id_last_name" 
+                           placeholder="Enter your last name"
+                           required
+                           autocomplete="family-name">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-group mb-4">
+                <label for="id_username" class="form-label">Username</label>
+                <input type="text" 
+                       class="form-control" 
+                       name="username" 
+                       id="id_username" 
+                       placeholder="Choose a username"
+                       required
+                       autocomplete="username">
+                <small class="form-text text-muted">This will be your unique identifier</small>
+              </div>
+              
+              <div class="form-group mb-4">
+                <label for="id_email" class="form-label">Email Address</label>
+                <input type="email" 
+                       class="form-control" 
+                       name="email" 
+                       id="id_email" 
+                       placeholder="Enter your email address"
+                       required
+                       autocomplete="email">
+                <small class="form-text text-muted">We'll send you a confirmation email</small>
+              </div>
+              
+              <div class="form-group mb-4">
+                <label for="id_password1" class="form-label">Password</label>
+                <div class="input-group">
+                  <input type="password" 
+                         class="form-control" 
+                         name="password1" 
+                         id="id_password1" 
+                         placeholder="Create a strong password"
+                         required
+                         autocomplete="new-password">
+                  <button class="btn btn-outline" type="button" onclick="togglePassword('id_password1', 'passwordToggleIcon1')">
+                    <i class="fas fa-eye" id="passwordToggleIcon1"></i>
+                  </button>
+                </div>
+                <small class="form-text text-muted">Use at least 8 characters with numbers and letters</small>
+              </div>
+              
+              <div class="form-group mb-4">
+                <label for="id_password2" class="form-label">Confirm Password</label>
+                <div class="input-group">
+                  <input type="password" 
+                         class="form-control" 
+                         name="password2" 
+                         id="id_password2" 
+                         placeholder="Confirm your password"
+                         required
+                         autocomplete="new-password">
+                  <button class="btn btn-outline" type="button" onclick="togglePassword('id_password2', 'passwordToggleIcon2')">
+                    <i class="fas fa-eye" id="passwordToggleIcon2"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="form-group mb-4">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="terms_accepted" id="terms_accepted" required>
+                  <label class="form-check-label" for="terms_accepted">
+                    I agree to the <a href="{% url 'terms' %}" target="_blank" class="text-primary">Terms of Service</a> 
+                    and <a href="{% url 'privacy' %}" target="_blank" class="text-primary">Privacy Policy</a>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group mb-4">
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" name="newsletter" id="newsletter">
+                  <label class="form-check-label" for="newsletter">
+                    Subscribe to our newsletter for updates and special offers
+                  </label>
+                </div>
+              </div>
+              
+              <div class="d-grid mb-4">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-user-plus"></i> Create Account
+                </button>
+              </div>
+            </form>
+          </div>
+          
+          <div class="card-footer text-center">
+            <p class="mb-0">
+              Already have an account? 
+              <a href="{% url 'login' %}" class="text-primary">
+                <i class="fas fa-sign-in-alt"></i> Sign in here
+              </a>
+            </p>
+          </div>
+        </div>
+        
+        <!-- Benefits -->
+        <div class="card mt-4">
+          <div class="card-body">
+            <h5 class="card-title text-center mb-4">Why Join Us?</h5>
+            <div class="row text-center">
+              <div class="col-4">
+                <i class="fas fa-shipping-fast text-primary text-2xl mb-2"></i>
+                <div class="text-sm">Fast Delivery</div>
+              </div>
+              <div class="col-4">
+                <i class="fas fa-shield-alt text-success text-2xl mb-2"></i>
+                <div class="text-sm">Secure Shopping</div>
+              </div>
+              <div class="col-4">
+                <i class="fas fa-heart text-danger text-2xl mb-2"></i>
+                <div class="text-sm">Wishlist</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function togglePassword(inputId, iconId) {
+  const passwordInput = document.getElementById(inputId);
+  const toggleIcon = document.getElementById(iconId);
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    toggleIcon.classList.remove('fa-eye');
+    toggleIcon.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    toggleIcon.classList.remove('fa-eye-slash');
+    toggleIcon.classList.add('fa-eye');
+  }
+}
+
+// Password strength indicator
+document.getElementById('id_password1').addEventListener('input', function() {
+  const password = this.value;
+  const strength = getPasswordStrength(password);
+  updatePasswordStrength(strength);
+});
+
+function getPasswordStrength(password) {
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^A-Za-z0-9]/.test(password)) strength++;
+  return strength;
+}
+
+function updatePasswordStrength(strength) {
+  // You can add a visual strength indicator here
+  console.log('Password strength:', strength);
+}
+
+// Auto-focus on first name field
+document.addEventListener('DOMContentLoaded', function() {
+  const firstNameField = document.getElementById('id_first_name');
+  if (firstNameField) {
+    firstNameField.focus();
+  }
+});
+</script>
+
+<style>
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem;
+    }
+    
+    .card {
+      margin: 0.5rem 0;
+    }
+    
+    .btn {
+      min-height: 44px;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+    }
+    
+    .form-control {
+      font-size: 16px; /* Prevents zoom on iOS */
+      min-height: 44px;
+    }
+    
+    .input-group .btn {
+      min-height: 44px;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .card-header {
+      font-size: 1.2rem;
+      padding: 1rem;
+    }
+    
+    .form-control {
+      font-size: 1rem;
+    }
+  }
+</style>
+{% endblock %}

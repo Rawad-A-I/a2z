@@ -1,0 +1,368 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Update Profile Address{% endblock %}
+
+{% block start %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  .map-container {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .address-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .btn-locate {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-locate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-user-edit"></i> Update Profile Address</h4>
+        </div>
+        <div class="card-body">
+          <!-- Current Address Display -->
+          {% if profile.shipping_address %}
+          <div class="alert alert-info">
+            <h6><i class="fas fa-info-circle"></i> Current Address</h6>
+            <p class="mb-0">{{ profile.shipping_address }}</p>
+            {% if profile.phone_number %}
+              <p class="mb-0"><i class="fas fa-phone"></i> {{ profile.phone_number }}</p>
+            {% endif %}
+          </div>
+          {% endif %}
+          
+          <!-- Address Form -->
+          <div class="address-form">
+            <h5>Update Your Address</h5>
+            <form method="POST">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="street_address">Street Address</label>
+                    {{ form.street_address }}
+                    {% if form.street_address.errors %}
+                      <div class="text-danger">{{ form.street_address.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="city">City</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}
+                      <div class="text-danger">{{ form.city.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="state">State</label>
+                    {{ form.state }}
+                    {% if form.state.errors %}
+                      <div class="text-danger">{{ form.state.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="zip_code">ZIP Code</label>
+                    {{ form.zip_code }}
+                    {% if form.zip_code.errors %}
+                      <div class="text-danger">{{ form.zip_code.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="country">Country</label>
+                    {{ form.country }}
+                    {% if form.country.errors %}
+                      <div class="text-danger">{{ form.country.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                      <div class="text-danger">{{ form.phone_number.errors }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Hidden fields for coordinates -->
+              <input type="hidden" id="latitude" name="latitude" value="{{ profile.latitude|default:'' }}">
+              <input type="hidden" id="longitude" name="longitude" value="{{ profile.longitude|default:'' }}">
+              
+              <div class="text-center">
+                <button type="button" class="btn btn-locate" onclick="locateUser()">
+                  <i class="fas fa-crosshairs"></i> Use Current Location
+                </button>
+                <button type="button" class="btn btn-outline-primary ml-2" onclick="geocodeAddress()">
+                  <i class="fas fa-search"></i> Find on Map
+                </button>
+                <button type="submit" class="btn btn-success ml-2">
+                  <i class="fas fa-save"></i> Save Address
+                </button>
+              </div>
+            </form>
+          </div>
+          
+          <!-- Map -->
+          <div class="mt-4">
+            <h5>Map View</h5>
+            <div id="map" class="map-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <!-- Address Tips -->
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-lightbulb"></i> Address Tips</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Use your current location for accuracy</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Include apartment/unit numbers</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Double-check ZIP codes</li>
+            <li class="mb-2"><i class="fas fa-check text-success"></i> Add a phone number for delivery</li>
+            <li class="mb-0"><i class="fas fa-check text-success"></i> This address will be used for delivery estimates</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Navigation -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h5><i class="fas fa-navigation"></i> Quick Navigation</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{% url 'comprehensive_address_management' %}" class="btn btn-secondary">
+              <i class="fas fa-arrow-left"></i> Back to Address Management
+            </a>
+            <a href="{% url 'add_shipping_address' %}" class="btn btn-success">
+              <i class="fas fa-plus"></i> Add Shipping Address
+            </a>
+            <a href="{% url 'store_locator' %}" class="btn btn-info">
+              <i class="fas fa-store"></i> Find Stores
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let map;
+let marker;
+
+// Initialize map
+function initMap() {
+  // Use user's coordinates if available, otherwise default to NYC
+  let centerLat = 40.7128;
+  let centerLng = -74.0060;
+  
+  {% if profile.latitude and profile.longitude %}
+    centerLat = {{ profile.latitude }};
+    centerLng = {{ profile.longitude }};
+  {% endif %}
+  
+  map = L.map('map').setView([centerLat, centerLng], 15);
+  
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  
+  // Add user's current location marker if coordinates exist
+  {% if profile.latitude and profile.longitude %}
+    marker = L.marker([{{ profile.latitude }}, {{ profile.longitude }}])
+      .addTo(map)
+      .bindPopup('Your Current Address')
+      .openPopup();
+  {% endif %}
+  
+  // Add click listener to map
+  map.on('click', function(event) {
+    const lat = event.latlng.lat;
+    const lng = event.latlng.lng;
+    
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+    
+    // Update marker
+    if (marker) {
+      map.removeLayer(marker);
+    }
+    
+    marker = L.marker([lat, lng]).addTo(map);
+    
+    // Reverse geocode to get address
+    reverseGeocode(lat, lng);
+  });
+}
+
+// Locate user's current position
+function locateUser() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        
+        // Update map
+        map.setView([lat, lng], 15);
+        
+        if (marker) {
+          map.removeLayer(marker);
+        }
+        
+        marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup('Your Location').openPopup();
+        
+        // Reverse geocode to get address
+        reverseGeocode(lat, lng);
+      },
+      function(error) {
+        alert('Error getting location: ' + error.message);
+      }
+    );
+  } else {
+    alert('Geolocation is not supported by this browser.');
+  }
+}
+
+// Geocode address using Nominatim
+function geocodeAddress() {
+  const street = document.getElementById('id_street_address').value;
+  const city = document.getElementById('id_city').value;
+  const state = document.getElementById('id_state').value;
+  const zipCode = document.getElementById('id_zip_code').value;
+  
+  const address = `${street}, ${city}, ${state} ${zipCode}`;
+  
+  if (!address.trim()) {
+    alert('Please enter an address first.');
+    return;
+  }
+  
+  // Use Nominatim API
+  fetch('{% url "geocode_address" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ address: address })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const lat = data.latitude;
+      const lng = data.longitude;
+      
+      document.getElementById('latitude').value = lat;
+      document.getElementById('longitude').value = lng;
+      
+      // Update map
+      map.setView([lat, lng], 15);
+      
+      if (marker) {
+        map.removeLayer(marker);
+      }
+      
+      marker = L.marker([lat, lng]).addTo(map);
+      marker.bindPopup('Selected Address').openPopup();
+    } else {
+      alert('Geocoding failed: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error geocoding address.');
+  });
+}
+
+// Reverse geocode coordinates to address using Nominatim
+function reverseGeocode(lat, lng) {
+  fetch('{% url "reverse_geocode" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ latitude: lat, longitude: lng })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const addressComponents = data.address_components;
+      
+      // Parse address components
+      let streetNumber = addressComponents.house_number || '';
+      let route = addressComponents.road || '';
+      let city = addressComponents.city || addressComponents.town || addressComponents.village || '';
+      let state = addressComponents.state || '';
+      let zipCode = addressComponents.postcode || '';
+      
+      // Update form fields
+      document.getElementById('id_street_address').value = (streetNumber + ' ' + route).trim();
+      document.getElementById('id_city').value = city;
+      document.getElementById('id_state').value = state;
+      document.getElementById('id_zip_code').value = zipCode;
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initMap();
+});
+</script>
+{% endblock %}

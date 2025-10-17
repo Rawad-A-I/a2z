@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Don't Forget Your Items - A2Z Mart</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .email-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .cart-reminder {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .cart-items {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .item-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+        .item-details {
+            flex: 1;
+        }
+        .item-name {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        .item-price {
+            color: #667eea;
+            font-weight: bold;
+        }
+        .item-quantity {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .urgency {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">🛒 A2Z Mart</div>
+            <h1 style="color: #2d3748;">Don't Forget Your Items!</h1>
+        </div>
+
+        <div class="cart-reminder">
+            <h2>🛒 You have items waiting in your cart!</h2>
+            <p>Complete your purchase to secure these items before they're gone.</p>
+        </div>
+
+        <div class="cart-items">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">Items in Your Cart</h3>
+            {% for item in cart_items %}
+            <div class="cart-item">
+                {% if item.product.product_images.first %}
+                <img src="{{ site_url }}/media/{{ item.product.product_images.first.image }}" 
+                     alt="{{ item.product.product_name }}" class="item-image">
+                {% else %}
+                <div class="item-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                    📦
+                </div>
+                {% endif %}
+                <div class="item-details">
+                    <div class="item-name">{{ item.product.product_name }}</div>
+                    <div class="item-quantity">Quantity: {{ item.quantity }}</div>
+                    <div class="item-price">${{ item.get_product_price }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="urgency">
+            <h4>⏰ Limited Time Offer!</h4>
+            <p>Complete your order within 24 hours and get <strong>FREE shipping</strong> on orders over $50!</p>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ site_url }}/cart/" class="cta-button">Complete Your Purchase</a>
+        </div>
+
+        <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="color: #2d3748; margin-bottom: 10px;">Why complete your order now?</h4>
+            <ul style="color: #4a5568; margin: 0; padding-left: 20px;">
+                <li>Secure your items before they sell out</li>
+                <li>Fast and reliable delivery</li>
+                <li>Easy returns and exchanges</li>
+                <li>Secure payment processing</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Need help? Contact us at support@a2zmart.com</p>
+            <p>© 2024 A2Z Mart. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

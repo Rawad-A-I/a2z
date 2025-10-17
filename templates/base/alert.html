@@ -1,0 +1,37 @@
+{% if messages %} {% for message in messages %}
+
+<div
+  class="alert alert-dismissible alert-{% if message.tags %}{{ message.tags }}{% endif %}"
+  role="alert"
+  style="text-align: center"
+  data-auto-dismiss="3000"
+>
+  {{message}}
+
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+{% endfor %} {% endif %}
+
+<script>
+// Auto-dismiss alerts after 3 seconds
+document.addEventListener('DOMContentLoaded', function() {
+  const alerts = document.querySelectorAll('[data-auto-dismiss]');
+  alerts.forEach(function(alert) {
+    const timeout = parseInt(alert.getAttribute('data-auto-dismiss'));
+    setTimeout(function() {
+      if (alert.parentNode) {
+        alert.style.transition = 'opacity 0.5s ease';
+        alert.style.opacity = '0';
+        setTimeout(function() {
+          if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+          }
+        }, 500);
+      }
+    }, timeout);
+  });
+});
+</script>

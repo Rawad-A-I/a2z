@@ -1,0 +1,130 @@
+{% extends "base/base.html"%} 
+{% block start %}
+<!-- Special Offers & New Items Section -->
+<section class="hero-section py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 0;">
+  <div class="hero-wrapper">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h1 class="display-4 fw-bold mb-4">Welcome to A2Z Mart</h1>
+          <p class="lead mb-4">Discover amazing deals, special offers, and the latest products! Use the search to find exactly what you're looking for.</p>
+          <div class="d-flex gap-3">
+            <a href="{% url 'products_only' %}" class="btn btn-outline-light btn-lg">
+              <i class="fas fa-search me-2"></i>Search Products
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-6 text-center">
+          <div class="hero-image">
+            <i class="fas fa-store fa-10x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Content Section - starts after hero -->
+<div class="main-content-section" style="background-color: white; margin: 0; padding: 0;">
+<!-- Special Offers Section -->
+<section id="special-offers" class="special-offers py-5" style="background-color: white;">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h2 class="text-center mb-5">
+          <i class="fas fa-star text-warning me-2"></i>Special Offers
+        </h2>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="offer-card text-center p-4 border rounded shadow-sm">
+          <div class="offer-icon mb-3">
+            <i class="fas fa-percentage fa-3x text-primary"></i>
+          </div>
+          <h4>Flash Sale</h4>
+          <p class="text-muted">Up to 50% off on selected items</p>
+          <a href="{% url 'products_only' %}?sort=priceAsc" class="btn btn-primary">Shop Sale</a>
+        </div>
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        <div class="offer-card text-center p-4 border rounded shadow-sm">
+          <div class="offer-icon mb-3">
+            <i class="fas fa-gift fa-3x text-success"></i>
+          </div>
+          <h4>New Arrivals</h4>
+          <p class="text-muted">Fresh products just added</p>
+          <a href="{% url 'products_only' %}?sort=newest" class="btn btn-success">View New</a>
+        </div>
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        <div class="offer-card text-center p-4 border rounded shadow-sm">
+          <div class="offer-icon mb-3">
+            <i class="fas fa-shipping-fast fa-3x text-info"></i>
+          </div>
+          <h4>Free Shipping</h4>
+          <p class="text-muted">On orders over $50</p>
+          <a href="{% url 'products_only' %}" class="btn btn-info">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Categories -->
+<section class="featured-categories py-5" style="background-color: white;">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h2 class="text-center mb-5">
+          <i class="fas fa-th-large text-primary me-2"></i>Shop by Category
+        </h2>
+      </div>
+    </div>
+    
+    <div class="row">
+      {% for category in categories|slice:":6" %}
+      <div class="col-md-4 col-lg-2 mb-4">
+        <a href="{% url 'products_only' %}?category={{ category.category_name }}" class="category-card text-decoration-none">
+          <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body d-flex flex-column justify-content-center">
+              <div class="category-icon mb-3">
+                <i class="fas fa-{{ category.icon|default:'tag' }} fa-2x text-primary"></i>
+              </div>
+              <h6 class="card-title">{{ category.category_name }}</h6>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Browse All Products Section -->
+<section class="browse-products py-5" style="background-color: white;">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center">
+        <h2 class="mb-4">
+          <i class="fas fa-shopping-bag text-primary me-2"></i>Browse All Products
+        </h2>
+        <p class="lead text-muted mb-4">Explore our complete catalog with advanced search and filtering</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+          <a href="{% url 'products_only' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-th-large me-2"></i>View All Products
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div> <!-- End of main-content-section -->
+
+
+{% endblock %}
+

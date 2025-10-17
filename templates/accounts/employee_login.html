@@ -1,0 +1,75 @@
+{% extends "base/base.html" %} {% load static %}
+{% block title %}Account Login{% endblock %}
+{% block start %}
+
+<!-- ============================ ACCOUNT LOGIN   ================================= -->
+<section class="section-content padding-bottom">
+  <div class="container-xl d-flex justify-content-center align-items-center mt-5">
+    <div class="row justify-content-center w-100">
+      <div class="col-xl-4">
+        <div class="card mb-4">
+          <div class="card-header" style="text-align: center; font-size: 25px; background-color: #007bff; color: white;">
+            <i class="fas fa-user-tie"></i> Account Portal
+          </div>
+          <div class="card-body">
+            <form method="POST" action="{% url 'account_login' %}">
+              {% csrf_token %} {% include "base/alert.html" %}
+
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Account Access:</strong> Use your account credentials to access the management system.
+              </div>
+
+              <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input
+                  class="form-control"
+                  required
+                  placeholder="Enter your username"
+                  name="username"
+                  type="text"
+                  autocomplete="username"
+                  id="username"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  class="form-control"
+                  required
+                  placeholder="Enter your password"
+                  name="password"
+                  type="password"
+                  id="password"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" checked/>
+                  <div class="custom-control-label">Remember me</div>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                  <i class="fas fa-sign-in-alt"></i> Access Account Portal
+                </button>
+              </div>
+
+              <div class="text-center mt-3">
+                <a href="{% url 'login' %}" class="btn btn-outline-secondary">
+                  <i class="fas fa-arrow-left"></i> Back to Customer Login
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ============================ ACCOUNT LOGIN END ================================= -->
+
+{% endblock %}

@@ -1,0 +1,434 @@
+{% extends 'base/base.html' %}
+{% block title %}Track Order - {{ order.order_id }}{% endblock title%}
+{% load static %} {% block start %}
+
+<section class="section-content padding-y">
+  <div class="container">
+    <div class="row">
+      <!-- Order Tracking Header -->
+      <div class="col-md-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h2 class="mb-1"><i class="fas fa-truck"></i> Track Your Order</h2>
+            <p class="text-muted mb-0">Order #{{ order.order_id }} • Placed on {{ order.order_date|date:"F j, Y" }}</p>
+          </div>
+          <div class="text-end">
+            <a href="{% url 'order_details' order.order_id %}" class="btn btn-outline-primary">
+              <i class="fas fa-eye"></i> View Details
+            </a>
+            <a href="{% url 'order_history' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Order Progress -->
+      <div class="col-md-8">
+        <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-route"></i> Order Progress</h5>
+          </div>
+          <div class="card-body">
+            <!-- Progress Bar -->
+            <div class="progress mb-4" style="height: 8px;">
+              <div class="progress-bar 
+                {% if order.status == 'cancelled' %}bg-danger
+                {% elif order.status == 'delivered' %}bg-success
+                {% else %}bg-primary{% endif %}" 
+                role="progressbar" 
+                style="width: {{ progress_percentage }}%" 
+                aria-valuenow="{{ progress_percentage }}" 
+                aria-valuemin="0" 
+                aria-valuemax="100">
+              </div>
+            </div>
+            
+            <!-- Progress Steps -->
+            <div class="tracking-timeline">
+              <div class="timeline-step {% if order.status == 'pending' or order.status == 'confirmed' or order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}">
+                <div class="timeline-icon">
+                  <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="timeline-content">
+                  <h6 class="timeline-title">Order Placed</h6>
+                  <p class="timeline-date">{{ order.order_date|date:"M d, Y H:i" }}</p>
+                  <p class="timeline-description">Your order has been successfully placed and is being reviewed.</p>
+                </div>
+              </div>
+              
+              <div class="timeline-step {% if order.status == 'confirmed' or order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}">
+                <div class="timeline-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="timeline-content">
+                  <h6 class="timeline-title">Order Confirmed</h6>
+                  <p class="timeline-date">
+                    {% if order.confirmed_date %}
+                      {{ order.confirmed_date|date:"M d, Y H:i" }}
+                    {% else %}
+                      Pending
+                    {% endif %}
+                  </p>
+                  <p class="timeline-description">Your order has been confirmed and stock has been allocated.</p>
+                </div>
+              </div>
+              
+              <div class="timeline-step {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}">
+                <div class="timeline-icon">
+                  <i class="fas fa-cogs"></i>
+                </div>
+                <div class="timeline-content">
+                  <h6 class="timeline-title">Processing</h6>
+                  <p class="timeline-date">
+                    {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}
+                      In Progress
+                    {% else %}
+                      Pending
+                    {% endif %}
+                  </p>
+                  <p class="timeline-description">Your order is being prepared for shipment.</p>
+                </div>
+              </div>
+              
+              <div class="timeline-step {% if order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}">
+                <div class="timeline-icon">
+                  <i class="fas fa-shipping-fast"></i>
+                </div>
+                <div class="timeline-content">
+                  <h6 class="timeline-title">Shipped</h6>
+                  <p class="timeline-date">
+                    {% if order.status == 'shipped' or order.status == 'delivered' %}
+                      On the way
+                    {% else %}
+                      Pending
+                    {% endif %}
+                  </p>
+                  <p class="timeline-description">Your order is on its way to you.</p>
+                </div>
+              </div>
+              
+              <div class="timeline-step {% if order.status == 'delivered' %}completed{% endif %}">
+                <div class="timeline-icon">
+                  <i class="fas fa-home"></i>
+                </div>
+                <div class="timeline-content">
+                  <h6 class="timeline-title">Delivered</h6>
+                  <p class="timeline-date">
+                    {% if order.status == 'delivered' %}
+                      Delivered
+                    {% else %}
+                      Pending
+                    {% endif %}
+                  </p>
+                  <p class="timeline-description">Your order has been delivered successfully.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Order Items -->
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-box"></i> Order Items</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Size</th>
+                    <th>Color</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in order_items.all %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'get_product' item.product.slug %}" class="text-decoration-none">
+                        {{ item.product.product_name }}
+                      </a>
+                    </td>
+                    <td>{{ item.size_variant.size_name|default:"N/A" }}</td>
+                    <td>
+                      {% if item.size_variant %}
+                        {% for color in item.product.color_variant.all %}
+                          {{ color.color_name|default:"N/A" }}
+                        {% endfor %}
+                      {% else %}
+                        N/A
+                      {% endif %}
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.product_price }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Summary -->
+      <div class="col-md-4">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Order Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="order-info">
+              <div class="info-item">
+                <span class="label">Order ID:</span>
+                <span class="value">{{ order.order_id }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Status:</span>
+                <span class="badge 
+                  {% if order.status == 'pending' %}bg-warning
+                  {% elif order.status == 'confirmed' %}bg-info
+                  {% elif order.status == 'processing' %}bg-primary
+                  {% elif order.status == 'shipped' %}bg-success
+                  {% elif order.status == 'delivered' %}bg-success
+                  {% elif order.status == 'cancelled' %}bg-danger
+                  {% else %}bg-secondary{% endif %}">
+                  {{ order.get_status_display }}
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="label">Payment Mode:</span>
+                <span class="value">{{ order.payment_mode }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Payment Status:</span>
+                <span class="value">{{ order.payment_status }}</span>
+              </div>
+              {% if order.assigned_employee %}
+              <div class="info-item">
+                <span class="label">Assigned To:</span>
+                <span class="value">{{ order.assigned_employee.get_full_name|default:order.assigned_employee.username }}</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-calculator"></i> Payment Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="payment-summary">
+              <div class="summary-item">
+                <span class="label">Subtotal:</span>
+                <span class="value">${{ order.order_total_price }}</span>
+              </div>
+              {% if order.coupon %}
+              <div class="summary-item">
+                <span class="label">Coupon Discount:</span>
+                <span class="value text-success">-${{ order.coupon.discount_amount }}</span>
+              </div>
+              {% endif %}
+              <hr>
+              <div class="summary-item total">
+                <span class="label">Total:</span>
+                <span class="value">${{ order.grand_total }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Shipping Address -->
+        {% if order.shipping_address %}
+        <div class="card mt-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Shipping Address</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">{{ order.shipping_address|linebreaks }}</p>
+          </div>
+        </div>
+        {% endif %}
+        
+        <!-- Order Notes -->
+        {% if order.notes %}
+        <div class="card mt-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-sticky-note"></i> Order Notes</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">{{ order.notes }}</p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.tracking-timeline {
+  position: relative;
+}
+
+.timeline-step {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  position: relative;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.timeline-step.completed {
+  opacity: 1;
+}
+
+.timeline-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 50px;
+  width: 2px;
+  height: 30px;
+  background: #e9ecef;
+  z-index: 1;
+}
+
+.timeline-step.completed:not(:last-child)::after {
+  background: #28a745;
+}
+
+.timeline-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.timeline-step.completed .timeline-icon {
+  background: #28a745;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.2);
+}
+
+.timeline-content {
+  flex: 1;
+  padding-top: 5px;
+}
+
+.timeline-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.timeline-date {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 5px;
+}
+
+.timeline-description {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+.timeline-step.completed .timeline-title {
+  color: #28a745;
+}
+
+.timeline-step.completed .timeline-date {
+  color: #28a745;
+}
+
+.order-info .info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.order-info .info-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.order-info .label {
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.order-info .value {
+  font-weight: 600;
+  color: #333;
+}
+
+.payment-summary .summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px 0;
+}
+
+.payment-summary .summary-item.total {
+  border-top: 2px solid #e9ecef;
+  padding-top: 15px;
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.payment-summary .label {
+  color: #6c757d;
+}
+
+.payment-summary .value {
+  font-weight: 600;
+  color: #333;
+}
+
+.progress {
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  transition: width 0.6s ease;
+}
+
+@media (max-width: 768px) {
+  .timeline-step {
+    margin-bottom: 20px;
+  }
+  
+  .timeline-icon {
+    width: 35px;
+    height: 35px;
+    margin-right: 15px;
+  }
+  
+  .timeline-step:not(:last-child)::after {
+    left: 17px;
+    top: 40px;
+  }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,270 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Product Analytics - Employee Dashboard{% endblock %}
+
+{% block start %}
+<style>
+/* Force color fixes for product analytics */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-info,
+.card.bg-warning,
+.card.bg-danger {
+    color: #ffffff !important;
+}
+
+.card.bg-primary *,
+.card.bg-success *,
+.card.bg-info *,
+.card.bg-warning *,
+.card.bg-danger * {
+    color: #ffffff !important;
+}
+
+.card.bg-primary h3,
+.card.bg-primary h5,
+.card.bg-success h3,
+.card.bg-success h5,
+.card.bg-info h3,
+.card.bg-info h5,
+.card.bg-warning h3,
+.card.bg-warning h5,
+.card.bg-danger h3,
+.card.bg-danger h5 {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+</style>
+<!-- Back Button -->
+{% include 'base/back_button.html' with back_text='Back to Products' %}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chart-line"></i> Product Analytics</h2>
+                <div class="btn-group">
+                    <a href="{% url 'employee_product_management' %}" class="btn btn-primary">
+                        <i class="fas fa-boxes"></i> Manage Products
+                    </a>
+                    <a href="{% url 'employee_hub' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Hub
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stock Alerts -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{ out_of_stock }}</h4>
+                                    <p class="mb-0">Out of Stock</p>
+                                </div>
+                                <i class="fas fa-times-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{ low_stock }}</h4>
+                                    <p class="mb-0">Low Stock</p>
+                                </div>
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Top Selling Products -->
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-trophy"></i> Top Selling Products (Last 30 Days)</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if top_selling_products %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Sold</th>
+                                                <th>Revenue</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for product in top_selling_products %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ product.product_name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ product.category.category_name }}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-primary">{{ product.total_sold|default:0 }}</span>
+                                                </td>
+                                                <td>
+                                                    <strong>${{ product.price|floatformat:2 }}</strong>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No sales data available for the last 30 days.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Products -->
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Low Stock Alert</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if low_stock_products %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Current Stock</th>
+                                                <th>Threshold</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for product in low_stock_products %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ product.product_name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ product.category.category_name }}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-{% if product.stock_quantity == 0 %}danger{% else %}warning{% endif %}">
+                                                        {{ product.stock_quantity }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ product.low_stock_threshold }}</td>
+                                                <td>
+                                                    <a href="{% url 'quick_edit_product' product.uid %}" 
+                                                       class="btn btn-sm btn-outline-warning">
+                                                        <i class="fas fa-edit"></i> Update
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-success">All products have adequate stock levels.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Category Performance -->
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-pie"></i> Category Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if category_stats %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Category</th>
+                                                <th>Products</th>
+                                                <th>Sales</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for category in category_stats %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ category.category_name }}</strong>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ category.product_count|default:0 }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success">{{ category.total_sales|default:0 }}</span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No category data available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-clock"></i> Recent Orders (Last 7 Days)</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_orders %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Order ID</th>
+                                                <th>Customer</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for order in recent_orders %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ order.order_id }}</strong>
+                                                </td>
+                                                <td>{{ order.user.username }}</td>
+                                                <td>{{ order.order_date|date:"M d, Y" }}</td>
+                                                <td>
+                                                    <span class="badge bg-{% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% else %}info{% endif %}">
+                                                        {{ order.status|title }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No recent orders found.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

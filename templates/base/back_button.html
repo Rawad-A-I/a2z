@@ -1,0 +1,12 @@
+{% comment %}
+Universal back button component
+Usage: {% include 'base/back_button.html' with back_text='Back Text' %}
+{% endcomment %}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <button onclick="history.back()" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>{{ back_text|default:"Back" }}
+        </button>
+    </div>
+</div>

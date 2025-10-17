@@ -1,0 +1,192 @@
+{% extends "base/base.html"%} 
+{% block start %}
+<!-- Back to Mart Home Overlay Button -->
+<div class="back-to-home-overlay">
+  <a href="{% url 'index' %}" class="btn btn-outline btn-sm">
+    <i class="fas fa-arrow-left"></i> Back to Mart Home
+  </a>
+</div>
+
+<!-- Products Header -->
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="display-5 fw-bold text-center mb-4">
+        <i class="fas fa-shopping-bag text-primary me-2"></i>All Products
+      </h1>
+      <p class="lead text-center text-muted mb-4">Browse our complete catalog with advanced search and filtering</p>
+    </div>
+  </div>
+</div>
+
+<!-- Products Section Only -->
+<section id="products" class="py-5" style="background: white; margin-top: 0;">
+  <div class="container">
+<style>
+  .filter-section {
+      margin-bottom: 20px;
+  }
+
+  .form-group {
+      margin-bottom: 10px;
+  }
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+      scale: 0.5;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  .card {
+    animation: appear linear;
+    animation-timeline: view();
+    animation-range: entry 0% cover 40%;
+  }
+</style>
+<div class="container mt-3 pt-3">
+  {% include 'base/alert.html' %}
+  <!-- Advanced Filter Section -->
+  <div class="filter-section mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+          <i class="fas fa-filter me-2"></i>Advanced Filters
+        </h5>
+      </div>
+      <div class="card-body">
+        <form method="GET" class="row g-3">
+          <div class="col-lg-3 col-md-6">
+            <label for="category" class="form-label fw-bold">Category</label>
+            <select id="category" name="category" class="form-select" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              {% for category in categories %}
+              <option value="{{ category.category_name }}" {% if selected_category == category.category_name %} selected {% endif %}>
+                {{ category.category_name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-lg-3 col-md-6">
+            <label for="sort" class="form-label fw-bold">Sort By</label>
+            <select id="sort" name="sort" class="form-select" onchange="this.form.submit()">
+              <option value="">Default</option>
+              <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest First</option>
+              <option value="priceAsc" {% if selected_sort == 'priceAsc' %}selected{% endif %}>Price: Low to High</option>
+              <option value="priceDesc" {% if selected_sort == 'priceDesc' %}selected{% endif %}>Price: High to Low</option>
+              <option value="nameAsc" {% if selected_sort == 'nameAsc' %}selected{% endif %}>Name: A to Z</option>
+              <option value="nameDesc" {% if selected_sort == 'nameDesc' %}selected{% endif %}>Name: Z to A</option>
+            </select>
+          </div>
+          
+          <div class="col-lg-3 col-md-6">
+            <label for="price_min" class="form-label fw-bold">Min Price</label>
+            <input type="number" id="price_min" name="price_min" class="form-control" placeholder="0" min="0" step="0.01">
+          </div>
+          
+          <div class="col-lg-3 col-md-6">
+            <label for="price_max" class="form-label fw-bold">Max Price</label>
+            <input type="number" id="price_max" name="price_max" class="form-control" placeholder="1000" min="0" step="0.01">
+          </div>
+          
+          <div class="col-12">
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-1"></i>Apply Filters
+              </button>
+              <a href="{% url 'products_only' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Clear All
+              </a>
+              <div class="ms-auto">
+                <small class="text-muted">
+                  <i class="fas fa-info-circle me-1"></i>
+                  Showing {{ products|length }} of {{ products.paginator.count }} products
+                </small>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product List -->
+  <div class="row">
+    {% for product in products %}
+    <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
+      <figure class="card card-product-grid">
+        <div class="img-wrap">
+          <img src="/media/{{product.product_images.first.image}}" />
+          {% if not product.is_in_stock %}
+          <div class="badge badge-danger position-absolute" style="top: 10px; right: 10px;">
+            Out of Stock
+          </div>
+          {% elif product.stock_quantity > 0 and product.is_low_stock %}
+          <div class="badge badge-warning position-absolute" style="top: 10px; right: 10px;">
+            Low Stock
+          </div>
+          {% endif %}
+        </div>
+        <figcaption class="info-wrap border-top">
+          <a href="{% url 'get_product' product.slug %}" class="title">
+            <b>{{ product.product_name }}</b></a>
+          <div class="price mt-2">${{product.price}}.00</div>
+          {% if not product.is_in_stock %}
+          <div class="text-danger small mt-1">
+            <i class="fas fa-times"></i> Currently unavailable
+          </div>
+          {% elif product.stock_quantity > 0 and product.is_low_stock %}
+          <div class="text-warning small mt-1">
+            <i class="fas fa-exclamation-triangle"></i> Only {{ product.stock_quantity }} left
+          </div>
+          {% endif %}
+        </figcaption>
+      </figure>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination Section -->
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center mb-4">
+      {% if products.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo; Previous</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a class="page-link">Previous</a>
+      </li>
+      {% endif %}
+
+      {% for num in products.paginator.page_range %}
+      <li class="page-item {% if products.number == num %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+      </li>
+      {% endfor %}
+
+      {% if products.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
+          <span aria-hidden="true">Next &raquo;</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a class="page-link">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  
+</div>
+</section>
+
+{% endblock %}

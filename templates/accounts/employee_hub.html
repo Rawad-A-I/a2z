@@ -1,0 +1,167 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Employee Hub - A2Z Mart{% endblock %}
+
+{% block start %}
+<style>
+/* Force proper styling for employee hub */
+.employee-hub-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.employee-hub-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: none;
+}
+
+.employee-hub-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    padding: 2rem;
+    text-align: center;
+}
+
+.employee-hub-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.employee-hub-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0.5rem 0 0 0;
+}
+
+       .management-card {
+           transition: all 0.3s ease;
+           border: none;
+           border-radius: 20px;
+           overflow: hidden;
+           box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+           background-color: #ffffff;
+       }
+
+       .management-card:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+           background-color: #f8f9fa;
+       }
+
+.management-card .card-body {
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.management-card .card-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.management-card .card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.management-card .card-text {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.management-card .btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.management-card .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+    .employee-hub-header h1 {
+        font-size: 2rem;
+    }
+    
+    .management-card .card-body {
+        padding: 2rem 1.5rem;
+    }
+    
+    .management-card .card-icon {
+        font-size: 3rem;
+    }
+}
+</style>
+
+<div class="employee-hub-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="employee-hub-card">
+                    <!-- Employee Hub Header -->
+                    <div class="employee-hub-header">
+                        <h1><i class="fas fa-briefcase"></i> Employee Hub</h1>
+                        <p>Welcome to your employee management center. Choose your area of focus below.</p>
+                    </div>
+                    
+                    <div class="p-4">
+                        <!-- Management Options -->
+                        <div class="row">
+                            <!-- Order Management -->
+                            <div class="col-md-6 mb-4">
+                                <div class="management-card h-100">
+                                    <div class="card-body">
+                                        <i class="fas fa-shopping-cart management-card card-icon text-primary"></i>
+                                        <h3 class="card-title">Order Management</h3>
+                                        <p class="card-text">
+                                            Access the modern order management dashboard with interactive charts, 
+                                            real-time analytics, delivery tracking, and comprehensive order insights.
+                                        </p>
+                                        <a href="{% url 'modern_order_dashboard' %}" class="btn btn-primary">
+                                            <i class="fas fa-chart-line me-2"></i>
+                                            Modern Order Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Product Management -->
+                            <div class="col-md-6 mb-4">
+                                <div class="management-card h-100">
+                                    <div class="card-body">
+                                        <i class="fas fa-boxes management-card card-icon text-success"></i>
+                                        <h3 class="card-title">Product Management</h3>
+                                        <p class="card-text">
+                                            Manage products, add new items, handle barcodes, track inventory, 
+                                            and perform bulk operations. Complete product lifecycle management.
+                                        </p>
+                                        <a href="{% url 'employee_product_management' %}" class="btn btn-success">
+                                            <i class="fas fa-boxes me-2"></i>
+                                            Manage Products
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

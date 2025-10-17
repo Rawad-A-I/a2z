@@ -1,0 +1,135 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block start %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Employee Notice -->
+            <div class="alert alert-info mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+                    <div>
+                        <h6 class="mb-1"><strong>Employee Access</strong></h6>
+                        <p class="mb-0">Choose your management area below to access the appropriate dashboard.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Management Options -->
+            <div class="row">
+                <!-- Order Management -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center p-5">
+                            <div class="mb-4">
+                                <i class="fas fa-shopping-cart fa-4x text-primary"></i>
+                            </div>
+                            <h3 class="card-title mb-3">Order Management</h3>
+                            <p class="card-text text-muted mb-4">
+                                Access the modern order management dashboard with interactive charts, 
+                                real-time analytics, delivery tracking, and comprehensive order insights.
+                            </p>
+                            <div class="d-grid">
+                                <a href="{% url 'modern_order_dashboard' %}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Modern Order Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Management -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center p-5">
+                            <div class="mb-4">
+                                <i class="fas fa-boxes fa-4x text-success"></i>
+                            </div>
+                            <h3 class="card-title mb-3">Product Management</h3>
+                            <p class="card-text text-muted mb-4">
+                                Manage products, add new items, handle barcodes, track inventory, 
+                                and perform bulk operations. Complete product lifecycle management.
+                            </p>
+                            <div class="d-grid">
+                                <a href="{% url 'employee_product_management' %}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-boxes me-2"></i>
+                                    Manage Products
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Quick Overview</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-primary mb-1">{{ stats.total_orders|default:"0" }}</h4>
+                                        <p class="text-muted mb-0">Total Orders</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-warning mb-1">{{ stats.pending_orders|default:"0" }}</h4>
+                                        <p class="text-muted mb-0">Pending Orders</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="border-end">
+                                        <h4 class="text-success mb-1">{{ stats.confirmed_orders|default:"0" }}</h4>
+                                        <p class="text-muted mb-0">Confirmed Orders</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-info mb-1">{{ stats.my_orders|default:"0" }}</h4>
+                                    <p class="text-muted mb-0">My Orders</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+}
+
+.border-end {
+    border-right: 1px solid #dee2e6 !important;
+}
+
+@media (max-width: 768px) {
+    .border-end {
+        border-right: none !important;
+        border-bottom: 1px solid #dee2e6 !important;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}

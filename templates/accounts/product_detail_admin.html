@@ -1,0 +1,296 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Product Detail - Admin{% endblock %}
+
+{% block start %}
+<div class="container mt-3 pt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Product Detail - Admin View</h3>
+                    <a href="{% url 'product_management' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Products
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Product Basic Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h4>{{ product.product_name }}</h4>
+                            <p class="text-muted">{{ product.product_desription }}</p>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Product Information</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Category:</strong></td>
+                                            <td>{{ product.category.category_name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Price:</strong></td>
+                                            <td>${{ product.price }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Section:</strong></td>
+                                            <td>{{ product.get_section_display }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Weight:</strong></td>
+                                            <td>{{ product.weight|default:"N/A" }} kg</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Dimensions:</strong></td>
+                                            <td>{{ product.dimensions|default:"N/A" }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Stock Information</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Stock Quantity:</strong></td>
+                                            <td>
+                                                <span class="badge bg-{% if product.stock_quantity > product.low_stock_threshold %}success{% elif product.stock_quantity > 0 %}warning{% else %}danger{% endif %}">
+                                                    {{ product.stock_quantity }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Low Stock Threshold:</strong></td>
+                                            <td>{{ product.low_stock_threshold }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Status:</strong></td>
+                                            <td>
+                                                <span class="badge bg-{% if product.is_in_stock %}success{% else %}danger{% endif %}">
+                                                    {% if product.is_in_stock %}In Stock{% else %}Out of Stock{% endif %}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Created:</strong></td>
+                                            <td>{{ product.created_at|date:"M d, Y" }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Product Flags</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% if product.is_featured %}
+                                    <span class="badge bg-primary">Featured</span>
+                                {% endif %}
+                                {% if product.is_bestseller %}
+                                    <span class="badge bg-success">Bestseller</span>
+                                {% endif %}
+                                {% if product.is_new_arrival %}
+                                    <span class="badge bg-info">New Arrival</span>
+                                {% endif %}
+                                {% if product.newest_product %}
+                                    <span class="badge bg-warning">Newest</span>
+                                {% endif %}
+                            </div>
+                            
+                            <h6 class="mt-3">SEO Information</h6>
+                            <div class="small">
+                                <p><strong>Meta Title:</strong> {{ product.meta_title|default:"Not set" }}</p>
+                                <p><strong>Keywords:</strong> {{ product.keywords|default:"Not set" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h5>Total Sold</h5>
+                                    <h3>{{ total_sold|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5>Total Revenue</h5>
+                                    <h3>${{ total_revenue|default:"0"|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5>Stock Value</h5>
+                                    <h3>${{ product.price|mul:product.stock_quantity|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h5>Reviews</h5>
+                                    <h3>{{ reviews|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stock Movements -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Recent Stock Movements</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if stock_movements %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Quantity</th>
+                                                    <th>Date</th>
+                                                    <th>User</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for movement in stock_movements %}
+                                                <tr>
+                                                    <td>
+                                                        <span class="badge bg-{% if movement.movement_type == 'in' %}success{% elif movement.movement_type == 'out' %}danger{% else %}info{% endif %}">
+                                                            {{ movement.get_movement_type_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ movement.quantity }}</td>
+                                                    <td>{{ movement.created_at|date:"M d, Y" }}</td>
+                                                    <td>{{ movement.user.username|default:"System" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No stock movements recorded.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Recent Reviews</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if reviews %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>User</th>
+                                                    <th>Rating</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for review in reviews %}
+                                                <tr>
+                                                    <td>{{ review.user.username }}</td>
+                                                    <td>
+                                                        <div class="d-flex">
+                                                            {% for i in "12345" %}
+                                                                {% if forloop.counter <= review.stars %}
+                                                                    <i class="fas fa-star text-warning"></i>
+                                                                {% else %}
+                                                                    <i class="far fa-star text-muted"></i>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                    </td>
+                                                    <td>{{ review.date_added|date:"M d, Y" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <p>No reviews yet.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Variants -->
+                    {% if product.color_variant.all or product.size_variant.all %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Product Variants</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        {% if product.color_variant.all %}
+                                        <div class="col-md-6">
+                                            <h6>Available Colors</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for color in product.color_variant.all %}
+                                                <span class="badge bg-secondary">{{ color.color_name }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if product.size_variant.all %}
+                                        <div class="col-md-6">
+                                            <h6>Available Sizes</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for size in product.size_variant.all %}
+                                                <span class="badge bg-secondary">{{ size.size_name }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>Quick Actions</h5>
+                            <div class="d-flex gap-2">
+                                <a href="#" class="btn btn-primary">
+                                    <i class="fas fa-edit"></i> Edit Product
+                                </a>
+                                <a href="#" class="btn btn-warning">
+                                    <i class="fas fa-warehouse"></i> Update Stock
+                                </a>
+                                <a href="#" class="btn btn-info">
+                                    <i class="fas fa-chart-bar"></i> View Analytics
+                                </a>
+                                <a href="#" class="btn btn-success">
+                                    <i class="fas fa-eye"></i> View on Site
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

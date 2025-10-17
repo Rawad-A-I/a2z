@@ -1,0 +1,302 @@
+{% extends "base/base.html" %} {% load static%} 
+{% block title %}About Us{% endblock %} {% block start %}
+
+<section class="section-content padding-y">
+  <div class="container">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <a href="{% url 'redirect_homepage' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Platform
+      </a>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="row mb-6">
+      <div class="col-12">
+        <div class="card bg-primary text-white">
+          <div class="card-body text-center py-6">
+            <img src="{% static 'images/about-us.png' %}" 
+                 alt="About Logo" 
+                 class="img-fluid mb-4" 
+                 style="max-height: 200px;">
+            <h1 class="display-4 font-bold mb-4">About A2Z Platform</h1>
+            <p class="lead opacity-90">
+              Your trusted partner for premium shopping experiences across multiple platforms
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row mb-6">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="text-2xl font-bold mb-4">Our Story</h2>
+            <p class="text-lg text-gray-700 mb-4">
+              Welcome to our e-Commerce platform! We are dedicated to providing
+              you with the best online shopping experience. Our journey began
+              with a simple idea: to make shopping easy, accessible, and
+              enjoyable for everyone. Over the years, we have grown into a
+              trusted online retailer, offering a wide range of products to meet
+              your needs.
+            </p>
+            <p class="text-lg text-gray-700">
+              Today, we operate multiple specialized platforms including A2Z Mart for general merchandise 
+              and A2Z Bar for premium beverages, each designed to provide the best shopping experience 
+              in their respective categories.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mission & Vision -->
+    <div class="row mb-6">
+      <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="text-center mb-4">
+              <i class="fas fa-bullseye text-primary text-4xl mb-3"></i>
+              <h3 class="text-xl font-bold">Our Mission</h3>
+            </div>
+            <p class="text-gray-700">
+              Our mission is to provide our customers with high-quality products
+              at competitive prices, backed by exceptional customer service. We
+              strive to create a seamless shopping experience, from browsing to
+              delivery, ensuring that you receive the best value and
+              satisfaction.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="text-center mb-4">
+              <i class="fas fa-eye text-success text-4xl mb-3"></i>
+              <h3 class="text-xl font-bold">Our Vision</h3>
+            </div>
+            <p class="text-gray-700">
+              Our vision is to be the leading online retailer, known for our
+              commitment to quality, innovation, and customer satisfaction. We
+              aim to continuously expand our product range and improve our
+              services to meet the evolving needs of our customers.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Our Platforms -->
+    <div class="row mb-6">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title text-center">
+              <i class="fas fa-store"></i> Our Platforms
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-lg-6 mb-4">
+                <div class="card border-primary">
+                  <div class="card-body text-center">
+                    <i class="fas fa-shopping-bag text-primary text-3xl mb-3"></i>
+                    <h4 class="font-bold mb-3">A2Z Mart</h4>
+                    <p class="text-gray-700 mb-3">
+                      Your one-stop shop for all your daily needs. From groceries to electronics, 
+                      home essentials to personal care - everything you need in one place.
+                    </p>
+                    <a href="{% url 'products_only' %}" class="btn btn-primary">
+                      <i class="fas fa-arrow-right"></i> Visit A2Z Mart
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-lg-6 mb-4">
+                <div class="card border-secondary">
+                  <div class="card-body text-center">
+                    <i class="fas fa-wine-bottle text-secondary text-3xl mb-3"></i>
+                    <h4 class="font-bold mb-3">A2Z Bar</h4>
+                    <p class="text-gray-700 mb-3">
+                      Premium drinks and beverages delivered to your doorstep. From craft beers 
+                      to fine wines, premium spirits to artisanal cocktails.
+                    </p>
+                    <a href="{% url 'bar_home' %}" class="btn btn-secondary">
+                      <i class="fas fa-arrow-right"></i> Visit A2Z Bar
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Values -->
+    <div class="row mb-6">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title text-center">
+              <i class="fas fa-heart"></i> Our Values
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                  <i class="fas fa-star text-warning text-3xl mb-3"></i>
+                  <h5 class="font-bold mb-2">Quality</h5>
+                  <p class="text-sm text-gray-600">We ensure every product meets our high standards</p>
+                </div>
+              </div>
+              
+              <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                  <i class="fas fa-handshake text-success text-3xl mb-3"></i>
+                  <h5 class="font-bold mb-2">Trust</h5>
+                  <p class="text-sm text-gray-600">Building lasting relationships with our customers</p>
+                </div>
+              </div>
+              
+              <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                  <i class="fas fa-lightbulb text-info text-3xl mb-3"></i>
+                  <h5 class="font-bold mb-2">Innovation</h5>
+                  <p class="text-sm text-gray-600">Continuously improving our platform and services</p>
+                </div>
+              </div>
+              
+              <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                  <i class="fas fa-users text-primary text-3xl mb-3"></i>
+                  <h5 class="font-bold mb-2">Community</h5>
+                  <p class="text-sm text-gray-600">Supporting and growing with our community</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="row mb-6">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title text-center">
+              <i class="fas fa-users"></i> Our Team
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card text-center">
+                  <div class="card-body">
+                    <div class="team-avatar mb-3">
+                      <i class="fas fa-user-circle text-4xl text-primary"></i>
+                    </div>
+                    <h5 class="font-bold">Development Team</h5>
+                    <p class="text-sm text-gray-600">Building and maintaining our platform</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card text-center">
+                  <div class="card-body">
+                    <div class="team-avatar mb-3">
+                      <i class="fas fa-user-circle text-4xl text-success"></i>
+                    </div>
+                    <h5 class="font-bold">Customer Support</h5>
+                    <p class="text-sm text-gray-600">Ensuring your satisfaction</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card text-center">
+                  <div class="card-body">
+                    <div class="team-avatar mb-3">
+                      <i class="fas fa-user-circle text-4xl text-warning"></i>
+                    </div>
+                    <h5 class="font-bold">Operations Team</h5>
+                    <p class="text-sm text-gray-600">Managing day-to-day operations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card bg-gray-50">
+          <div class="card-body text-center py-6">
+            <h3 class="text-2xl font-bold mb-4">Get in Touch</h3>
+            <p class="text-lg text-gray-700 mb-4">
+              Have questions about our platform or need assistance? We're here to help!
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+              <a href="{% url 'contact' %}" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Contact Us
+              </a>
+              <a href="{% url 'products_only' %}" class="btn btn-outline">
+                <i class="fas fa-shopping-bag"></i> Start Shopping
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .para-text {
+    line-height: 1.8;
+    text-align: justify;
+  }
+  
+  .team-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-gray-100);
+    border-radius: 50%;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 0.5rem;
+    }
+    
+    .btn {
+      min-height: 44px;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+    }
+    
+    .display-4 {
+      font-size: 2rem !important;
+    }
+    
+    .text-4xl {
+      font-size: 2rem !important;
+    }
+  }
+</style>
+{% endblock %}
