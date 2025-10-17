@@ -3,8 +3,11 @@
 # Deployment fix script for migration conflicts and image optimization
 echo "🔧 Starting deployment fix..."
 
-# Step 1: Fix duplicate cart data
-echo "📋 Step 1: Fixing duplicate cart data..."
+# Step 1: Fix duplicate data issues
+echo "📋 Step 1: Fixing duplicate data issues..."
+
+# Fix duplicate carts
+echo "  - Fixing duplicate carts..."
 python manage.py shell -c "
 from accounts.models import Cart
 seen = set()
@@ -20,6 +23,32 @@ if duplicates:
     print(f'Removed {len(duplicates)} duplicate carts')
 else:
     print('No duplicate carts found')
+"
+
+# Fix duplicate product slugs
+echo "  - Fixing duplicate product slugs..."
+python manage.py shell -c "
+from products.models import Product
+from django.utils.text import slugify
+seen_slugs = set()
+products_to_fix = []
+for product in Product.objects.all():
+    if product.slug in seen_slugs:
+        products_to_fix.append(product)
+    else:
+        seen_slugs.add(product.slug)
+for product in products_to_fix:
+    original_slug = product.slug
+    counter = 1
+    new_slug = f'{original_slug}-{counter}'
+    while Product.objects.filter(slug=new_slug).exists():
+        counter += 1
+        new_slug = f'{original_slug}-{counter}'
+    product.slug = new_slug
+    product.save()
+    print(f'Fixed duplicate slug: {original_slug} -> {new_slug}')
+if not products_to_fix:
+    print('No duplicate product slugs found')
 "
 
 # Step 2: Apply migrations

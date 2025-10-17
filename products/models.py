@@ -147,7 +147,14 @@ class Product(BaseModel):
     bundle_products = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="bundled_with")
     
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.product_name)
+        if not self.slug:
+            self.slug = slugify(self.product_name)
+            # Ensure slug is unique
+            original_slug = self.slug
+            counter = 1
+            while Product.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                self.slug = f"{original_slug}-{counter}"
+                counter += 1
         super(Product, self).save(*args, **kwargs)
 
     def __str__(self) -> str:

@@ -10,31 +10,26 @@ def cleanup_duplicate_carts_before_constraint(apps, schema_editor):
     Cart = apps.get_model('accounts', 'Cart')
     
     try:
-        from django.db.models import Count
         from django.db import transaction
         
         with transaction.atomic():
-            # Handle duplicate carts for authenticated users
-            duplicate_users = Cart.objects.filter(
-                user__isnull=False,
-                is_paid=False
-            ).values('user').annotate(
-                count=Count('id')
-            ).filter(count__gt=1)
+            # Find all duplicate combinations of (user_id, is_paid)
+            seen_combinations = set()
+            duplicates_to_remove = []
             
-            for user_data in duplicate_users:
-                user_id = user_data['user']
-                user_carts = Cart.objects.filter(
-                    user_id=user_id,
-                    is_paid=False
-                ).order_by('-created_at')
-                
-                if user_carts.count() > 1:
-                    # Keep the newest cart, mark others as paid
-                    carts_to_mark = user_carts[1:]
-                    for cart in carts_to_mark:
-                        cart.is_paid = True
-                        cart.save()
+            for cart in Cart.objects.all():
+                key = (cart.user_id, cart.is_paid)
+                if key in seen_combinations:
+                    duplicates_to_remove.append(cart.id)
+                else:
+                    seen_combinations.add(key)
+            
+            # Remove duplicates
+            if duplicates_to_remove:
+                Cart.objects.filter(id__in=duplicates_to_remove).delete()
+                print(f"Removed {len(duplicates_to_remove)} duplicate carts")
+            else:
+                print("No duplicate carts found")
                         
     except Exception as e:
         print(f"Warning: Could not clean up duplicate carts: {e}")

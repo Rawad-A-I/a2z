@@ -8,11 +8,15 @@
 
 ### **2. Duplicate Cart Data:**
 - **Issue**: `UniqueViolation: could not create unique index "accounts_cart_user_id_is_paid_b33fa986_uniq"`
-- **Solution**: Created data migration `0030_fix_duplicate_carts.py` to remove duplicates
+- **Solution**: Updated migration `0024_cart_session_key_simple.py` to remove duplicates before constraint
 
 ### **3. Missing Database Fields:**
 - **Issue**: `column products_category.original_filename does not exist`
 - **Solution**: Temporarily removed optimization fields from models
+
+### **4. Duplicate Product Slugs:**
+- **Issue**: `duplicate key value violates unique constraint "products_product_slug_key"`
+- **Solution**: Created migration `0022_fix_duplicate_slugs.py` and updated Product model
 
 ## **🛠️ Final Fixes Applied:**
 
@@ -22,13 +26,14 @@
 - **Result**: Models work without database field dependencies
 
 ### **✅ Migration Strategy:**
-- **Created**: `accounts/migrations/0030_fix_duplicate_carts.py`
-- **Purpose**: Removes duplicate cart data before applying constraints
-- **Safe**: No data loss, only removes duplicates
+- **Updated**: `accounts/migrations/0024_cart_session_key_simple.py`
+- **Created**: `products/migrations/0022_fix_duplicate_slugs.py`
+- **Purpose**: Removes duplicate data before applying constraints
+- **Safe**: No data loss, only removes duplicates and fixes slugs
 
 ### **✅ Deployment Script:**
-- **Updated**: `deploy_fix.sh` with duplicate cart cleanup
-- **Process**: Clean data → Apply migrations → Collect static files
+- **Updated**: `deploy_fix.sh` with comprehensive duplicate data cleanup
+- **Process**: Clean cart duplicates → Clean product slugs → Apply migrations → Collect static files
 - **Test**: Verify image optimization works
 
 ## **🎯 Current Status:**
@@ -38,6 +43,7 @@
 - No database field errors
 - Image optimization works (without tracking)
 - Duplicate cart issue resolved
+- Duplicate product slug issue resolved
 
 ### **📊 Image Optimization Status:**
 - **✅ Works**: Image optimization and validation
