@@ -4,7 +4,14 @@
     <div class="col-md-3">
       <figure class="card card-product-grid">
         <div class="img-wrap">
-          <img src="/media/{{product.product_images.first.image}}" />
+          {% if product.product_images.first %}
+            <img src="{{ product.product_images.first.image.url }}" alt="{{ product.product_name }}" />
+          {% else %}
+            <div class="product-image-placeholder d-flex align-items-center justify-content-center" 
+                 style="height: 200px; background-color: #f8f9fa;">
+              <i class="fas fa-image text-4xl text-gray-400"></i>
+            </div>
+          {% endif %}
           {% if not product.is_in_stock %}
           <div class="badge badge-danger position-absolute" style="top: 10px; right: 10px;">
             Out of Stock
@@ -18,7 +25,18 @@
         <figcaption class="info-wrap border-top">
           <a href="{% url 'get_product' product.slug %}" class="title">
             <b>{{ product.product_name }}</b></a>
-          <div class="price mt-2">${{product.price}}.00</div>
+          
+          <!-- Price Display Logic -->
+          {% if product.parent %}
+            <!-- This is a size variant - show price -->
+            <div class="price mt-2">${{product.price}}.00</div>
+          {% else %}
+            <!-- This is a parent product - show "Select Size" -->
+            <div class="price mt-2 text-muted">
+              <small>Select size for price</small>
+            </div>
+          {% endif %}
+          
           {% if not product.is_in_stock %}
           <div class="text-danger small mt-1">
             <i class="fas fa-times"></i> Currently unavailable

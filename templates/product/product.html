@@ -19,7 +19,7 @@
             <div class="product-image-container">
               {% if product.product_images.first %}
                 <img id="mainImage" 
-                     src="/media/{{ product.product_images.first.image }}" 
+                     src="{{ product.product_images.first.image.url }}" 
                      class="img-fluid rounded product-main-image" 
                      alt="{{ product.product_name }}"
                      style="width: 100%; height: 400px; object-fit: cover; cursor: zoom-in;"
@@ -37,7 +37,7 @@
             <div class="row mt-3">
               {% for image in product.product_images.all|slice:":4" %}
               <div class="col-3">
-                <img src="/media/{{ image.image }}" 
+                <img src="{{ image.image.url }}" 
                      class="img-fluid rounded product-thumbnail" 
                      alt="{{ product.product_name }}"
                      style="width: 100%; height: 80px; object-fit: cover; cursor: pointer;"
@@ -71,14 +71,33 @@
             
             <!-- Price -->
             <div class="product-price mb-4">
-              <span class="price-current text-2xl font-bold text-primary">${{ product.price }}</span>
-              {% if product.discount_price %}
-                <span class="price-original text-lg text-muted ms-2">
-                  <del>${{ product.discount_price }}</del>
-                </span>
-                <span class="discount-badge badge badge-danger ms-2">
-                  Save ${{ product.discount_price|floatformat:2 }}
-                </span>
+              {% if product.parent %}
+                <!-- This is a size variant - show price -->
+                <span class="price-current text-2xl font-bold text-primary">${{ product.price }}</span>
+                {% if product.discount_price %}
+                  <span class="price-original text-lg text-muted ms-2">
+                    <del>${{ product.discount_price }}</del>
+                  </span>
+                  <span class="discount-badge badge badge-danger ms-2">
+                    Save ${{ product.discount_price|floatformat:2 }}
+                  </span>
+                {% endif %}
+              {% elif product.child_products.exists %}
+                <!-- Product has size variants - hide price until size selected -->
+                <div id="priceDisplay" class="text-muted">
+                  <span class="text-lg">Select a size to see price</span>
+                </div>
+              {% else %}
+                <!-- Standalone product - show price -->
+                <span class="price-current text-2xl font-bold text-primary">${{ product.price }}</span>
+                {% if product.discount_price %}
+                  <span class="price-original text-lg text-muted ms-2">
+                    <del>${{ product.discount_price }}</del>
+                  </span>
+                  <span class="discount-badge badge badge-danger ms-2">
+                    Save ${{ product.discount_price|floatformat:2 }}
+                  </span>
+                {% endif %}
               {% endif %}
             </div>
             
@@ -135,16 +154,31 @@
               {% csrf_token %}
               
               <!-- Size Variant -->
-              {% if product.size_variant.exists %}
-              <div class="form-group mb-3">
-                <label class="form-label">Size</label>
-                <select name="size_variant" class="form-control" required>
-                  <option value="">Select Size</option>
-                  {% for size in product.size_variant.all %}
-                    <option value="{{ size.id }}">{{ size.size_name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
+              {% if product.parent %}
+                <!-- This is a size variant - show current size and link to parent -->
+                <div class="form-group mb-3">
+                  <label class="form-label">Size</label>
+                  <div class="alert alert-info">
+                    <strong>Current Size:</strong> {{ product.product_name|cut:product.parent.product_name|cut:' '|title }}
+                    <br>
+                    <a href="{% url 'get_product' product.parent.slug %}" class="btn btn-sm btn-outline-primary mt-2">
+                      View All Sizes
+                    </a>
+                  </div>
+                </div>
+              {% elif product.child_products.exists %}
+                <!-- Product has size variants - show size selector -->
+                <div class="form-group mb-3">
+                  <label class="form-label">Size</label>
+                  <select name="size_variant" id="sizeSelect" class="form-control" required onchange="updatePriceAndImage(this.value)">
+                    <option value="">Select Size</option>
+                    {% for variant in product.child_products.all %}
+                      <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-image="{{ variant.product_images.first.image.url|default:'' }}">
+                        {{ variant.product_name|cut:product.product_name|cut:' '|title }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
               {% endif %}
               
               <!-- Color Variant -->
@@ -428,6 +462,33 @@ function shareProduct() {
     // Fallback to copying URL
     navigator.clipboard.writeText(window.location.href);
     alert('Product URL copied to clipboard!');
+  }
+}
+
+function updatePriceAndImage(selectedValue) {
+  const selectElement = document.getElementById('sizeSelect');
+  const selectedOption = selectElement.options[selectElement.selectedIndex];
+  const priceDisplay = document.getElementById('priceDisplay');
+  const mainImage = document.getElementById('mainImage');
+  
+  if (selectedValue && selectedOption) {
+    const price = selectedOption.getAttribute('data-price');
+    const imageUrl = selectedOption.getAttribute('data-image');
+    
+    // Update price display
+    if (priceDisplay) {
+      priceDisplay.innerHTML = `<span class="price-current text-2xl font-bold text-primary">$${price}</span>`;
+    }
+    
+    // Update image if variant has its own image
+    if (imageUrl && mainImage) {
+      mainImage.src = imageUrl;
+    }
+  } else {
+    // Reset to default
+    if (priceDisplay) {
+      priceDisplay.innerHTML = '<span class="text-lg">Select a size to see price</span>';
+    }
   }
 }
 </script>

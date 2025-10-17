@@ -14,14 +14,38 @@ from accounts.models import Wishlist
 def product_list(request):
     """Display all products"""
     products = Product.objects.filter(parent=None).order_by('-created_at')
+    
+    # For products with size variants, show "Regular" size as default
+    processed_products = []
+    for product in products:
+        if product.child_products.exists():
+            # Look for "Regular" size variant
+            regular_variant = product.child_products.filter(
+                product_name__icontains='regular'
+            ).first()
+            
+            if regular_variant:
+                # Use the regular variant as the display product
+                processed_products.append(regular_variant)
+            else:
+                # If no regular variant, use the first variant
+                processed_products.append(product.child_products.first())
+        else:
+            # Standalone product
+            processed_products.append(product)
+    
     context = {
-        'products': products,
+        'products': processed_products,
     }
     return render(request, 'products/product_list.html', context)
 
 def get_product(request, slug):
     product = get_object_or_404(Product, slug=slug)
-    sorted_size_variants = product.size_variant.all().order_by('size_name')
+    
+    # Get size variants (child products)
+    size_variants = product.child_products.all().order_by('product_name')
+    
+    # Get related products (other parent products in same category)
     related_products = list(product.category.products.filter(parent=None).exclude(uid=product.uid))
 
     # Review product view
@@ -65,7 +89,7 @@ def get_product(request, slug):
 
     context = {
         'product': product,
-        'sorted_size_variants': sorted_size_variants,
+        'size_variants': size_variants,
         'related_products': related_products,
         'review_form': review_form,
         'rating_percentage': rating_percentage,
@@ -73,16 +97,16 @@ def get_product(request, slug):
     }
 
     if request.GET.get('size'):
-        size = request.GET.get('size')
-        # Get the specific size variant
-        size_variant = product.get_product_by_size(size)
-        if size_variant:
-            context['selected_size'] = size
+        size_id = request.GET.get('size')
+        # Get the specific size variant by ID
+        try:
+            size_variant = product.child_products.get(id=size_id)
+            context['selected_size'] = size_id
             context['selected_variant'] = size_variant
             context['updated_price'] = size_variant.price
-        else:
+        except Product.DoesNotExist:
             # Fallback to original product if size variant not found
-            context['selected_size'] = size
+            context['selected_size'] = size_id
             context['updated_price'] = product.price
 
     return render(request, 'product/product.html', context=context)
