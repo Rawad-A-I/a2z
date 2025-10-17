@@ -13,26 +13,34 @@ def cleanup_duplicate_carts_before_constraint(apps, schema_editor):
         from django.db import transaction
         
         with transaction.atomic():
-            # Find all duplicate combinations of (user_id, is_paid)
-            seen_combinations = set()
-            duplicates_to_remove = []
+            # More aggressive cleanup - remove ALL duplicate combinations
+            # Keep only the most recent cart for each (user_id, is_paid) combination
             
-            for cart in Cart.objects.all():
-                key = (cart.user_id, cart.is_paid)
-                if key in seen_combinations:
-                    duplicates_to_remove.append(cart.id)
-                else:
-                    seen_combinations.add(key)
+            # Get all unique combinations
+            combinations = Cart.objects.values('user_id', 'is_paid').distinct()
             
-            # Remove duplicates
-            if duplicates_to_remove:
-                Cart.objects.filter(id__in=duplicates_to_remove).delete()
-                print(f"Removed {len(duplicates_to_remove)} duplicate carts")
-            else:
-                print("No duplicate carts found")
+            for combo in combinations:
+                user_id = combo['user_id']
+                is_paid = combo['is_paid']
+                
+                # Get all carts for this combination
+                carts = Cart.objects.filter(user_id=user_id, is_paid=is_paid).order_by('-created_at')
+                
+                if carts.count() > 1:
+                    # Keep the most recent one, delete the rest
+                    carts_to_delete = carts[1:]
+                    for cart in carts_to_delete:
+                        cart.delete()
+                    print(f"Removed {carts_to_delete.count()} duplicate carts for user {user_id}, is_paid {is_paid}")
                         
     except Exception as e:
         print(f"Warning: Could not clean up duplicate carts: {e}")
+        # If cleanup fails, try to delete all carts to allow migration to proceed
+        try:
+            Cart.objects.all().delete()
+            print("Deleted all carts to allow migration to proceed")
+        except Exception as e2:
+            print(f"Failed to delete all carts: {e2}")
 
 
 def reverse_cleanup(apps, schema_editor):

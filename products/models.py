@@ -118,9 +118,9 @@ class Product(BaseModel):
     size_variant = models.ManyToManyField(SizeVariant, blank=True)
     newest_product = models.BooleanField(default=False)
     
-    # Size variant information
-    size_name = models.CharField(max_length=100, blank=True, help_text="Size name for this variant (e.g., Small, Medium, Large)")
-    has_size_variants = models.BooleanField(default=False, help_text="Check if this product has different sizes")
+    # Size variant information (temporarily commented out for deployment)
+    # size_name = models.CharField(max_length=100, blank=True, help_text="Size name for this variant (e.g., Small, Medium, Large)")
+    # has_size_variants = models.BooleanField(default=False, help_text="Check if this product has different sizes")
     
     # Enhanced inventory management
     stock_quantity = models.PositiveIntegerField(default=0)
@@ -153,23 +153,14 @@ class Product(BaseModel):
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            # Create slug based on product name and size (if applicable)
-            base_name = self.product_name
-            if self.size_name:
-                base_name = f"{self.product_name}-{self.size_name}"
-            
-            self.slug = slugify(base_name)
+            # Create slug based on product name
+            self.slug = slugify(self.product_name)
             # Ensure slug is unique
             original_slug = self.slug
             counter = 1
             while Product.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 self.slug = f"{original_slug}-{counter}"
                 counter += 1
-        
-        # If this is a size variant, mark the parent as having size variants
-        if self.parent:
-            self.parent.has_size_variants = True
-            self.parent.save(update_fields=['has_size_variants'])
         
         super(Product, self).save(*args, **kwargs)
 
@@ -180,28 +171,26 @@ class Product(BaseModel):
         """Get all size variants of this product"""
         if self.parent:
             # This is a size variant, return siblings
-            return self.parent.child_products.filter(size_name__isnull=False).exclude(pk=self.pk)
+            return self.parent.child_products.exclude(pk=self.pk)
         else:
             # This is a parent product, return all size variants
-            return self.child_products.filter(size_name__isnull=False)
+            return self.child_products.all()
     
     def get_product_by_size(self, size_name):
         """Get a specific size variant of this product"""
         if self.parent:
             # This is a size variant, look in parent's children
-            return self.parent.child_products.filter(size_name=size_name).first()
+            return self.parent.child_products.filter(product_name__icontains=size_name).first()
         else:
             # This is a parent product, look in own children
-            return self.child_products.filter(size_name=size_name).first()
+            return self.child_products.filter(product_name__icontains=size_name).first()
     
     def is_size_variant(self):
         """Check if this product is a size variant"""
-        return self.parent is not None and self.size_name
+        return self.parent is not None
     
     def get_display_name(self):
         """Get display name including size if applicable"""
-        if self.size_name:
-            return f"{self.product_name} ({self.size_name})"
         return self.product_name
 
     def get_rating(self):
