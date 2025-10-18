@@ -329,7 +329,7 @@ def add_product(request):
                     for error in image_errors:
                         messages.error(request, f"❌ {error}")
             else:
-                messages.warning(request, f"⚠️ Product "{product.product_name}" created without images. Consider adding images for better presentation.")
+                messages.warning(request, f"⚠️ Product '{product.product_name}' created without images. Consider adding images for better presentation.")
             
             # Handle barcode creation
             barcode_value = request.POST.get('barcode_value', '').strip()
