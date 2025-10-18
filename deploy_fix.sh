@@ -39,8 +39,22 @@ except Exception as e:
             cursor.execute('DROP TABLE IF EXISTS accounts_cartitem CASCADE;')
             cursor.execute('DROP TABLE IF EXISTS accounts_cart CASCADE;')
             print('Dropped cart and cartitem tables')
+            
+            # Recreate the cart table with proper structure
+            cursor.execute('''
+                CREATE TABLE accounts_cart (
+                    uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    user_id INTEGER REFERENCES auth_user(id) ON DELETE CASCADE,
+                    session_key VARCHAR(40),
+                    is_paid BOOLEAN NOT NULL DEFAULT FALSE
+                );
+            ''')
+            print('Recreated cart table')
+            
     except Exception as e2:
-        print(f'Failed to drop cart tables: {e2}')
+        print(f'Failed to recreate cart tables: {e2}')
 "
 
 # Fix duplicate product slugs using raw SQL to avoid model issues
