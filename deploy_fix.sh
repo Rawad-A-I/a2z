@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deployment fix script for migration conflicts and image optimization
+# Deployment fix script for migration conflicts and size variant system
 echo "🔧 Starting deployment fix..."
 
 # Step 1: Aggressive duplicate data cleanup
@@ -72,16 +72,53 @@ if not products_to_fix:
 echo "📋 Step 2: Applying migrations..."
 python manage.py migrate --noinput
 
-# Step 3: Collect static files
-echo "📋 Step 3: Collecting static files..."
+# Step 3: Update existing products with new fields
+echo "📋 Step 3: Updating existing products with new fields..."
+python manage.py shell -c "
+from products.models import Product
+from django.db import transaction
+
+try:
+    with transaction.atomic():
+        # Update has_size_variants for all products
+        for product in Product.objects.all():
+            product.has_size_variants = product.child_products.exists()
+            product.save(update_fields=['has_size_variants'])
+        
+        print('Updated has_size_variants for all products')
+        
+        # Set default values for new fields
+        Product.objects.filter(is_size_variant__isnull=True).update(is_size_variant=False)
+        Product.objects.filter(has_size_variants__isnull=True).update(has_size_variants=False)
+        
+        print('Set default values for new fields')
+        
+except Exception as e:
+    print(f'Failed to update products: {e}')
+"
+
+# Step 4: Collect static files
+echo "📋 Step 4: Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Step 4: Test image optimization (optional)
-echo "📋 Step 4: Testing image optimization..."
+# Step 5: Test size variant system
+echo "📋 Step 5: Testing size variant system..."
 python manage.py shell -c "
-from products.image_utils import ImageOptimizer
-formats = ImageOptimizer.get_available_formats()
-print(f'Available image formats: {formats}')
+from products.models import Product
+try:
+    # Test model methods
+    products = Product.objects.all()[:3]
+    for product in products:
+        has_variants = product.has_size_variants()
+        display_price = product.get_display_price()
+        print(f'Product: {product.product_name}')
+        print(f'  Has size variants: {has_variants}')
+        print(f'  Display price: {display_price}')
+        print(f'  Is size variant: {product.is_size_variant}')
+        print()
+    print('Size variant system test completed successfully')
+except Exception as e:
+    print(f'Size variant system test failed: {e}')
 "
 
 echo "✅ Deployment fix completed!"
