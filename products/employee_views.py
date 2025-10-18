@@ -265,20 +265,29 @@ def add_product(request):
                     messages.warning(request, warning)
             
             try:
+                # Get the selected product type from the form
+                product_type = request.POST.get('product_type', 'standalone')
+                
                 # Create the product
                 product = form.save(commit=False)
                 
-                # Handle size variant logic
-                if is_size_variant:
-                    # Set parent for size variant
+                # Handle different product types
+                if product_type == 'variant' or is_size_variant:
+                    # SIZE VARIANT: Set parent, size name, and is_size_variant
                     product.parent = parent
                     product.is_size_variant = True
                     product.size_name = size_name
                     # Update product name to include size
-                    if size_name:
+                    if size_name and parent:
                         product.product_name = f"{parent.product_name} {size_name}"
-                else:
-                    # Ensure parent is None for standalone products
+                elif product_type == 'parent':
+                    # PARENT PRODUCT: No parent, no price, no size name
+                    product.parent = None
+                    product.is_size_variant = False
+                    product.size_name = ''
+                    product.price = None  # Parent products don't have prices
+                else:  # standalone
+                    # STANDALONE PRODUCT: No parent, has price, no size name
                     product.parent = None
                     product.is_size_variant = False
                     product.size_name = ''
@@ -287,7 +296,7 @@ def add_product(request):
                 product.save()
                 
                 # Update has_size_variants for parent if this is a variant
-                if is_size_variant and parent:
+                if (product_type == 'variant' or is_size_variant) and parent:
                     parent.has_size_variants = True
                     parent.save()
                 

@@ -148,8 +148,11 @@ class ProductInsertionForm(forms.ModelForm):
         self.fields['low_stock_threshold'].initial = 10
         
         # Set up querysets for related fields
-        # Show all products as potential parents, but prefer standalone products
-        self.fields['parent'].queryset = Product.objects.filter(parent=None).order_by('product_name')
+        # Only show standalone products as potential parents (products without size variants)
+        self.fields['parent'].queryset = Product.objects.filter(
+            parent=None,
+            has_size_variants=False  # Only standalone products can be parents
+        ).order_by('product_name')
         self.fields['parent'].required = False
         self.fields['parent'].empty_label = "Select parent product (for size variants only)"
         
@@ -186,23 +189,25 @@ class ProductInsertionForm(forms.ModelForm):
         if not category:
             errors.append("Please select a category for the product.")
         
-        # Validation for size variants
-        if is_size_variant:
-            # Size variants must have a parent
+        # Get the selected product type from the form
+        product_type = None
+        if hasattr(self, 'data') and 'product_type' in self.data:
+            product_type = self.data.get('product_type')
+        
+        # Validation based on product type
+        if product_type == 'variant' or is_size_variant:
+            # SIZE VARIANT: Must have parent, size name, and price
             if not parent:
                 errors.append("⚠️ Size variants must have a parent product selected.")
             
-            # Size variants must have a size name
             if not size_name or len(size_name.strip()) < 1:
                 errors.append("⚠️ Size variants must have a size name (e.g., Small, Medium, Large).")
             
-            # Size variants must have a price
             if not price or price <= 0:
                 errors.append("⚠️ Each size variant must have its own price greater than $0.")
             
             # Check for existing size variants with same name and parent
             if product_name and parent and size_name:
-                # Check for exact match
                 existing = Product.objects.filter(
                     parent=parent,
                     size_name__iexact=size_name.strip()
@@ -224,20 +229,52 @@ class ProductInsertionForm(forms.ModelForm):
             if size_name and not size_name.strip().replace(' ', '').replace('-', '').isalnum():
                 warnings.append("⚠️ Size name should contain only letters, numbers, spaces, and hyphens.")
                 
-        else:
-            # Non-variant products cannot have a parent
+        elif product_type == 'parent':
+            # PARENT PRODUCT: Cannot have parent, cannot have price, cannot have size name
             if parent:
-                errors.append("❌ Standalone products cannot have a parent. Please uncheck 'Size Variant' or select 'Standalone Product'.")
+                errors.append("❌ Parent products cannot have a parent. They are the top-level product.")
             
-            # Standalone products must have a price
-            if not price or price <= 0:
-                errors.append("⚠️ Standalone products must have a price greater than $0.")
+            if price and price > 0:
+                errors.append("❌ Parent products do not have prices. Prices are set for each size variant.")
             
-            # Check for existing products with same name (only for parent products)
+            if size_name:
+                errors.append("❌ Parent products do not have size names. Size names are set for variants.")
+            
+            # Check for existing parent products with same name
             if product_name:
                 existing = Product.objects.filter(
                     product_name__iexact=product_name.strip(),
-                    parent=None  # Only check parent products
+                    parent=None
+                ).exclude(pk=self.instance.pk if self.instance else None)
+                
+                if existing.exists():
+                    errors.append(f"❌ A parent product with name '{product_name}' already exists. Please choose a different name.")
+                
+                # Check for similar product names (warning)
+                similar_products = Product.objects.filter(
+                    product_name__icontains=product_name.strip(),
+                    parent=None
+                ).exclude(pk=self.instance.pk if self.instance else None)
+                
+                if similar_products.exists():
+                    warnings.append(f"⚠️ Similar parent product names exist: {', '.join([p.product_name for p in similar_products[:3]])}")
+                    
+        else:  # product_type == 'standalone' or default
+            # STANDALONE PRODUCT: Cannot have parent, must have price, cannot have size name
+            if parent:
+                errors.append("❌ Standalone products cannot have a parent. Please select 'Standalone Product'.")
+            
+            if not price or price <= 0:
+                errors.append("⚠️ Standalone products must have a price greater than $0.")
+            
+            if size_name:
+                errors.append("❌ Standalone products do not have size names. Only size variants have size names.")
+            
+            # Check for existing standalone products with same name
+            if product_name:
+                existing = Product.objects.filter(
+                    product_name__iexact=product_name.strip(),
+                    parent=None
                 ).exclude(pk=self.instance.pk if self.instance else None)
                 
                 if existing.exists():
