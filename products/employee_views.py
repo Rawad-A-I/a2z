@@ -272,7 +272,7 @@ def add_product(request):
                 product = form.save(commit=False)
                 
                 # Handle different product types
-                if product_type == 'variant' or is_size_variant:
+                if product_type == 'variant':
                     # SIZE VARIANT: Set parent, size name, and is_size_variant
                     product.parent = parent
                     product.is_size_variant = True
@@ -296,7 +296,7 @@ def add_product(request):
                 product.save()
                 
                 # Update has_size_variants for parent if this is a variant
-                if (product_type == 'variant' or is_size_variant) and parent:
+                if product_type == 'variant' and parent:
                     try:
                         parent.has_size_variants = True
                         parent.save(update_fields=['has_size_variants'])

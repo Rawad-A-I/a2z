@@ -40,22 +40,43 @@ class BarcodeForm(forms.ModelForm):
 
 
 class ProductInsertionForm(forms.ModelForm):
-    """Form for employees to insert new products with all characteristics"""
+    """Dynamic form for employees to insert new products with different types"""
     
-    # New fields for size variant system
-    is_size_variant = forms.BooleanField(
-        required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        help_text="Check if this is a size variant of an existing product"
+    # Product type selection - this drives the entire form behavior
+    PRODUCT_TYPE_CHOICES = [
+        ('parent', 'Parent Product (will have size variants)'),
+        ('variant', 'Size Variant (of an existing parent)'),
+        ('standalone', 'Standalone Product (no size variants)'),
+    ]
+    
+    product_type = forms.ChoiceField(
+        choices=PRODUCT_TYPE_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        help_text="Select the type of product you want to create"
     )
+    
+    # Size variant specific fields (only shown for variants)
     size_name = forms.CharField(
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'e.g., Small, Medium, Large, Regular'
+            'placeholder': 'e.g., Small, Medium, Large, Size 10'
         }),
         help_text="Size name for this variant (e.g., Small, Medium, Large)"
+    )
+    
+    # Weight field (only for variants and standalone)
+    weight = forms.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'step': '0.01',
+            'placeholder': 'Weight in kg'
+        }),
+        help_text="Weight of this specific size (in kg)"
     )
     
     class Meta:
@@ -64,7 +85,7 @@ class ProductInsertionForm(forms.ModelForm):
             'product_name', 'category', 'price', 'product_desription',
             'parent', 'color_variant', 'size_variant', 'newest_product',
             'is_in_stock', 'stock_quantity', 'low_stock_threshold',
-            'weight', 'dimensions', 'section', 'is_featured', 
+            'dimensions', 'section', 'is_featured', 
             'is_bestseller', 'is_new_arrival', 'meta_title', 
             'meta_description', 'keywords', 'related_products', 'bundle_products'
         ]
@@ -105,11 +126,6 @@ class ProductInsertionForm(forms.ModelForm):
                 'class': 'form-control',
                 'min': '0',
                 'placeholder': '10'
-            }),
-            'weight': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'placeholder': 'Weight in kg'
             }),
             'dimensions': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -171,6 +187,38 @@ class ProductInsertionForm(forms.ModelForm):
         self.fields['bundle_products'].queryset = Product.objects.all()
         self.fields['bundle_products'].required = False
         
+        # Set up dynamic field requirements based on product type
+        self.setup_dynamic_fields()
+    
+    def setup_dynamic_fields(self):
+        """Set up field requirements and visibility based on product type"""
+        # Get the selected product type from form data
+        product_type = None
+        if hasattr(self, 'data') and 'product_type' in self.data:
+            product_type = self.data.get('product_type')
+        
+        # Set up field requirements based on product type
+        if product_type == 'parent':
+            # Parent products: no price, no parent, no size name
+            self.fields['price'].required = False
+            self.fields['parent'].required = False
+            self.fields['size_name'].required = False
+            self.fields['weight'].required = False
+            
+        elif product_type == 'variant':
+            # Size variants: must have parent, size name, and price
+            self.fields['parent'].required = True
+            self.fields['size_name'].required = True
+            self.fields['price'].required = True
+            self.fields['weight'].required = False  # Optional for variants
+            
+        else:  # standalone
+            # Standalone products: must have price, no parent, no size name
+            self.fields['price'].required = True
+            self.fields['parent'].required = False
+            self.fields['size_name'].required = False
+            self.fields['weight'].required = False  # Optional for standalone
+        
         # Make price optional initially - will be validated in clean method
         self.fields['price'].required = False
         
@@ -199,12 +247,10 @@ class ProductInsertionForm(forms.ModelForm):
             errors.append("Please select a category for the product.")
         
         # Get the selected product type from the form
-        product_type = None
-        if hasattr(self, 'data') and 'product_type' in self.data:
-            product_type = self.data.get('product_type')
+        product_type = self.cleaned_data.get('product_type')
         
         # Validation based on product type
-        if product_type == 'variant' or is_size_variant:
+        if product_type == 'variant':
             # SIZE VARIANT: Must have parent, size name, and price
             if not parent:
                 errors.append("⚠️ Size variants must have a parent product selected.")
