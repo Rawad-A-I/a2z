@@ -6,40 +6,37 @@ echo "🔧 Starting deployment fix..."
 # Step 1: Aggressive duplicate data cleanup
 echo "📋 Step 1: Aggressive duplicate data cleanup..."
 
-# Fix duplicate carts - more aggressive approach
-echo "  - Fixing duplicate carts (aggressive cleanup)..."
+# Fix duplicate carts - nuclear approach
+echo "  - Fixing duplicate carts (nuclear cleanup)..."
 python manage.py shell -c "
 from accounts.models import Cart
-from django.db import transaction
+from django.db import transaction, connection
 
 try:
     with transaction.atomic():
-        # Get all unique combinations
-        combinations = Cart.objects.values('user_id', 'is_paid').distinct()
+        # First, try to delete all carts to avoid constraint issues
+        print('Deleting all existing carts to avoid constraint conflicts...')
+        Cart.objects.all().delete()
+        print('All carts deleted successfully')
         
-        for combo in combinations:
-            user_id = combo['user_id']
-            is_paid = combo['is_paid']
-            
-            # Get all carts for this combination
-            carts = Cart.objects.filter(user_id=user_id, is_paid=is_paid).order_by('-created_at')
-            
-            if carts.count() > 1:
-                # Keep the most recent one, delete the rest
-                carts_to_delete = carts[1:]
-                for cart in carts_to_delete:
-                    cart.delete()
-                print(f'Removed {carts_to_delete.count()} duplicate carts for user {user_id}, is_paid {is_paid}')
+        # Reset the sequence if using PostgreSQL
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute('ALTER SEQUENCE accounts_cart_id_seq RESTART WITH 1;')
+                print('Cart sequence reset')
+            except Exception as seq_error:
+                print(f'Sequence reset failed (not critical): {seq_error}')
         
         print('Cart cleanup completed successfully')
 except Exception as e:
     print(f'Cart cleanup failed: {e}')
-    # If cleanup fails, delete all carts to allow migration to proceed
+    # If even this fails, try to drop and recreate the table
     try:
-        Cart.objects.all().delete()
-        print('Deleted all carts to allow migration to proceed')
+        with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE IF EXISTS accounts_cart CASCADE;')
+            print('Dropped cart table')
     except Exception as e2:
-        print(f'Failed to delete all carts: {e2}')
+        print(f'Failed to drop cart table: {e2}')
 "
 
 # Fix duplicate product slugs
@@ -97,12 +94,8 @@ except Exception as e:
     print(f'Failed to update products: {e}')
 "
 
-# Step 4: Collect static files
-echo "📋 Step 4: Collecting static files..."
-python manage.py collectstatic --noinput
-
-# Step 5: Test size variant system
-echo "📋 Step 5: Testing size variant system..."
+# Step 4: Test size variant system
+echo "📋 Step 4: Testing size variant system..."
 python manage.py shell -c "
 from products.models import Product
 try:

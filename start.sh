@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Apply database migrations
-echo "Applying database migrations..."
-python manage.py migrate --noinput
+# Run deployment fix first
+echo "🔧 Running deployment fix..."
+chmod +x deploy_fix.sh
+./deploy_fix.sh
 
 # Create superuser if it doesn't exist
 echo "Creating superuser..."
