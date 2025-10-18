@@ -55,20 +55,14 @@
                                         <li><strong>Size Variant:</strong> A specific size of an existing parent product (e.g., "T-Shirt Large")</li>
                                     </ul>
                                 </div>
-                                <div class="form-check">
-                                    <input type="radio" name="product_type" value="standalone" id="standalone" class="form-check-input" checked>
-                                    <label for="standalone" class="form-check-label"><strong>Standalone Product</strong></label>
-                                    <small class="form-text text-muted d-block">A product without size variants - shows price immediately</small>
-                                </div>
-                                <div class="form-check">
-                                    <input type="radio" name="product_type" value="parent" id="parent" class="form-check-input">
-                                    <label for="parent" class="form-check-label"><strong>Parent Product</strong></label>
-                                    <small class="form-text text-muted d-block">A product that will have size variants - no price shown until size is selected</small>
-                                </div>
-                                <div class="form-check">
-                                    <input type="radio" name="product_type" value="variant" id="variant" class="form-check-input">
-                                    <label for="variant" class="form-check-label"><strong>Size Variant</strong></label>
-                                    <small class="form-text text-muted d-block">A size variant of an existing product - requires parent selection</small>
+                                {{ form.product_type }}
+                                {% if form.product_type.errors %}
+                                    <div class="text-danger">{{ form.product_type.errors }}</div>
+                                {% endif %}
+                                
+                                <!-- Debug: Show the rendered HTML -->
+                                <div class="mt-2">
+                                    <small class="text-muted">Debug: Form field rendered</small>
                                 </div>
                             </div>
                         </div>
@@ -534,11 +528,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const sizeName = document.getElementById('size-name');
     const priceField = document.getElementById('price-field');
     const priceHelp = document.getElementById('price-help');
-    const isSizeVariantCheckbox = document.getElementById('id_is_size_variant');
+    const weightField = document.getElementById('weight-field');
     
-    // Hide the is_size_variant checkbox since we control it with radio buttons
-    if (isSizeVariantCheckbox) {
-        isSizeVariantCheckbox.style.display = 'none';
+    // Debug: Log the elements to make sure they exist
+    console.log('Product type radios:', productTypeRadios);
+    console.log('Parent selection:', parentSelection);
+    console.log('Size name:', sizeName);
+    console.log('Price field:', priceField);
+    console.log('Weight field:', weightField);
+    
+    // Show alert if elements are not found
+    if (productTypeRadios.length === 0) {
+        alert('No product type radio buttons found!');
+    }
+    if (!parentSelection) {
+        alert('Parent selection element not found!');
+    }
+    if (!sizeName) {
+        alert('Size name element not found!');
+    }
+    if (!priceField) {
+        alert('Price field element not found!');
+    }
+    if (!weightField) {
+        alert('Weight field element not found!');
     }
     
     // Create warning/error display area
@@ -675,28 +688,27 @@ document.addEventListener('DOMContentLoaded', function() {
         priceField.style.display = 'block';
         weightField.style.display = 'block';
         
-        // Update is_size_variant checkbox
-        if (selectedType === 'variant') {
-            isSizeVariantCheckbox.checked = true;
-        } else {
-            isSizeVariantCheckbox.checked = false;
-        }
+        // Debug: Log the selected type
+        console.log('Selected product type:', selectedType);
         
         switch(selectedType) {
             case 'standalone':
                 priceHelp.textContent = 'Required for standalone products';
                 weightField.style.display = 'block';
+                console.log('Standalone selected - showing price and weight fields');
                 break;
             case 'parent':
                 priceField.style.display = 'none';
                 weightField.style.display = 'none';
                 priceHelp.textContent = 'Parent products do not have prices';
+                console.log('Parent selected - hiding price and weight fields');
                 break;
             case 'variant':
                 parentSelection.style.display = 'block';
                 sizeName.style.display = 'block';
                 weightField.style.display = 'block';
                 priceHelp.textContent = 'Required for size variants';
+                console.log('Variant selected - showing parent, size, price, and weight fields');
                 break;
         }
         
@@ -708,6 +720,9 @@ document.addEventListener('DOMContentLoaded', function() {
     productTypeRadios.forEach(radio => {
         radio.addEventListener('change', updateFormFields);
     });
+    
+    // Initialize form fields on page load
+    updateFormFields();
     
     // Add validation on form submit
     const form = document.querySelector('form');

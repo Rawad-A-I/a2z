@@ -52,7 +52,8 @@ class ProductInsertionForm(forms.ModelForm):
     product_type = forms.ChoiceField(
         choices=PRODUCT_TYPE_CHOICES,
         widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
-        help_text="Select the type of product you want to create"
+        help_text="Select the type of product you want to create",
+        initial='standalone'
     )
     
     # Size variant specific fields (only shown for variants)
