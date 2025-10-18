@@ -148,7 +148,8 @@ class ProductInsertionForm(forms.ModelForm):
         self.fields['low_stock_threshold'].initial = 10
         
         # Set up querysets for related fields
-        self.fields['parent'].queryset = Product.objects.filter(parent=None)  # Only parent products
+        # Show all products as potential parents, but prefer standalone products
+        self.fields['parent'].queryset = Product.objects.filter(parent=None).order_by('product_name')
         self.fields['parent'].required = False
         self.fields['parent'].empty_label = "Select parent product (for size variants only)"
         

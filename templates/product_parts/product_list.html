@@ -27,14 +27,14 @@
             <b>{{ product.product_name }}</b></a>
           
           <!-- Price Display Logic -->
-          {% if product.get_display_price %}
-            <!-- Standalone product - show price -->
-            <div class="price mt-2">${{product.get_display_price}}.00</div>
-          {% else %}
+          {% if product.has_size_variants %}
             <!-- Product with size variants - show "Select Size" -->
             <div class="price mt-2 text-muted">
               <small>Select size for price</small>
             </div>
+          {% else %}
+            <!-- Standalone product - show price -->
+            <div class="price mt-2">${{product.price}}.00</div>
           {% endif %}
           
           {% if not product.is_in_stock %}
