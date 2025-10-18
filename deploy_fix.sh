@@ -6,14 +6,19 @@ echo "🔧 Starting deployment fix..."
 # Step 1: Aggressive duplicate data cleanup
 echo "📋 Step 1: Aggressive duplicate data cleanup..."
 
-# Fix duplicate carts - nuclear approach with direct SQL
+# Fix duplicate carts - nuclear approach with foreign key handling
 echo "  - Fixing duplicate carts (nuclear cleanup)..."
 python manage.py shell -c "
 from django.db import connection
 
 try:
     with connection.cursor() as cursor:
-        # Delete all carts using raw SQL to avoid Django model issues
+        # First, delete all cart items to avoid foreign key constraints
+        print('Deleting all cart items to avoid foreign key constraints...')
+        cursor.execute('DELETE FROM accounts_cartitem;')
+        print('All cart items deleted successfully')
+        
+        # Then delete all carts
         print('Deleting all existing carts using raw SQL...')
         cursor.execute('DELETE FROM accounts_cart;')
         print('All carts deleted successfully')
@@ -31,10 +36,11 @@ except Exception as e:
     # If even this fails, try to drop and recreate the table
     try:
         with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE IF EXISTS accounts_cartitem CASCADE;')
             cursor.execute('DROP TABLE IF EXISTS accounts_cart CASCADE;')
-            print('Dropped cart table')
+            print('Dropped cart and cartitem tables')
     except Exception as e2:
-        print(f'Failed to drop cart table: {e2}')
+        print(f'Failed to drop cart tables: {e2}')
 "
 
 # Fix duplicate product slugs using raw SQL to avoid model issues
@@ -45,21 +51,21 @@ from django.utils.text import slugify
 
 try:
     with connection.cursor() as cursor:
-        # Get all products with their slugs
-        cursor.execute('SELECT id, slug FROM products_product WHERE slug IS NOT NULL;')
+        # Get all products with their slugs (using uid instead of id)
+        cursor.execute('SELECT uid, slug FROM products_product WHERE slug IS NOT NULL;')
         products = cursor.fetchall()
         
         seen_slugs = set()
         products_to_fix = []
         
-        for product_id, slug in products:
+        for product_uid, slug in products:
             if slug in seen_slugs:
-                products_to_fix.append((product_id, slug))
+                products_to_fix.append((product_uid, slug))
             else:
                 seen_slugs.add(slug)
         
         # Fix duplicate slugs
-        for product_id, original_slug in products_to_fix:
+        for product_uid, original_slug in products_to_fix:
             counter = 1
             new_slug = f'{original_slug}-{counter}'
             
@@ -72,7 +78,7 @@ try:
                 new_slug = f'{original_slug}-{counter}'
             
             # Update the slug
-            cursor.execute('UPDATE products_product SET slug = %s WHERE id = %s;', [new_slug, product_id])
+            cursor.execute('UPDATE products_product SET slug = %s WHERE uid = %s;', [new_slug, product_uid])
             print(f'Fixed duplicate slug: {original_slug} -> {new_slug}')
         
         if not products_to_fix:
@@ -87,8 +93,8 @@ except Exception as e:
 echo "📋 Step 2: Applying migrations..."
 python manage.py migrate --noinput
 
-# Step 2.5: Apply size_name migration specifically
-echo "📋 Step 2.5: Applying size_name migration..."
+# Step 2.5: Apply nullable fields migration specifically
+echo "📋 Step 2.5: Applying nullable fields migration..."
 python manage.py migrate products 0024 --noinput
 
 # Step 3: Update existing products with new fields using raw SQL
@@ -109,7 +115,7 @@ try:
         cursor.execute('''
             UPDATE products_product 
             SET has_size_variants = TRUE 
-            WHERE id IN (
+            WHERE uid IN (
                 SELECT DISTINCT parent_id 
                 FROM products_product 
                 WHERE parent_id IS NOT NULL

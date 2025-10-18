@@ -265,12 +265,16 @@ def add_product(request):
             if is_size_variant:
                 # Set parent for size variant
                 product.parent = parent
+                product.is_size_variant = True
+                product.size_name = size_name
                 # Update product name to include size
                 if size_name:
                     product.product_name = f"{parent.product_name} {size_name}"
             else:
                 # Ensure parent is None for standalone products
                 product.parent = None
+                product.is_size_variant = False
+                product.size_name = ''
             
             # Save the product
             product.save()

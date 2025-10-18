@@ -119,9 +119,9 @@ class Product(BaseModel):
     newest_product = models.BooleanField(default=False)
     
     # Size variant information
-    is_size_variant = models.BooleanField(default=False, help_text="Check if this product is a size variant")
+    is_size_variant = models.BooleanField(default=False, null=True, blank=True, help_text="Check if this product is a size variant")
     size_name = models.CharField(max_length=100, blank=True, help_text="Size name for this variant (e.g., Small, Medium, Large)")
-    has_size_variants = models.BooleanField(default=False, help_text="Check if this product has different sizes")
+    has_size_variants = models.BooleanField(default=False, null=True, blank=True, help_text="Check if this product has different sizes")
     
     # Enhanced inventory management
     stock_quantity = models.PositiveIntegerField(default=0)
