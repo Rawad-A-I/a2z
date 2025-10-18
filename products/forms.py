@@ -173,52 +173,106 @@ class ProductInsertionForm(forms.ModelForm):
         is_size_variant = cleaned_data.get('is_size_variant')
         size_name = cleaned_data.get('size_name')
         price = cleaned_data.get('price')
+        category = cleaned_data.get('category')
+        
+        # Store validation errors
+        errors = []
+        warnings = []
+        
+        # Basic validation
+        if not product_name or len(product_name.strip()) < 2:
+            errors.append("Product name must be at least 2 characters long.")
+        
+        if not category:
+            errors.append("Please select a category for the product.")
         
         # Validation for size variants
         if is_size_variant:
             # Size variants must have a parent
             if not parent:
-                raise forms.ValidationError("Size variants must have a parent product.")
+                errors.append("⚠️ Size variants must have a parent product selected.")
             
             # Size variants must have a size name
-            if not size_name:
-                raise forms.ValidationError("Size variants must have a size name.")
+            if not size_name or len(size_name.strip()) < 1:
+                errors.append("⚠️ Size variants must have a size name (e.g., Small, Medium, Large).")
             
             # Size variants must have a price
-            if not price:
-                raise forms.ValidationError("Each size variant must have its own price.")
+            if not price or price <= 0:
+                errors.append("⚠️ Each size variant must have its own price greater than $0.")
             
             # Check for existing size variants with same name and parent
-            if product_name and parent:
+            if product_name and parent and size_name:
+                # Check for exact match
                 existing = Product.objects.filter(
-                    product_name=product_name,
-                    parent=parent
+                    parent=parent,
+                    size_name__iexact=size_name.strip()
                 ).exclude(pk=self.instance.pk if self.instance else None)
                 
                 if existing.exists():
-                    raise forms.ValidationError(
-                        f"A size variant with name '{product_name}' already exists for this parent product."
-                    )
+                    errors.append(f"❌ A size variant '{size_name}' already exists for '{parent.product_name}'. Please choose a different size name.")
+                
+                # Check for similar size names (warning)
+                similar_sizes = Product.objects.filter(
+                    parent=parent,
+                    size_name__icontains=size_name.strip()
+                ).exclude(pk=self.instance.pk if self.instance else None)
+                
+                if similar_sizes.exists():
+                    warnings.append(f"⚠️ Similar size names exist for this parent: {', '.join([s.size_name for s in similar_sizes])}")
+            
+            # Validate size name format
+            if size_name and not size_name.strip().replace(' ', '').replace('-', '').isalnum():
+                warnings.append("⚠️ Size name should contain only letters, numbers, spaces, and hyphens.")
+                
         else:
             # Non-variant products cannot have a parent
             if parent:
-                raise forms.ValidationError("Non-variant products cannot have a parent.")
+                errors.append("❌ Standalone products cannot have a parent. Please uncheck 'Size Variant' or select 'Standalone Product'.")
             
             # Standalone products must have a price
-            if not price:
-                raise forms.ValidationError("Standalone products must have a price.")
+            if not price or price <= 0:
+                errors.append("⚠️ Standalone products must have a price greater than $0.")
             
             # Check for existing products with same name (only for parent products)
             if product_name:
                 existing = Product.objects.filter(
-                    product_name=product_name,
+                    product_name__iexact=product_name.strip(),
                     parent=None  # Only check parent products
                 ).exclude(pk=self.instance.pk if self.instance else None)
                 
                 if existing.exists():
-                    raise forms.ValidationError(
-                        f"A product with name '{product_name}' already exists."
-                    )
+                    errors.append(f"❌ A product with name '{product_name}' already exists. Please choose a different name.")
+                
+                # Check for similar product names (warning)
+                similar_products = Product.objects.filter(
+                    product_name__icontains=product_name.strip(),
+                    parent=None
+                ).exclude(pk=self.instance.pk if self.instance else None)
+                
+                if similar_products.exists():
+                    warnings.append(f"⚠️ Similar product names exist: {', '.join([p.product_name for p in similar_products[:3]])}")
+        
+        # Price validation
+        if price and price > 0:
+            if price > 10000:
+                warnings.append("⚠️ Price seems unusually high. Please verify the amount.")
+            elif price < 0.01:
+                warnings.append("⚠️ Price seems unusually low. Please verify the amount.")
+        
+        # Category validation
+        if category:
+            # Check if category has other products (for context)
+            category_products = Product.objects.filter(category=category, parent=None).count()
+            if category_products > 0:
+                warnings.append(f"ℹ️ This category already has {category_products} product(s).")
+        
+        # Store warnings in cleaned_data for template access
+        if warnings:
+            cleaned_data['_warnings'] = warnings
+        
+        # Raise validation errors if any
+        if errors:
+            raise forms.ValidationError(errors)
         
         return cleaned_data
 

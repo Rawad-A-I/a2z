@@ -47,6 +47,13 @@
                                 <div class="alert alert-info mb-3">
                                     <i class="fas fa-info-circle"></i>
                                     <strong>Choose the type of product you want to create:</strong>
+                                    <br><br>
+                                    <strong>💡 Quick Guide:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li><strong>Standalone:</strong> Single product with fixed price (e.g., "iPhone 15")</li>
+                                        <li><strong>Parent:</strong> Product that will have size variants (e.g., "T-Shirt" → will have S, M, L variants)</li>
+                                        <li><strong>Size Variant:</strong> A specific size of an existing parent product (e.g., "T-Shirt Large")</li>
+                                    </ul>
                                 </div>
                                 <div class="form-check">
                                     <input type="radio" name="product_type" value="standalone" id="standalone" class="form-check-input" checked>
@@ -423,11 +430,46 @@
                             </div>
                         </div>
 
+                        <!-- Validation Summary -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0"><i class="fas fa-clipboard-check"></i> Validation Checklist</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Required Fields:</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="fas fa-check text-success" id="check-product-name"></i> Product Name</li>
+                                                    <li><i class="fas fa-check text-success" id="check-category"></i> Category</li>
+                                                    <li><i class="fas fa-check text-success" id="check-price"></i> Price (if applicable)</li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>For Size Variants:</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="fas fa-check text-success" id="check-parent"></i> Parent Product</li>
+                                                    <li><i class="fas fa-check text-success" id="check-size-name"></i> Size Name</li>
+                                                    <li><i class="fas fa-check text-success" id="check-variant-price"></i> Variant Price</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-warning mt-3 mb-0">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <strong>Note:</strong> All required fields must be completed before the product can be created.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between">
                             <a href="{% url 'employee_product_management' %}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Back to Products
                             </a>
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success" id="submit-btn">
                                 <i class="fas fa-save"></i> Add Product
                             </button>
                         </div>
@@ -489,6 +531,110 @@ document.addEventListener('DOMContentLoaded', function() {
         isSizeVariantCheckbox.style.display = 'none';
     }
     
+    // Create warning/error display area
+    function createAlertContainer() {
+        const alertContainer = document.createElement('div');
+        alertContainer.id = 'form-alerts';
+        alertContainer.className = 'mb-3';
+        const form = document.querySelector('form');
+        form.insertBefore(alertContainer, form.firstChild);
+        return alertContainer;
+    }
+    
+    // Show alert message
+    function showAlert(message, type = 'warning') {
+        let alertContainer = document.getElementById('form-alerts');
+        if (!alertContainer) {
+            alertContainer = createAlertContainer();
+        }
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alertDiv);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // Clear alerts
+    function clearAlerts() {
+        const alertContainer = document.getElementById('form-alerts');
+        if (alertContainer) {
+            alertContainer.innerHTML = '';
+        }
+    }
+    
+    // Validate form fields
+    function validateForm() {
+        clearAlerts();
+        const selectedType = document.querySelector('input[name="product_type"]:checked').value;
+        const productName = document.querySelector('#id_product_name').value.trim();
+        const category = document.querySelector('#id_category').value;
+        const price = document.querySelector('#id_price').value;
+        const parent = document.querySelector('#id_parent').value;
+        const sizeNameValue = document.querySelector('#id_size_name').value.trim();
+        
+        let hasErrors = false;
+        
+        // Basic validation
+        if (!productName || productName.length < 2) {
+            showAlert('⚠️ Product name must be at least 2 characters long.', 'danger');
+            hasErrors = true;
+        }
+        
+        if (!category) {
+            showAlert('⚠️ Please select a category for the product.', 'danger');
+            hasErrors = true;
+        }
+        
+        // Type-specific validation
+        if (selectedType === 'variant') {
+            if (!parent) {
+                showAlert('⚠️ Size variants must have a parent product selected.', 'danger');
+                hasErrors = true;
+            }
+            
+            if (!sizeNameValue || sizeNameValue.length < 1) {
+                showAlert('⚠️ Size variants must have a size name (e.g., Small, Medium, Large).', 'danger');
+                hasErrors = true;
+            }
+            
+            if (!price || parseFloat(price) <= 0) {
+                showAlert('⚠️ Each size variant must have its own price greater than $0.', 'danger');
+                hasErrors = true;
+            }
+        } else if (selectedType === 'standalone') {
+            if (parent) {
+                showAlert('❌ Standalone products cannot have a parent. Please select "Standalone Product".', 'danger');
+                hasErrors = true;
+            }
+            
+            if (!price || parseFloat(price) <= 0) {
+                showAlert('⚠️ Standalone products must have a price greater than $0.', 'danger');
+                hasErrors = true;
+            }
+        }
+        
+        // Price validation
+        if (price && parseFloat(price) > 0) {
+            if (parseFloat(price) > 10000) {
+                showAlert('⚠️ Price seems unusually high. Please verify the amount.', 'warning');
+            } else if (parseFloat(price) < 0.01) {
+                showAlert('⚠️ Price seems unusually low. Please verify the amount.', 'warning');
+            }
+        }
+        
+        return !hasErrors;
+    }
+    
     function updateFormFields() {
         const selectedType = document.querySelector('input[name="product_type"]:checked').value;
         
@@ -518,6 +664,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 priceHelp.textContent = 'Required for size variants';
                 break;
         }
+        
+        // Clear any existing alerts when switching types
+        clearAlerts();
     }
     
     // Add event listeners
@@ -525,8 +674,119 @@ document.addEventListener('DOMContentLoaded', function() {
         radio.addEventListener('change', updateFormFields);
     });
     
+    // Add validation on form submit
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            showAlert('❌ Please fix the errors above before submitting.', 'danger');
+        }
+    });
+    
+    // Add real-time validation
+    const productNameField = document.querySelector('#id_product_name');
+    const priceField = document.querySelector('#id_price');
+    const sizeNameField = document.querySelector('#id_size_name');
+    
+    if (productNameField) {
+        productNameField.addEventListener('blur', function() {
+            if (this.value.trim().length > 0 && this.value.trim().length < 2) {
+                showAlert('⚠️ Product name should be at least 2 characters long.', 'warning');
+            }
+        });
+    }
+    
+    if (priceField) {
+        priceField.addEventListener('blur', function() {
+            const price = parseFloat(this.value);
+            if (price > 0) {
+                if (price > 10000) {
+                    showAlert('⚠️ Price seems unusually high. Please verify the amount.', 'warning');
+                } else if (price < 0.01) {
+                    showAlert('⚠️ Price seems unusually low. Please verify the amount.', 'warning');
+                }
+            }
+        });
+    }
+    
+    if (sizeNameField) {
+        sizeNameField.addEventListener('blur', function() {
+            const sizeName = this.value.trim();
+            if (sizeName && !sizeName.replace(/[^a-zA-Z0-9\s-]/g, '').length) {
+                showAlert('⚠️ Size name should contain only letters, numbers, spaces, and hyphens.', 'warning');
+            }
+        });
+    }
+    
+    // Update validation checklist
+    function updateValidationChecklist() {
+        const selectedType = document.querySelector('input[name="product_type"]:checked').value;
+        const productName = document.querySelector('#id_product_name').value.trim();
+        const category = document.querySelector('#id_category').value;
+        const price = document.querySelector('#id_price').value;
+        const parent = document.querySelector('#id_parent').value;
+        const sizeNameValue = document.querySelector('#id_size_name').value.trim();
+        
+        // Update basic checks
+        updateCheckIcon('check-product-name', productName && productName.length >= 2);
+        updateCheckIcon('check-category', category);
+        
+        // Update price check based on product type
+        if (selectedType === 'parent') {
+            updateCheckIcon('check-price', true); // Parent products don't need price
+        } else {
+            updateCheckIcon('check-price', price && parseFloat(price) > 0);
+        }
+        
+        // Update variant-specific checks
+        if (selectedType === 'variant') {
+            updateCheckIcon('check-parent', parent);
+            updateCheckIcon('check-size-name', sizeNameValue && sizeNameValue.length >= 1);
+            updateCheckIcon('check-variant-price', price && parseFloat(price) > 0);
+        } else {
+            // Hide variant checks for non-variant products
+            updateCheckIcon('check-parent', true);
+            updateCheckIcon('check-size-name', true);
+            updateCheckIcon('check-variant-price', true);
+        }
+    }
+    
+    function updateCheckIcon(elementId, isValid) {
+        const icon = document.getElementById(elementId);
+        if (icon) {
+            if (isValid) {
+                icon.className = 'fas fa-check text-success';
+            } else {
+                icon.className = 'fas fa-times text-danger';
+            }
+        }
+    }
+    
+    // Add event listeners for real-time validation updates
+    const productNameField = document.querySelector('#id_product_name');
+    const categoryField = document.querySelector('#id_category');
+    const priceField = document.querySelector('#id_price');
+    const parentField = document.querySelector('#id_parent');
+    const sizeNameField = document.querySelector('#id_size_name');
+    
+    [productNameField, categoryField, priceField, parentField, sizeNameField].forEach(field => {
+        if (field) {
+            field.addEventListener('input', updateValidationChecklist);
+            field.addEventListener('change', updateValidationChecklist);
+        }
+    });
+    
+    // Update checklist when product type changes
+    productTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            updateFormFields();
+            updateValidationChecklist();
+        });
+    });
+    
     // Initial form state
     updateFormFields();
+    updateValidationChecklist();
 });
 </script>
 {% endblock %}
