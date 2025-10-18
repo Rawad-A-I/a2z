@@ -13,7 +13,7 @@ def fix_duplicate_carts(apps, schema_editor):
     
     # Find users with multiple unpaid carts
     duplicate_users = Cart.objects.filter(is_paid=False).values('user_id').annotate(
-        count=Count('id')
+        count=Count('uid')
     ).filter(count__gt=1)
     
     for user_data in duplicate_users:
@@ -27,7 +27,7 @@ def fix_duplicate_carts(apps, schema_editor):
         # Keep the newest one, mark others as paid
         if user_carts.count() > 1:
             newest_cart = user_carts.first()
-            old_carts = user_carts.exclude(id=newest_cart.id)
+            old_carts = user_carts.exclude(uid=newest_cart.uid)
             
             # Mark old carts as paid to avoid conflicts
             old_carts.update(is_paid=True)

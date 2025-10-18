@@ -53,6 +53,21 @@ except Exception as e:
             ''')
             print('Recreated cart table')
             
+            # Recreate the cartitem table with proper structure
+            cursor.execute('''
+                CREATE TABLE accounts_cartitem (
+                    uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    cart_id UUID NOT NULL REFERENCES accounts_cart(uid) ON DELETE CASCADE,
+                    product_id UUID NOT NULL REFERENCES products_product(uid) ON DELETE CASCADE,
+                    quantity INTEGER NOT NULL DEFAULT 1,
+                    price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                    UNIQUE(cart_id, product_id)
+                );
+            ''')
+            print('Recreated cartitem table')
+            
     except Exception as e2:
         print(f'Failed to recreate cart tables: {e2}')
 "
@@ -101,6 +116,69 @@ try:
         print('Product slug cleanup completed successfully')
 except Exception as e:
     print(f'Product slug cleanup failed: {e}')
+"
+
+# Step 1.5: Ensure cart tables exist
+echo "📋 Step 1.5: Ensuring cart tables exist..."
+python manage.py shell -c "
+from django.db import connection
+
+try:
+    with connection.cursor() as cursor:
+        # Check if cart table exists
+        cursor.execute('''
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'accounts_cart'
+            );
+        ''')
+        cart_exists = cursor.fetchone()[0]
+        
+        if not cart_exists:
+            print('Cart table does not exist, creating...')
+            cursor.execute('''
+                CREATE TABLE accounts_cart (
+                    uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    user_id INTEGER REFERENCES auth_user(id) ON DELETE CASCADE,
+                    session_key VARCHAR(40),
+                    is_paid BOOLEAN NOT NULL DEFAULT FALSE
+                );
+            ''')
+            print('Created cart table')
+        
+        # Check if cartitem table exists
+        cursor.execute('''
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'accounts_cartitem'
+            );
+        ''')
+        cartitem_exists = cursor.fetchone()[0]
+        
+        if not cartitem_exists:
+            print('Cartitem table does not exist, creating...')
+            cursor.execute('''
+                CREATE TABLE accounts_cartitem (
+                    uid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                    cart_id UUID NOT NULL REFERENCES accounts_cart(uid) ON DELETE CASCADE,
+                    product_id UUID NOT NULL REFERENCES products_product(uid) ON DELETE CASCADE,
+                    quantity INTEGER NOT NULL DEFAULT 1,
+                    price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                    UNIQUE(cart_id, product_id)
+                );
+            ''')
+            print('Created cartitem table')
+        
+        print('Cart tables verification completed')
+        
+except Exception as e:
+    print(f'Cart table verification failed: {e}')
 "
 
 # Step 2: Apply migrations
