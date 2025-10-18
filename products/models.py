@@ -118,9 +118,10 @@ class Product(BaseModel):
     size_variant = models.ManyToManyField(SizeVariant, blank=True)
     newest_product = models.BooleanField(default=False)
     
-    # Size variant information (temporarily commented out for deployment)
-    # size_name = models.CharField(max_length=100, blank=True, help_text="Size name for this variant (e.g., Small, Medium, Large)")
-    # has_size_variants = models.BooleanField(default=False, help_text="Check if this product has different sizes")
+    # Size variant information
+    is_size_variant = models.BooleanField(default=False, help_text="Check if this product is a size variant")
+    size_name = models.CharField(max_length=100, blank=True, help_text="Size name for this variant (e.g., Small, Medium, Large)")
+    has_size_variants = models.BooleanField(default=False, help_text="Check if this product has different sizes")
     
     # Enhanced inventory management
     stock_quantity = models.PositiveIntegerField(default=0)
@@ -161,6 +162,10 @@ class Product(BaseModel):
             while Product.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 self.slug = f"{original_slug}-{counter}"
                 counter += 1
+        
+        # Update has_size_variants based on child products
+        if self.pk:
+            self.has_size_variants = self.child_products.exists()
         
         super(Product, self).save(*args, **kwargs)
 
