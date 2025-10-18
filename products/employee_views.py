@@ -297,8 +297,12 @@ def add_product(request):
                 
                 # Update has_size_variants for parent if this is a variant
                 if (product_type == 'variant' or is_size_variant) and parent:
-                    parent.has_size_variants = True
-                    parent.save()
+                    try:
+                        parent.has_size_variants = True
+                        parent.save(update_fields=['has_size_variants'])
+                    except Exception as e:
+                        # Field might not exist yet, log but don't fail
+                        print(f"Warning: Could not update has_size_variants: {e}")
                 
             except Exception as e:
                 messages.error(request, f"❌ Error creating product: {str(e)}")

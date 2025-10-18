@@ -183,11 +183,14 @@ except Exception as e:
 
 # Step 2: Apply migrations
 echo "📋 Step 2: Applying migrations..."
+# Apply products migrations first to avoid dependency issues
+python manage.py migrate products --noinput
+# Then apply all other migrations
 python manage.py migrate --noinput
 
-# Step 2.5: Apply nullable fields migration specifically
-echo "📋 Step 2.5: Applying nullable fields migration..."
-python manage.py migrate products 0024 --noinput
+# Step 2.5: Apply size variant fields migration specifically
+echo "📋 Step 2.5: Applying size variant fields migration..."
+python manage.py migrate products 0025 --noinput
 
 # Step 3: Update existing products with new fields using raw SQL
 echo "📋 Step 3: Updating existing products with new fields..."

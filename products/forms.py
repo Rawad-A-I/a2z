@@ -149,10 +149,19 @@ class ProductInsertionForm(forms.ModelForm):
         
         # Set up querysets for related fields
         # Only show standalone products as potential parents (products without size variants)
-        self.fields['parent'].queryset = Product.objects.filter(
-            parent=None,
-            has_size_variants=False  # Only standalone products can be parents
-        ).order_by('product_name')
+        try:
+            # Try to use has_size_variants field if it exists
+            self.fields['parent'].queryset = Product.objects.filter(
+                parent=None,
+                has_size_variants=False
+            ).order_by('product_name')
+        except Exception:
+            # Fallback: filter by child_products if has_size_variants doesn't exist
+            self.fields['parent'].queryset = Product.objects.filter(
+                parent=None
+            ).exclude(
+                child_products__isnull=False
+            ).order_by('product_name')
         self.fields['parent'].required = False
         self.fields['parent'].empty_label = "Select parent product (for size variants only)"
         
