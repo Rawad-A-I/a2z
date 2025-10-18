@@ -71,9 +71,9 @@
             
             <!-- Price -->
             <div class="product-price mb-4">
-              {% if product.parent %}
-                <!-- This is a size variant - show price -->
-                <span class="price-current text-2xl font-bold text-primary">${{ product.price }}</span>
+              {% if product.get_display_price %}
+                <!-- Standalone product - show price -->
+                <span class="price-current text-2xl font-bold text-primary">${{ product.get_display_price }}</span>
                 {% if product.discount_price %}
                   <span class="price-original text-lg text-muted ms-2">
                     <del>${{ product.discount_price }}</del>
@@ -82,22 +82,11 @@
                     Save ${{ product.discount_price|floatformat:2 }}
                   </span>
                 {% endif %}
-              {% elif product.child_products.exists %}
+              {% else %}
                 <!-- Product has size variants - hide price until size selected -->
                 <div id="priceDisplay" class="text-muted">
                   <span class="text-lg">Select a size to see price</span>
                 </div>
-              {% else %}
-                <!-- Standalone product - show price -->
-                <span class="price-current text-2xl font-bold text-primary">${{ product.price }}</span>
-                {% if product.discount_price %}
-                  <span class="price-original text-lg text-muted ms-2">
-                    <del>${{ product.discount_price }}</del>
-                  </span>
-                  <span class="discount-badge badge badge-danger ms-2">
-                    Save ${{ product.discount_price|floatformat:2 }}
-                  </span>
-                {% endif %}
               {% endif %}
             </div>
             
@@ -166,7 +155,7 @@
                     </a>
                   </div>
                 </div>
-              {% elif product.child_products.exists %}
+              {% elif product.has_size_variants %}
                 <!-- Product has size variants - show size selector -->
                 <div class="form-group mb-3">
                   <label class="form-label">Size</label>

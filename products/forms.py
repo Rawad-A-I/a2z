@@ -41,6 +41,23 @@ class BarcodeForm(forms.ModelForm):
 
 class ProductInsertionForm(forms.ModelForm):
     """Form for employees to insert new products with all characteristics"""
+    
+    # New fields for size variant system
+    is_size_variant = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Check if this is a size variant of an existing product"
+    )
+    size_name = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g., Small, Medium, Large, Regular'
+        }),
+        help_text="Size name for this variant (e.g., Small, Medium, Large)"
+    )
+    
     class Meta:
         model = Product
         fields = [
@@ -131,15 +148,18 @@ class ProductInsertionForm(forms.ModelForm):
         self.fields['low_stock_threshold'].initial = 10
         
         # Set up querysets for related fields
-        self.fields['parent'].queryset = Product.objects.all()
+        self.fields['parent'].queryset = Product.objects.filter(parent=None)  # Only parent products
         self.fields['parent'].required = False
-        self.fields['parent'].empty_label = "Select parent product (optional)"
+        self.fields['parent'].empty_label = "Select parent product (for size variants only)"
         
         self.fields['related_products'].queryset = Product.objects.all()
         self.fields['related_products'].required = False
         
         self.fields['bundle_products'].queryset = Product.objects.all()
         self.fields['bundle_products'].required = False
+        
+        # Make price optional initially - will be validated in clean method
+        self.fields['price'].required = False
         
         # Make variant fields optional
         self.fields['color_variant'].required = False
@@ -149,17 +169,55 @@ class ProductInsertionForm(forms.ModelForm):
         cleaned_data = super().clean()
         product_name = cleaned_data.get('product_name')
         parent = cleaned_data.get('parent')
+        is_size_variant = cleaned_data.get('is_size_variant')
+        size_name = cleaned_data.get('size_name')
+        price = cleaned_data.get('price')
         
-        # Check for existing products with same name
-        if product_name:
-            existing = Product.objects.filter(
-                product_name=product_name
-            ).exclude(pk=self.instance.pk if self.instance else None)
+        # Validation for size variants
+        if is_size_variant:
+            # Size variants must have a parent
+            if not parent:
+                raise forms.ValidationError("Size variants must have a parent product.")
             
-            if existing.exists():
-                raise forms.ValidationError(
-                    f"A product with name '{product_name}' already exists."
-                )
+            # Size variants must have a size name
+            if not size_name:
+                raise forms.ValidationError("Size variants must have a size name.")
+            
+            # Size variants must have a price
+            if not price:
+                raise forms.ValidationError("Each size variant must have its own price.")
+            
+            # Check for existing size variants with same name and parent
+            if product_name and parent:
+                existing = Product.objects.filter(
+                    product_name=product_name,
+                    parent=parent
+                ).exclude(pk=self.instance.pk if self.instance else None)
+                
+                if existing.exists():
+                    raise forms.ValidationError(
+                        f"A size variant with name '{product_name}' already exists for this parent product."
+                    )
+        else:
+            # Non-variant products cannot have a parent
+            if parent:
+                raise forms.ValidationError("Non-variant products cannot have a parent.")
+            
+            # Standalone products must have a price
+            if not price:
+                raise forms.ValidationError("Standalone products must have a price.")
+            
+            # Check for existing products with same name (only for parent products)
+            if product_name:
+                existing = Product.objects.filter(
+                    product_name=product_name,
+                    parent=None  # Only check parent products
+                ).exclude(pk=self.instance.pk if self.instance else None)
+                
+                if existing.exists():
+                    raise forms.ValidationError(
+                        f"A product with name '{product_name}' already exists."
+                    )
         
         return cleaned_data
 

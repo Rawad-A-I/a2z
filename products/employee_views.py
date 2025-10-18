@@ -253,16 +253,40 @@ def add_product(request):
     if request.method == 'POST':
         form = ProductInsertionForm(request.POST, request.FILES)
         if form.is_valid():
-            product = form.save()
+            # Get form data
+            is_size_variant = form.cleaned_data.get('is_size_variant', False)
+            size_name = form.cleaned_data.get('size_name', '')
+            parent = form.cleaned_data.get('parent')
+            
+            # Create the product
+            product = form.save(commit=False)
+            
+            # Handle size variant logic
+            if is_size_variant:
+                # Set parent for size variant
+                product.parent = parent
+                # Update product name to include size
+                if size_name:
+                    product.product_name = f"{parent.product_name} {size_name}"
+            else:
+                # Ensure parent is None for standalone products
+                product.parent = None
+            
+            # Save the product
+            product.save()
             
             # Handle product images
             product_images = request.FILES.getlist('product_images')
             if product_images:
                 for i, image in enumerate(product_images):
+                    alt_text = f"{product.product_name} - Image {i+1}"
+                    if is_size_variant and size_name:
+                        alt_text = f"{product.product_name} - {size_name} - Image {i+1}"
+                    
                     ProductImage.objects.create(
                         product=product,
                         image=image,
-                        alt_text=f"{product.product_name} - Image {i+1}",
+                        alt_text=alt_text,
                         is_primary=(i == 0),  # First image is primary
                         sort_order=i
                     )
@@ -286,6 +310,11 @@ def add_product(request):
                     }
                     return render(request, 'products/add_product.html', context)
                 
+                # Set barcode type based on product type
+                if is_size_variant:
+                    barcode_type = 'SIZE_VARIANT'
+                    barcode_notes = f'Barcode for {size_name} size variant'
+                
                 Barcode.objects.create(
                     product=product,
                     barcode_value=barcode_value,
@@ -298,13 +327,16 @@ def add_product(request):
             else:
                 # Auto-generate barcode
                 barcode_value = Barcode.generate_barcode()
+                barcode_type = 'SIZE_VARIANT' if is_size_variant else 'GENERATED'
+                barcode_notes = f'Barcode for {size_name} size variant' if is_size_variant else 'Auto-generated barcode'
+                
                 Barcode.objects.create(
                     product=product,
                     barcode_value=barcode_value,
-                    barcode_type='GENERATED',
+                    barcode_type=barcode_type,
                     is_primary=True,
                     is_active=True,
-                    notes='Auto-generated barcode'
+                    notes=barcode_notes
                 )
                 messages.success(request, f'Product "{product.product_name}" created with auto-generated barcode: {barcode_value}')
             

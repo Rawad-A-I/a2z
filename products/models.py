@@ -192,6 +192,16 @@ class Product(BaseModel):
     def get_display_name(self):
         """Get display name including size if applicable"""
         return self.product_name
+    
+    def has_size_variants(self):
+        """Check if this product has size variants (child products)"""
+        return self.child_products.exists()
+    
+    def get_display_price(self):
+        """Get display price for catalog view"""
+        if self.has_size_variants():
+            return None  # Hide price for products with variants
+        return self.price  # Show price for standalone products
 
     def get_rating(self):
         total = sum(int(review['stars']) for review in self.reviews.values())
