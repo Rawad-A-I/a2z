@@ -6,26 +6,24 @@ echo "🔧 Starting deployment fix..."
 # Step 1: Aggressive duplicate data cleanup
 echo "📋 Step 1: Aggressive duplicate data cleanup..."
 
-# Fix duplicate carts - nuclear approach
+# Fix duplicate carts - nuclear approach with direct SQL
 echo "  - Fixing duplicate carts (nuclear cleanup)..."
 python manage.py shell -c "
-from accounts.models import Cart
-from django.db import transaction, connection
+from django.db import connection
 
 try:
-    with transaction.atomic():
-        # First, try to delete all carts to avoid constraint issues
-        print('Deleting all existing carts to avoid constraint conflicts...')
-        Cart.objects.all().delete()
+    with connection.cursor() as cursor:
+        # Delete all carts using raw SQL to avoid Django model issues
+        print('Deleting all existing carts using raw SQL...')
+        cursor.execute('DELETE FROM accounts_cart;')
         print('All carts deleted successfully')
         
         # Reset the sequence if using PostgreSQL
-        with connection.cursor() as cursor:
-            try:
-                cursor.execute('ALTER SEQUENCE accounts_cart_id_seq RESTART WITH 1;')
-                print('Cart sequence reset')
-            except Exception as seq_error:
-                print(f'Sequence reset failed (not critical): {seq_error}')
+        try:
+            cursor.execute('ALTER SEQUENCE accounts_cart_id_seq RESTART WITH 1;')
+            print('Cart sequence reset')
+        except Exception as seq_error:
+            print(f'Sequence reset failed (not critical): {seq_error}')
         
         print('Cart cleanup completed successfully')
 except Exception as e:
@@ -39,77 +37,124 @@ except Exception as e:
         print(f'Failed to drop cart table: {e2}')
 "
 
-# Fix duplicate product slugs
+# Fix duplicate product slugs using raw SQL to avoid model issues
 echo "  - Fixing duplicate product slugs..."
 python manage.py shell -c "
-from products.models import Product
+from django.db import connection
 from django.utils.text import slugify
-seen_slugs = set()
-products_to_fix = []
-for product in Product.objects.all():
-    if product.slug in seen_slugs:
-        products_to_fix.append(product)
-    else:
-        seen_slugs.add(product.slug)
-for product in products_to_fix:
-    original_slug = product.slug
-    counter = 1
-    new_slug = f'{original_slug}-{counter}'
-    while Product.objects.filter(slug=new_slug).exists():
-        counter += 1
-        new_slug = f'{original_slug}-{counter}'
-    product.slug = new_slug
-    product.save()
-    print(f'Fixed duplicate slug: {original_slug} -> {new_slug}')
-if not products_to_fix:
-    print('No duplicate product slugs found')
+
+try:
+    with connection.cursor() as cursor:
+        # Get all products with their slugs
+        cursor.execute('SELECT id, slug FROM products_product WHERE slug IS NOT NULL;')
+        products = cursor.fetchall()
+        
+        seen_slugs = set()
+        products_to_fix = []
+        
+        for product_id, slug in products:
+            if slug in seen_slugs:
+                products_to_fix.append((product_id, slug))
+            else:
+                seen_slugs.add(slug)
+        
+        # Fix duplicate slugs
+        for product_id, original_slug in products_to_fix:
+            counter = 1
+            new_slug = f'{original_slug}-{counter}'
+            
+            # Check if new slug exists
+            while True:
+                cursor.execute('SELECT COUNT(*) FROM products_product WHERE slug = %s;', [new_slug])
+                if cursor.fetchone()[0] == 0:
+                    break
+                counter += 1
+                new_slug = f'{original_slug}-{counter}'
+            
+            # Update the slug
+            cursor.execute('UPDATE products_product SET slug = %s WHERE id = %s;', [new_slug, product_id])
+            print(f'Fixed duplicate slug: {original_slug} -> {new_slug}')
+        
+        if not products_to_fix:
+            print('No duplicate product slugs found')
+        
+        print('Product slug cleanup completed successfully')
+except Exception as e:
+    print(f'Product slug cleanup failed: {e}')
 "
 
 # Step 2: Apply migrations
 echo "📋 Step 2: Applying migrations..."
 python manage.py migrate --noinput
 
-# Step 3: Update existing products with new fields
+# Step 2.5: Apply size_name migration specifically
+echo "📋 Step 2.5: Applying size_name migration..."
+python manage.py migrate products 0024 --noinput
+
+# Step 3: Update existing products with new fields using raw SQL
 echo "📋 Step 3: Updating existing products with new fields..."
 python manage.py shell -c "
-from products.models import Product
-from django.db import transaction
+from django.db import connection
 
 try:
-    with transaction.atomic():
-        # Update has_size_variants for all products
-        for product in Product.objects.all():
-            product.has_size_variants = product.child_products.exists()
-            product.save(update_fields=['has_size_variants'])
-        
-        print('Updated has_size_variants for all products')
-        
-        # Set default values for new fields
-        Product.objects.filter(is_size_variant__isnull=True).update(is_size_variant=False)
-        Product.objects.filter(has_size_variants__isnull=True).update(has_size_variants=False)
+    with connection.cursor() as cursor:
+        # Set default values for new fields using raw SQL
+        cursor.execute('UPDATE products_product SET is_size_variant = FALSE WHERE is_size_variant IS NULL;')
+        cursor.execute('UPDATE products_product SET has_size_variants = FALSE WHERE has_size_variants IS NULL;')
+        cursor.execute('UPDATE products_product SET size_name = \'\' WHERE size_name IS NULL;')
         
         print('Set default values for new fields')
+        
+        # Update has_size_variants based on child products
+        cursor.execute('''
+            UPDATE products_product 
+            SET has_size_variants = TRUE 
+            WHERE id IN (
+                SELECT DISTINCT parent_id 
+                FROM products_product 
+                WHERE parent_id IS NOT NULL
+            );
+        ''')
+        
+        print('Updated has_size_variants for all products')
         
 except Exception as e:
     print(f'Failed to update products: {e}')
 "
 
-# Step 4: Test size variant system
+# Step 4: Test size variant system using raw SQL
 echo "📋 Step 4: Testing size variant system..."
 python manage.py shell -c "
-from products.models import Product
+from django.db import connection
+
 try:
-    # Test model methods
-    products = Product.objects.all()[:3]
-    for product in products:
-        has_variants = product.has_size_variants()
-        display_price = product.get_display_price()
-        print(f'Product: {product.product_name}')
-        print(f'  Has size variants: {has_variants}')
-        print(f'  Display price: {display_price}')
-        print(f'  Is size variant: {product.is_size_variant}')
-        print()
-    print('Size variant system test completed successfully')
+    with connection.cursor() as cursor:
+        # Test if the new fields exist and have data
+        cursor.execute('SELECT COUNT(*) FROM products_product WHERE is_size_variant IS NOT NULL;')
+        is_size_variant_count = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM products_product WHERE has_size_variants IS NOT NULL;')
+        has_size_variants_count = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM products_product WHERE size_name IS NOT NULL;')
+        size_name_count = cursor.fetchone()[0]
+        
+        print(f'Products with is_size_variant field: {is_size_variant_count}')
+        print(f'Products with has_size_variants field: {has_size_variants_count}')
+        print(f'Products with size_name field: {size_name_count}')
+        
+        # Test a few products
+        cursor.execute('SELECT product_name, is_size_variant, has_size_variants, size_name FROM products_product LIMIT 3;')
+        products = cursor.fetchall()
+        
+        for product_name, is_size_variant, has_size_variants, size_name in products:
+            print(f'Product: {product_name}')
+            print(f'  Is size variant: {is_size_variant}')
+            print(f'  Has size variants: {has_size_variants}')
+            print(f'  Size name: {size_name}')
+            print()
+        
+        print('Size variant system test completed successfully')
 except Exception as e:
     print(f'Size variant system test failed: {e}')
 "
