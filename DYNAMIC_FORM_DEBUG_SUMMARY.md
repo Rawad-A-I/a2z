@@ -188,3 +188,7 @@ function updateFormFields() {
 - ✅ **Default value set** for product_type
 
 **The dynamic form should now work correctly with proper field switching based on product type selection!** 🎉
+
+
+
+

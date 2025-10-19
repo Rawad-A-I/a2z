@@ -5,6 +5,38 @@
 
 {% block extra_css %}
 <link href="{% static 'css/image-optimization.css' %}" rel="stylesheet" />
+<style>
+    /* Product type card styles */
+    .product-type-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #dee2e6;
+    }
+    
+    .product-type-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .product-type-card.border-primary {
+        border-color: #007bff !important;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    .product-type-card.bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    /* Step sections */
+    .product-form-section {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock %}
 
 {% block start %}
@@ -40,109 +72,247 @@
                             </div>
                         </div>
 
-                        <!-- Product Type Selection -->
-                        <div class="row mb-4">
+                        <!-- Step 1: Product Type Selection -->
+                        <div class="row mb-5">
                             <div class="col-12">
-                                <label class="form-label">Product Type *</label>
-                                <div class="alert alert-info mb-3">
-                                    <i class="fas fa-info-circle"></i>
-                                    <strong>Choose the type of product you want to create:</strong>
-                                    <br><br>
-                                    <strong>💡 Quick Guide:</strong>
-                                    <ul class="mb-0 mt-2">
-                                        <li><strong>Standalone:</strong> Single product with fixed price (e.g., "iPhone 15")</li>
-                                        <li><strong>Parent:</strong> Product that will have size variants (e.g., "T-Shirt" → will have S, M, L variants)</li>
-                                        <li><strong>Size Variant:</strong> A specific size of an existing parent product (e.g., "T-Shirt Large")</li>
-                                    </ul>
-                                </div>
-                                {{ form.product_type }}
-                                {% if form.product_type.errors %}
-                                    <div class="text-danger">{{ form.product_type.errors }}</div>
-                                {% endif %}
-                                
-                                <!-- Debug: Show the rendered HTML -->
-                                <div class="mt-2">
-                                    <small class="text-muted">Debug: Form field rendered</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3" id="parent-selection" style="display: none;">
-                                <label for="{{ form.parent.id_for_label }}" class="form-label">Parent Product *</label>
-                                <div class="position-relative">
-                                    <input type="text" 
-                                           id="parent-search" 
-                                           class="form-control" 
-                                           placeholder="Search for parent product..."
-                                           autocomplete="off">
-                                    <div id="parent-search-results" class="position-absolute w-100 bg-white border rounded shadow-lg" style="display: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-list"></i> Step 1: Choose Product Type</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-4">Select the type of product you want to create. Each type has different requirements.</p>
+                                        
+                                        <div class="row">
+                                            <!-- Standalone Product Option -->
+                                            <div class="col-md-4 mb-3">
+                                                <div class="card h-100 product-type-card" data-type="standalone">
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-mobile-alt fa-3x text-primary mb-3"></i>
+                                                        <h5 class="card-title">Standalone Product</h5>
+                                                        <p class="card-text text-muted">A single product with fixed price</p>
+                                                        <div class="mt-3">
+                                                            <small class="text-success"><strong>Example:</strong> iPhone 15, Laptop, Book</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Parent Product Option -->
+                                            <div class="col-md-4 mb-3">
+                                                <div class="card h-100 product-type-card" data-type="parent">
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-layer-group fa-3x text-success mb-3"></i>
+                                                        <h5 class="card-title">Parent Product</h5>
+                                                        <p class="card-text text-muted">A product that will have size variants</p>
+                                                        <div class="mt-3">
+                                                            <small class="text-success"><strong>Example:</strong> T-Shirt, Sneakers, Jeans</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Size Variant Option -->
+                                            <div class="col-md-4 mb-3">
+                                                <div class="card h-100 product-type-card" data-type="variant">
+                                                    <div class="card-body text-center">
+                                                        <i class="fas fa-tags fa-3x text-warning mb-3"></i>
+                                                        <h5 class="card-title">Size Variant</h5>
+                                                        <p class="card-text text-muted">A specific size of an existing parent</p>
+                                                        <div class="mt-3">
+                                                            <small class="text-success"><strong>Example:</strong> T-Shirt Large, Sneakers Size 10</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Hidden form field -->
+                                        {{ form.product_type }}
+                                        {% if form.product_type.errors %}
+                                            <div class="text-danger">{{ form.product_type.errors }}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                {{ form.parent }}
-                                {% if form.parent.errors %}
-                                    <div class="text-danger">{{ form.parent.errors }}</div>
-                                {% endif %}
-                                <small class="form-text text-muted">
-                                    <strong>Select a parent product for size variants</strong><br>
-                                    Only standalone products (without size variants) can be selected as parents.
-                                </small>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3" id="size-name" style="display: none;">
-                                <label for="{{ form.size_name.id_for_label }}" class="form-label">Size Name *</label>
-                                {{ form.size_name }}
-                                {% if form.size_name.errors %}
-                                    <div class="text-danger">{{ form.size_name.errors }}</div>
-                                {% endif %}
-                                <small class="form-text text-muted">
-                                    <strong>Size name for this variant</strong><br>
-                                    Examples: Small, Medium, Large, Regular, XS, S, M, L, XL, XXL
-                                </small>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.newest_product.id_for_label }}" class="form-label">Product Status</label>
-                                <div class="form-check">
-                                    {{ form.newest_product }}
-                                    <label class="form-check-label" for="{{ form.newest_product.id_for_label }}">
-                                        Newest Product
-                                    </label>
-                                </div>
-                                {% if form.newest_product.errors %}
-                                    <div class="text-danger">{{ form.newest_product.errors }}</div>
-                                {% endif %}
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3" id="price-field">
-                                <label for="{{ form.price.id_for_label }}" class="form-label">Price *</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    {{ form.price }}
+                        <!-- Step 2: Product Details Form -->
+                        <div class="row mb-5" id="step-2" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0"><i class="fas fa-edit"></i> Step 2: Product Details</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Standalone Product Form -->
+                                        <div id="standalone-form" class="product-form-section" style="display: none;">
+                                            <h6 class="text-primary mb-3"><i class="fas fa-mobile-alt"></i> Standalone Product Details</h6>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.product_name.id_for_label }}" class="form-label">Product Name *</label>
+                                                    {{ form.product_name }}
+                                                    {% if form.product_name.errors %}
+                                                        <div class="text-danger">{{ form.product_name.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.category.id_for_label }}" class="form-label">Category *</label>
+                                                    {{ form.category }}
+                                                    {% if form.category.errors %}
+                                                        <div class="text-danger">{{ form.category.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.price.id_for_label }}" class="form-label">Price *</label>
+                                                    {{ form.price }}
+                                                    {% if form.price.errors %}
+                                                        <div class="text-danger">{{ form.price.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Enter the fixed price for this product</small>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.weight.id_for_label }}" class="form-label">Weight (kg)</label>
+                                                    {{ form.weight }}
+                                                    {% if form.weight.errors %}
+                                                        <div class="text-danger">{{ form.weight.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Optional: Weight of the product</small>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 mb-3">
+                                                    <label for="{{ form.product_desription.id_for_label }}" class="form-label">Product Description *</label>
+                                                    {{ form.product_desription }}
+                                                    {% if form.product_desription.errors %}
+                                                        <div class="text-danger">{{ form.product_desription.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Parent Product Form -->
+                                        <div id="parent-form" class="product-form-section" style="display: none;">
+                                            <h6 class="text-success mb-3"><i class="fas fa-layer-group"></i> Parent Product Details</h6>
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle"></i>
+                                                <strong>Parent Product:</strong> This product will have size variants. You don't set a price here - prices are set for each size variant.
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.product_name.id_for_label }}" class="form-label">Product Name *</label>
+                                                    {{ form.product_name }}
+                                                    {% if form.product_name.errors %}
+                                                        <div class="text-danger">{{ form.product_name.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Base name for the product (e.g., "T-Shirt")</small>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.category.id_for_label }}" class="form-label">Category *</label>
+                                                    {{ form.category }}
+                                                    {% if form.category.errors %}
+                                                        <div class="text-danger">{{ form.category.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 mb-3">
+                                                    <label for="{{ form.product_desription.id_for_label }}" class="form-label">Product Description *</label>
+                                                    {{ form.product_desription }}
+                                                    {% if form.product_desription.errors %}
+                                                        <div class="text-danger">{{ form.product_desription.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Description that applies to all size variants</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Size Variant Form -->
+                                        <div id="variant-form" class="product-form-section" style="display: none;">
+                                            <h6 class="text-warning mb-3"><i class="fas fa-tags"></i> Size Variant Details</h6>
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                <strong>Size Variant:</strong> This is a specific size of an existing parent product. You need to select the parent product first.
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.parent.id_for_label }}" class="form-label">Parent Product *</label>
+                                                    <div class="position-relative">
+                                                        <input type="text" 
+                                                               id="parent-search" 
+                                                               class="form-control" 
+                                                               placeholder="Search for parent product..."
+                                                               autocomplete="off">
+                                                        <div id="parent-search-results" class="position-absolute w-100 bg-white border rounded shadow-lg" style="display: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                                        </div>
+                                                    </div>
+                                                    {{ form.parent }}
+                                                    {% if form.parent.errors %}
+                                                        <div class="text-danger">{{ form.parent.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Select the parent product for this size variant</small>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.size_name.id_for_label }}" class="form-label">Size Name *</label>
+                                                    {{ form.size_name }}
+                                                    {% if form.size_name.errors %}
+                                                        <div class="text-danger">{{ form.size_name.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Examples: Small, Medium, Large, Size 10, XL</small>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.price.id_for_label }}" class="form-label">Price *</label>
+                                                    {{ form.price }}
+                                                    {% if form.price.errors %}
+                                                        <div class="text-danger">{{ form.price.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Price for this specific size</small>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ form.weight.id_for_label }}" class="form-label">Weight (kg)</label>
+                                                    {{ form.weight }}
+                                                    {% if form.weight.errors %}
+                                                        <div class="text-danger">{{ form.weight.errors }}</div>
+                                                    {% endif %}
+                                                    <small class="form-text text-muted">Weight for this specific size</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                {% if form.price.errors %}
-                                    <div class="text-danger">{{ form.price.errors }}</div>
-                                {% endif %}
-                                <small class="form-text text-muted" id="price-help">Required for standalone products and size variants</small>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.stock_quantity.id_for_label }}" class="form-label">Stock Quantity</label>
-                                {{ form.stock_quantity }}
-                                {% if form.stock_quantity.errors %}
-                                    <div class="text-danger">{{ form.stock_quantity.errors }}</div>
-                                {% endif %}
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.product_desription.id_for_label }}" class="form-label">Product Description *</label>
-                            {{ form.product_desription }}
-                            {% if form.product_desription.errors %}
-                                <div class="text-danger">{{ form.product_desription.errors }}</div>
-                            {% endif %}
+                        <!-- Additional Fields Section (shown after Step 2) -->
+                        <div class="row mb-5" id="additional-fields" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="fas fa-cogs"></i> Additional Product Settings</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ form.stock_quantity.id_for_label }}" class="form-label">Stock Quantity</label>
+                                                {{ form.stock_quantity }}
+                                                {% if form.stock_quantity.errors %}
+                                                    <div class="text-danger">{{ form.stock_quantity.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ form.low_stock_threshold.id_for_label }}" class="form-label">Low Stock Threshold</label>
+                                                {{ form.low_stock_threshold }}
+                                                {% if form.low_stock_threshold.errors %}
+                                                    <div class="text-danger">{{ form.low_stock_threshold.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Product Variants Section -->
@@ -522,37 +692,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Dynamic form behavior for product types
-    const productTypeRadios = document.querySelectorAll('input[name="product_type"]');
-    const parentSelection = document.getElementById('parent-selection');
-    const sizeName = document.getElementById('size-name');
-    const priceField = document.getElementById('price-field');
-    const priceHelp = document.getElementById('price-help');
-    const weightField = document.getElementById('weight-field');
+    // Step-by-step form behavior
+    const productTypeCards = document.querySelectorAll('.product-type-card');
+    const step2 = document.getElementById('step-2');
+    const additionalFields = document.getElementById('additional-fields');
+    const standaloneForm = document.getElementById('standalone-form');
+    const parentForm = document.getElementById('parent-form');
+    const variantForm = document.getElementById('variant-form');
     
-    // Debug: Log the elements to make sure they exist
-    console.log('Product type radios:', productTypeRadios);
-    console.log('Parent selection:', parentSelection);
-    console.log('Size name:', sizeName);
-    console.log('Price field:', priceField);
-    console.log('Weight field:', weightField);
-    
-    // Show alert if elements are not found
-    if (productTypeRadios.length === 0) {
-        alert('No product type radio buttons found!');
-    }
-    if (!parentSelection) {
-        alert('Parent selection element not found!');
-    }
-    if (!sizeName) {
-        alert('Size name element not found!');
-    }
-    if (!priceField) {
-        alert('Price field element not found!');
-    }
-    if (!weightField) {
-        alert('Weight field element not found!');
-    }
+    // Debug: Log the elements
+    console.log('Product type cards:', productTypeCards);
+    console.log('Step 2:', step2);
+    console.log('Standalone form:', standaloneForm);
+    console.log('Parent form:', parentForm);
+    console.log('Variant form:', variantForm);
     
     // Create warning/error display area
     function createAlertContainer() {
@@ -678,51 +831,76 @@ document.addEventListener('DOMContentLoaded', function() {
         return !hasErrors;
     }
     
-    function updateFormFields() {
-        const selectedType = document.querySelector('input[name="product_type"]:checked').value;
-        const weightField = document.getElementById('weight-field');
-        
-        // Reset all fields
-        parentSelection.style.display = 'none';
-        sizeName.style.display = 'none';
-        priceField.style.display = 'block';
-        weightField.style.display = 'block';
-        
-        // Debug: Log the selected type
+    // Handle product type card selection
+    function handleProductTypeSelection(selectedType) {
         console.log('Selected product type:', selectedType);
         
+        // Remove active class from all cards
+        productTypeCards.forEach(card => {
+            card.classList.remove('border-primary', 'bg-light');
+        });
+        
+        // Add active class to selected card
+        const selectedCard = document.querySelector(`[data-type="${selectedType}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('border-primary', 'bg-light');
+        }
+        
+        // Update hidden form field
+        const productTypeInput = document.querySelector(`input[name="product_type"][value="${selectedType}"]`);
+        if (productTypeInput) {
+            productTypeInput.checked = true;
+        }
+        
+        // Show Step 2
+        step2.style.display = 'block';
+        additionalFields.style.display = 'block';
+        
+        // Hide all form sections
+        standaloneForm.style.display = 'none';
+        parentForm.style.display = 'none';
+        variantForm.style.display = 'none';
+        
+        // Show the appropriate form section
         switch(selectedType) {
             case 'standalone':
-                priceHelp.textContent = 'Required for standalone products';
-                weightField.style.display = 'block';
-                console.log('Standalone selected - showing price and weight fields');
+                standaloneForm.style.display = 'block';
+                console.log('Showing standalone form');
                 break;
             case 'parent':
-                priceField.style.display = 'none';
-                weightField.style.display = 'none';
-                priceHelp.textContent = 'Parent products do not have prices';
-                console.log('Parent selected - hiding price and weight fields');
+                parentForm.style.display = 'block';
+                console.log('Showing parent form');
                 break;
             case 'variant':
-                parentSelection.style.display = 'block';
-                sizeName.style.display = 'block';
-                weightField.style.display = 'block';
-                priceHelp.textContent = 'Required for size variants';
-                console.log('Variant selected - showing parent, size, price, and weight fields');
+                variantForm.style.display = 'block';
+                console.log('Showing variant form');
                 break;
         }
         
-        // Clear any existing alerts when switching types
-        clearAlerts();
+        // Scroll to Step 2
+        step2.scrollIntoView({ behavior: 'smooth' });
     }
     
-    // Add event listeners
-    productTypeRadios.forEach(radio => {
-        radio.addEventListener('change', updateFormFields);
+    // Add event listeners to product type cards
+    productTypeCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const selectedType = this.dataset.type;
+            handleProductTypeSelection(selectedType);
+        });
+        
+        // Add hover effects
+        card.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('border-primary')) {
+                this.classList.add('border-secondary');
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('border-primary')) {
+                this.classList.remove('border-secondary');
+            }
+        });
     });
-    
-    // Initialize form fields on page load
-    updateFormFields();
     
     // Add validation on form submit
     const form = document.querySelector('form');
