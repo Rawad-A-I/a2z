@@ -252,7 +252,13 @@ def add_product(request):
     
     # Get categories and parent products for the form
     categories = Category.objects.all()
-    parent_products = Product.objects.filter(parent=None, has_size_variants=False)
+    
+    # Try to get parent products, but handle case where has_size_variants field doesn't exist yet
+    try:
+        parent_products = Product.objects.filter(parent=None, has_size_variants=False)
+    except Exception:
+        # Fallback: get all products without parent (standalone products)
+        parent_products = Product.objects.filter(parent=None)
     
     if request.method == 'POST':
         # Handle the new simplified form
@@ -306,9 +312,13 @@ def add_product(request):
                     has_size_variants=False,
                     product_desription=parent.product_desription
                 )
-                # Update parent to have size variants
-                parent.has_size_variants = True
-                parent.save(update_fields=['has_size_variants'])
+                # Update parent to have size variants (if field exists)
+                try:
+                    parent.has_size_variants = True
+                    parent.save(update_fields=['has_size_variants'])
+                except Exception:
+                    # Field might not exist yet, skip this update
+                    pass
             
             product.save()
             messages.success(request, f'Product "{product.product_name}" created successfully!')

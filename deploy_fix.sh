@@ -194,7 +194,7 @@ python manage.py migrate --noinput
 
 # Step 2.5: Apply size variant fields migration specifically
 echo "📋 Step 2.5: Applying size variant fields migration..."
-python manage.py migrate products 0026 --noinput
+python manage.py migrate products 0027 --noinput
 
 # Step 3: Update existing products with new fields using raw SQL
 echo "📋 Step 3: Updating existing products with new fields..."
