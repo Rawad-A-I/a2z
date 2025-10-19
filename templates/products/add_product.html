@@ -8,9 +8,14 @@
 <style>
     /* Product type card styles */
     .product-type-card {
-        cursor: pointer;
+        cursor: pointer !important;
         transition: all 0.3s ease;
         border: 2px solid #dee2e6;
+        user-select: none;
+    }
+    
+    .product-type-card * {
+        pointer-events: none;
     }
     
     .product-type-card:hover {
@@ -81,6 +86,9 @@
                                     </div>
                                     <div class="card-body">
                                         <p class="text-muted mb-4">Select the type of product you want to create. Each type has different requirements.</p>
+                                        <div class="alert alert-light mb-4">
+                                            <i class="fas fa-hand-pointer"></i> <strong>Click on any card below to select a product type</strong>
+                                        </div>
                                         
                                         <div class="row">
                                             <!-- Standalone Product Option -->
@@ -92,6 +100,9 @@
                                                         <p class="card-text text-muted">A single product with fixed price</p>
                                                         <div class="mt-3">
                                                             <small class="text-success"><strong>Example:</strong> iPhone 15, Laptop, Book</small>
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <small class="text-primary"><strong>Click to Select</strong></small>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -107,6 +118,9 @@
                                                         <div class="mt-3">
                                                             <small class="text-success"><strong>Example:</strong> T-Shirt, Sneakers, Jeans</small>
                                                         </div>
+                                                        <div class="mt-2">
+                                                            <small class="text-success"><strong>Click to Select</strong></small>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -121,13 +135,18 @@
                                                         <div class="mt-3">
                                                             <small class="text-success"><strong>Example:</strong> T-Shirt Large, Sneakers Size 10</small>
                                                         </div>
+                                                        <div class="mt-2">
+                                                            <small class="text-warning"><strong>Click to Select</strong></small>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         
                                         <!-- Hidden form field -->
-                                        {{ form.product_type }}
+                                        <div style="display: none;">
+                                            {{ form.product_type }}
+                                        </div>
                                         {% if form.product_type.errors %}
                                             <div class="text-danger">{{ form.product_type.errors }}</div>
                                         {% endif %}
@@ -701,11 +720,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const variantForm = document.getElementById('variant-form');
     
     // Debug: Log the elements
-    console.log('Product type cards:', productTypeCards);
-    console.log('Step 2:', step2);
+    console.log('Product type cards found:', productTypeCards.length);
+    console.log('Step 2 element:', step2);
     console.log('Standalone form:', standaloneForm);
     console.log('Parent form:', parentForm);
     console.log('Variant form:', variantForm);
+    
+    // Show alert if no cards found
+    if (productTypeCards.length === 0) {
+        alert('No product type cards found! Check the HTML structure.');
+    }
     
     // Create warning/error display area
     function createAlertContainer() {
@@ -885,6 +909,7 @@ document.addEventListener('DOMContentLoaded', function() {
     productTypeCards.forEach(card => {
         card.addEventListener('click', function() {
             const selectedType = this.dataset.type;
+            console.log('Card clicked:', selectedType);
             handleProductTypeSelection(selectedType);
         });
         
