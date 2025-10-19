@@ -250,168 +250,77 @@ def add_product(request):
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
     
-    if request.method == 'POST':
-        form = ProductInsertionForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Get form data
-            is_size_variant = form.cleaned_data.get('is_size_variant', False)
-            size_name = form.cleaned_data.get('size_name', '')
-            parent = form.cleaned_data.get('parent')
-            warnings = form.cleaned_data.get('_warnings', [])
-            
-            # Show warnings if any
-            if warnings:
-                for warning in warnings:
-                    messages.warning(request, warning)
-            
-            try:
-                # Get the selected product type from the form
-                product_type = request.POST.get('product_type', 'standalone')
-                
-                # Create the product
-                product = form.save(commit=False)
-                
-                # Handle different product types
-                if product_type == 'variant':
-                    # SIZE VARIANT: Set parent, size name, and is_size_variant
-                    product.parent = parent
-                    product.is_size_variant = True
-                    product.size_name = size_name
-                    # Update product name to include size
-                    if size_name and parent:
-                        product.product_name = f"{parent.product_name} {size_name}"
-                elif product_type == 'parent':
-                    # PARENT PRODUCT: No parent, no price, no size name
-                    product.parent = None
-                    product.is_size_variant = False
-                    product.size_name = ''
-                    product.price = None  # Parent products don't have prices
-                else:  # standalone
-                    # STANDALONE PRODUCT: No parent, has price, no size name
-                    product.parent = None
-                    product.is_size_variant = False
-                    product.size_name = ''
-                
-                # Save the product
-                product.save()
-                
-                # Update has_size_variants for parent if this is a variant
-                if product_type == 'variant' and parent:
-                    try:
-                        parent.has_size_variants = True
-                        parent.save(update_fields=['has_size_variants'])
-                    except Exception as e:
-                        # Field might not exist yet, log but don't fail
-                        print(f"Warning: Could not update has_size_variants: {e}")
-                
-            except Exception as e:
-                messages.error(request, f"❌ Error creating product: {str(e)}")
-                context = {
-                    'form': form,
-                    'categories': Category.objects.all(),
-                }
-                return render(request, 'products/add_product.html', context)
-            
-            # Handle product images
-            product_images = request.FILES.getlist('product_images')
-            images_created = 0
-            image_errors = []
-            
-            if product_images:
-                for i, image in enumerate(product_images):
-                    try:
-                        alt_text = f"{product.product_name} - Image {i+1}"
-                        if is_size_variant and size_name:
-                            alt_text = f"{product.product_name} - {size_name} - Image {i+1}"
-                        
-                        ProductImage.objects.create(
-                            product=product,
-                            image=image,
-                            alt_text=alt_text,
-                            is_primary=(i == 0),  # First image is primary
-                            sort_order=i
-                        )
-                        images_created += 1
-                    except Exception as e:
-                        image_errors.append(f"Image {i+1}: {str(e)}")
-                
-                if images_created > 0:
-                    messages.success(request, f'✅ Product "{product.product_name}" created with {images_created} image(s)')
-                
-                if image_errors:
-                    for error in image_errors:
-                        messages.error(request, f"❌ {error}")
-            else:
-                messages.warning(request, f"⚠️ Product '{product.product_name}' created without images. Consider adding images for better presentation.")
-            
-            # Handle barcode creation
-            barcode_value = request.POST.get('barcode_value', '').strip()
-            barcode_type = request.POST.get('barcode_type', 'GENERATED')
-            is_primary = request.POST.get('is_primary') == 'on'
-            is_active = request.POST.get('is_active') == 'on'
-            barcode_notes = request.POST.get('barcode_notes', '')
-            
-            try:
-                # Create barcode if provided or generate one
-                if barcode_value:
-                    # Validate barcode format
-                    if len(barcode_value) < 8 or len(barcode_value) > 20:
-                        messages.warning(request, f"⚠️ Barcode '{barcode_value}' length seems unusual. Standard barcodes are 8-20 characters.")
-                    
-                    # Check if barcode already exists
-                    if Barcode.objects.filter(barcode_value=barcode_value).exists():
-                        messages.error(request, f'❌ Barcode {barcode_value} already exists. Please use a different barcode.')
-                        context = {
-                            'form': form,
-                            'categories': Category.objects.all(),
-                        }
-                        return render(request, 'products/add_product.html', context)
-                    
-                    # Set barcode type based on product type
-                    if is_size_variant:
-                        barcode_type = 'SIZE_VARIANT'
-                        barcode_notes = f'Barcode for {size_name} size variant'
-                    
-                    Barcode.objects.create(
-                        product=product,
-                        barcode_value=barcode_value,
-                        barcode_type=barcode_type,
-                        is_primary=is_primary,
-                        is_active=is_active,
-                        notes=barcode_notes
-                    )
-                    messages.success(request, f'✅ Product "{product.product_name}" created with barcode: {barcode_value}')
-                else:
-                    # Auto-generate barcode
-                    try:
-                        barcode_value = Barcode.generate_barcode()
-                        barcode_type = 'SIZE_VARIANT' if is_size_variant else 'GENERATED'
-                        barcode_notes = f'Barcode for {size_name} size variant' if is_size_variant else 'Auto-generated barcode'
-                        
-                        Barcode.objects.create(
-                            product=product,
-                            barcode_value=barcode_value,
-                            barcode_type=barcode_type,
-                            is_primary=True,
-                            is_active=True,
-                            notes=barcode_notes
-                        )
-                        messages.success(request, f'✅ Product "{product.product_name}" created with auto-generated barcode: {barcode_value}')
-                    except Exception as e:
-                        messages.warning(request, f"⚠️ Could not auto-generate barcode: {str(e)}. Product created without barcode.")
-                        
-            except Exception as e:
-                messages.error(request, f"❌ Error creating barcode: {str(e)}")
-            
-            return redirect('employee_product_management')
-    else:
-        form = ProductInsertionForm()
+    # Get categories and parent products for the form
+    categories = Category.objects.all()
+    parent_products = Product.objects.filter(parent=None, has_size_variants=False)
     
-    context = {
-        'form': form,
-        'categories': Category.objects.all(),
-    }
-    return render(request, 'products/add_product.html', context)
+    if request.method == 'POST':
+        # Handle the new simplified form
+        product_type = request.POST.get('product_type')
+        
+        if not product_type:
+            messages.error(request, 'Please select a product type.')
+            return render(request, 'products/add_product.html', {
+                'categories': categories,
+                'parent_products': parent_products
+            })
+        
+        try:
+            # Create product based on type
+            if product_type == 'standalone':
+                product = Product(
+                    product_name=request.POST.get('product_name'),
+                    category_id=request.POST.get('category'),
+                    price=request.POST.get('price'),
+                    product_desription=request.POST.get('product_desription'),
+                    weight=request.POST.get('weight') or None,
+                    stock_quantity=request.POST.get('stock_quantity', 0),
+                    low_stock_threshold=request.POST.get('low_stock_threshold', 10),
+                    is_size_variant=False,
+                    has_size_variants=False
+                )
+            elif product_type == 'parent':
+                product = Product(
+                    product_name=request.POST.get('product_name'),
+                    category_id=request.POST.get('category'),
+                    product_desription=request.POST.get('product_desription'),
+                    stock_quantity=request.POST.get('stock_quantity', 0),
+                    low_stock_threshold=request.POST.get('low_stock_threshold', 10),
+                    is_size_variant=False,
+                    has_size_variants=False,
+                    price=None  # Parent products don't have prices
+                )
+            elif product_type == 'variant':
+                parent_id = request.POST.get('parent')
+                parent = Product.objects.get(id=parent_id)
+                product = Product(
+                    product_name=f"{parent.product_name} {request.POST.get('size_name')}",
+                    category=parent.category,
+                    parent=parent,
+                    price=request.POST.get('price'),
+                    size_name=request.POST.get('size_name'),
+                    weight=request.POST.get('weight') or None,
+                    stock_quantity=request.POST.get('stock_quantity', 0),
+                    low_stock_threshold=request.POST.get('low_stock_threshold', 10),
+                    is_size_variant=True,
+                    has_size_variants=False,
+                    product_desription=parent.product_desription
+                )
+                # Update parent to have size variants
+                parent.has_size_variants = True
+                parent.save(update_fields=['has_size_variants'])
+            
+            product.save()
+            messages.success(request, f'Product "{product.product_name}" created successfully!')
+            return redirect('employee_product_management')
+            
+        except Exception as e:
+            messages.error(request, f'Error creating product: {str(e)}')
+    
+    return render(request, 'products/add_product.html', {
+        'categories': categories,
+        'parent_products': parent_products
+    })
 
 
 @login_required
