@@ -6,12 +6,25 @@
 {% block extra_css %}
 <link href="{% static 'css/image-optimization.css' %}" rel="stylesheet" />
 <style>
-    /* Product type card styles */
+    /* Product type card styles - Override any global conflicts */
     .product-type-card {
         cursor: pointer !important;
-        transition: all 0.3s ease;
-        border: 2px solid #dee2e6;
-        user-select: none;
+        transition: all 0.3s ease !important;
+        border: 2px solid #dee2e6 !important;
+        user-select: none !important;
+        pointer-events: auto !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }
+    
+    /* Ensure card children don't block clicks */
+    .product-type-card * {
+        pointer-events: none !important;
+    }
+    
+    /* But allow the card itself to be clickable */
+    .product-type-card {
+        pointer-events: auto !important;
     }
     
     .product-type-card:hover {
@@ -52,8 +65,7 @@
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        <!-- Hidden field for is_size_variant -->
-                        {{ form.is_size_variant }}
+                        <!-- Hidden field for is_size_variant removed - no longer needed -->
                         
                         <!-- These fields are now in the step-by-step sections below -->
 
@@ -885,13 +897,29 @@ document.addEventListener('DOMContentLoaded', function() {
         step2.scrollIntoView({ behavior: 'smooth' });
     }
     
-    // Add event listeners to product type cards
+    // Add event listeners to product type cards with multiple approaches
     productTypeCards.forEach(card => {
-        card.addEventListener('click', function() {
+        // Primary click handler
+        card.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             const selectedType = this.dataset.type;
             console.log('Card clicked:', selectedType);
             handleProductTypeSelection(selectedType);
         });
+        
+        // Backup click handler for touch devices
+        card.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const selectedType = this.dataset.type;
+            console.log('Card touched:', selectedType);
+            handleProductTypeSelection(selectedType);
+        });
+        
+        // Force cursor pointer style
+        card.style.cursor = 'pointer';
+        card.style.pointerEvents = 'auto';
         
         // Add hover effects
         card.addEventListener('mouseenter', function() {
@@ -1088,6 +1116,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Force hide all form sections initially
+    if (step2) step2.style.display = 'none';
+    if (additionalFields) additionalFields.style.display = 'none';
+    if (standaloneForm) standaloneForm.style.display = 'none';
+    if (parentForm) parentForm.style.display = 'none';
+    if (variantForm) variantForm.style.display = 'none';
     
     // Initial form state
     updateFormFields();
