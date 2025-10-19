@@ -1,61 +1,74 @@
-{% extends 'base/base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product - Employee Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Completely isolated styles - no external dependencies */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .product-type-card {
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            border: 2px solid #dee2e6 !important;
+            border-radius: 10px !important;
+            margin-bottom: 20px !important;
+            background: white !important;
+        }
+        
+        .product-type-card:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+            border-color: #007bff !important;
+        }
+        
+        .product-type-card.selected {
+            border-color: #007bff !important;
+            background-color: #f8f9fa !important;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25) !important;
+        }
+        
+        .form-section {
+            display: none !important;
+        }
+        
+        .form-section.active {
+            display: block !important;
+        }
+        
+        .step-indicator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Override any global styles */
+        * {
+            box-sizing: border-box;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
 
-{% block title %}Add Product - Employee Dashboard{% endblock %}
-
-{% block extra_css %}
-<style>
-    /* Clean, simple styles for the new add product page */
-    .product-type-card {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 2px solid #dee2e6;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    
-    .product-type-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        border-color: #007bff;
-    }
-    
-    .product-type-card.selected {
-        border-color: #007bff;
-        background-color: #f8f9fa;
-        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-    }
-    
-    .form-section {
-        display: none;
-        animation: fadeIn 0.5s ease-in;
-    }
-    
-    .form-section.active {
-        display: block;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .step-indicator {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    
-    .hidden {
-        display: none !important;
-    }
-</style>
-{% endblock %}
-
-{% block start %}
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -65,7 +78,7 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" enctype="multipart/form-data" id="product-form">
-                        {% csrf_token %}
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                         
                         <!-- Step 1: Product Type Selection -->
                         <div class="step-indicator">
@@ -253,106 +266,161 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const productTypeCards = document.querySelectorAll('.product-type-card');
-    const productDetails = document.getElementById('product-details');
-    const productTypeInput = document.getElementById('product_type');
-    const standaloneForm = document.getElementById('standalone-form');
-    const parentForm = document.getElementById('parent-form');
-    const variantForm = document.getElementById('variant-form');
+// Completely isolated JavaScript - no external dependencies
+(function() {
+    'use strict';
     
-    // Handle product type card selection
-    productTypeCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const selectedType = this.dataset.type;
+    // Wait for DOM to be ready
+    function ready(fn) {
+        if (document.readyState !== 'loading') {
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+    
+    ready(function() {
+        console.log('Add Product Page Loaded');
+        
+        const productTypeCards = document.querySelectorAll('.product-type-card');
+        const productDetails = document.getElementById('product-details');
+        const productTypeInput = document.getElementById('product_type');
+        const standaloneForm = document.getElementById('standalone-form');
+        const parentForm = document.getElementById('parent-form');
+        const variantForm = document.getElementById('variant-form');
+        
+        console.log('Found cards:', productTypeCards.length);
+        console.log('Product details element:', productDetails);
+        
+        // Force hide all form sections initially
+        if (productDetails) productDetails.style.display = 'none';
+        if (standaloneForm) standaloneForm.style.display = 'none';
+        if (parentForm) parentForm.style.display = 'none';
+        if (variantForm) variantForm.style.display = 'none';
+        
+        // Handle product type card selection
+        productTypeCards.forEach((card, index) => {
+            console.log('Setting up card', index);
             
-            // Remove selected class from all cards
-            productTypeCards.forEach(c => c.classList.remove('selected'));
+            // Force cursor pointer
+            card.style.cursor = 'pointer';
+            card.style.pointerEvents = 'auto';
             
-            // Add selected class to clicked card
-            this.classList.add('selected');
-            
-            // Set the hidden input value
-            productTypeInput.value = selectedType;
-            
-            // Show product details section
-            productDetails.classList.add('active');
-            
-            // Hide all form sections
-            standaloneForm.classList.remove('active');
-            parentForm.classList.remove('active');
-            variantForm.classList.remove('active');
-            
-            // Show the appropriate form section
-            switch(selectedType) {
-                case 'standalone':
-                    standaloneForm.classList.add('active');
-                    break;
-                case 'parent':
-                    parentForm.classList.add('active');
-                    break;
-                case 'variant':
-                    variantForm.classList.add('active');
-                    break;
-            }
-            
-            // Scroll to product details
-            productDetails.scrollIntoView({ behavior: 'smooth' });
+            card.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Card clicked:', this.dataset.type);
+                
+                const selectedType = this.dataset.type;
+                
+                // Remove selected class from all cards
+                productTypeCards.forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                
+                // Set the hidden input value
+                if (productTypeInput) {
+                    productTypeInput.value = selectedType;
+                }
+                
+                // Show product details section
+                if (productDetails) {
+                    productDetails.style.display = 'block';
+                    productDetails.classList.add('active');
+                }
+                
+                // Hide all form sections
+                if (standaloneForm) standaloneForm.style.display = 'none';
+                if (parentForm) parentForm.style.display = 'none';
+                if (variantForm) variantForm.style.display = 'none';
+                
+                // Show the appropriate form section
+                switch(selectedType) {
+                    case 'standalone':
+                        if (standaloneForm) {
+                            standaloneForm.style.display = 'block';
+                            standaloneForm.classList.add('active');
+                        }
+                        break;
+                    case 'parent':
+                        if (parentForm) {
+                            parentForm.style.display = 'block';
+                            parentForm.classList.add('active');
+                        }
+                        break;
+                    case 'variant':
+                        if (variantForm) {
+                            variantForm.style.display = 'block';
+                            variantForm.classList.add('active');
+                        }
+                        break;
+                }
+                
+                // Scroll to product details
+                if (productDetails) {
+                    productDetails.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
         });
+        
+        // Form validation
+        const form = document.getElementById('product-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const productType = productTypeInput ? productTypeInput.value : '';
+                
+                if (!productType) {
+                    e.preventDefault();
+                    alert('Please select a product type first!');
+                    return;
+                }
+                
+                // Additional validation based on product type
+                if (productType === 'standalone') {
+                    const productName = document.querySelector('input[name="product_name"]');
+                    const category = document.querySelector('select[name="category"]');
+                    const price = document.querySelector('input[name="price"]');
+                    const description = document.querySelector('textarea[name="product_desription"]');
+                    
+                    if (!productName || !productName.value || !category || !category.value || !price || !price.value || !description || !description.value) {
+                        e.preventDefault();
+                        alert('Please fill in all required fields for standalone product!');
+                        return;
+                    }
+                }
+                
+                if (productType === 'parent') {
+                    const productName = document.querySelector('input[name="product_name"]');
+                    const category = document.querySelector('select[name="category"]');
+                    const description = document.querySelector('textarea[name="product_desription"]');
+                    
+                    if (!productName || !productName.value || !category || !category.value || !description || !description.value) {
+                        e.preventDefault();
+                        alert('Please fill in all required fields for parent product!');
+                        return;
+                    }
+                }
+                
+                if (productType === 'variant') {
+                    const parent = document.querySelector('select[name="parent"]');
+                    const sizeName = document.querySelector('input[name="size_name"]');
+                    const price = document.querySelector('input[name="price"]');
+                    
+                    if (!parent || !parent.value || !sizeName || !sizeName.value || !price || !price.value) {
+                        e.preventDefault();
+                        alert('Please fill in all required fields for size variant!');
+                        return;
+                    }
+                }
+            });
+        }
     });
-    
-    // Form validation
-    document.getElementById('product-form').addEventListener('submit', function(e) {
-        const productType = productTypeInput.value;
-        
-        if (!productType) {
-            e.preventDefault();
-            alert('Please select a product type first!');
-            return;
-        }
-        
-        // Additional validation based on product type
-        if (productType === 'standalone') {
-            const productName = document.querySelector('input[name="product_name"]').value;
-            const category = document.querySelector('select[name="category"]').value;
-            const price = document.querySelector('input[name="price"]').value;
-            const description = document.querySelector('textarea[name="product_desription"]').value;
-            
-            if (!productName || !category || !price || !description) {
-                e.preventDefault();
-                alert('Please fill in all required fields for standalone product!');
-                return;
-            }
-        }
-        
-        if (productType === 'parent') {
-            const productName = document.querySelector('input[name="product_name"]').value;
-            const category = document.querySelector('select[name="category"]').value;
-            const description = document.querySelector('textarea[name="product_desription"]').value;
-            
-            if (!productName || !category || !description) {
-                e.preventDefault();
-                alert('Please fill in all required fields for parent product!');
-                return;
-            }
-        }
-        
-        if (productType === 'variant') {
-            const parent = document.querySelector('select[name="parent"]').value;
-            const sizeName = document.querySelector('input[name="size_name"]').value;
-            const price = document.querySelector('input[name="price"]').value;
-            
-            if (!parent || !sizeName || !price) {
-                e.preventDefault();
-                alert('Please fill in all required fields for size variant!');
-                return;
-            }
-        }
-    });
-});
+})();
 </script>
-{% endblock %}
+
+</body>
+</html>
