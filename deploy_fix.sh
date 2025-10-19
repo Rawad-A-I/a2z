@@ -183,6 +183,10 @@ except Exception as e:
 
 # Step 2: Apply migrations
 echo "📋 Step 2: Applying migrations..."
+# First, create merge migration to resolve conflicts
+echo "📋 Step 2.1: Creating merge migration..."
+python manage.py makemigrations --merge --noinput
+
 # Apply products migrations first to avoid dependency issues
 python manage.py migrate products --noinput
 # Then apply all other migrations
@@ -190,7 +194,7 @@ python manage.py migrate --noinput
 
 # Step 2.5: Apply size variant fields migration specifically
 echo "📋 Step 2.5: Applying size variant fields migration..."
-python manage.py migrate products 0025 --noinput
+python manage.py migrate products 0026 --noinput
 
 # Step 3: Update existing products with new fields using raw SQL
 echo "📋 Step 3: Updating existing products with new fields..."
