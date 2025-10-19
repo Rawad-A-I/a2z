@@ -36,9 +36,26 @@
         
         .form-section {
             display: none !important;
+            position: relative !important;
+            z-index: 1 !important;
         }
         
         .form-section.active {
+            display: block !important;
+        }
+        
+        /* Ensure form sections don't overlap */
+        #standalone-form,
+        #parent-form,
+        #variant-form {
+            display: none !important;
+            clear: both !important;
+            width: 100% !important;
+        }
+        
+        #standalone-form.active,
+        #parent-form.active,
+        #variant-form.active {
             display: block !important;
         }
         
@@ -327,18 +344,27 @@
                     productTypeInput.value = selectedType;
                 }
                 
+                // First, hide ALL form sections completely
+                if (standaloneForm) {
+                    standaloneForm.style.display = 'none';
+                    standaloneForm.classList.remove('active');
+                }
+                if (parentForm) {
+                    parentForm.style.display = 'none';
+                    parentForm.classList.remove('active');
+                }
+                if (variantForm) {
+                    variantForm.style.display = 'none';
+                    variantForm.classList.remove('active');
+                }
+                
                 // Show product details section
                 if (productDetails) {
                     productDetails.style.display = 'block';
                     productDetails.classList.add('active');
                 }
                 
-                // Hide all form sections
-                if (standaloneForm) standaloneForm.style.display = 'none';
-                if (parentForm) parentForm.style.display = 'none';
-                if (variantForm) variantForm.style.display = 'none';
-                
-                // Show the appropriate form section
+                // Now show ONLY the appropriate form section
                 switch(selectedType) {
                     case 'standalone':
                         if (standaloneForm) {
