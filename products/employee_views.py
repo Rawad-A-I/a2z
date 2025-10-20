@@ -271,9 +271,33 @@ def add_product(request):
                 'parent_products': parent_products
             })
         
+        # Debug: Log the form data
+        print(f"DEBUG: Product type: {product_type}")
+        print(f"DEBUG: POST data: {dict(request.POST)}")
+        
         try:
             # Create product based on type
             if product_type == 'standalone':
+                # Validate required fields
+                if not request.POST.get('product_name'):
+                    messages.error(request, 'Product name is required.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                if not request.POST.get('category'):
+                    messages.error(request, 'Category is required.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                if not request.POST.get('price'):
+                    messages.error(request, 'Price is required for standalone products.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                
                 product = Product(
                     product_name=request.POST.get('product_name'),
                     category_id=request.POST.get('category'),
@@ -286,6 +310,20 @@ def add_product(request):
                     has_size_variants=False
                 )
             elif product_type == 'parent':
+                # Validate required fields for parent
+                if not request.POST.get('product_name'):
+                    messages.error(request, 'Product name is required.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                if not request.POST.get('category'):
+                    messages.error(request, 'Category is required.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                
                 product = Product(
                     product_name=request.POST.get('product_name'),
                     category_id=request.POST.get('category'),
@@ -297,8 +335,36 @@ def add_product(request):
                     price=None  # Parent products don't have prices
                 )
             elif product_type == 'variant':
-                parent_id = request.POST.get('parent')
-                parent = Product.objects.get(id=parent_id)
+                # Validate required fields for variant
+                if not request.POST.get('parent'):
+                    messages.error(request, 'Parent product is required for size variants.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                if not request.POST.get('size_name'):
+                    messages.error(request, 'Size name is required for size variants.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                if not request.POST.get('price'):
+                    messages.error(request, 'Price is required for size variants.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                
+                try:
+                    parent_id = request.POST.get('parent')
+                    parent = Product.objects.get(id=parent_id)
+                except Product.DoesNotExist:
+                    messages.error(request, 'Selected parent product does not exist.')
+                    return render(request, 'products/add_product.html', {
+                        'categories': categories,
+                        'parent_products': parent_products
+                    })
+                
                 product = Product(
                     product_name=f"{parent.product_name} {request.POST.get('size_name')}",
                     category=parent.category,
