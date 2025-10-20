@@ -82,6 +82,19 @@
             margin: 0 auto;
             padding: 20px;
         }
+        
+        /* Ensure button is clickable */
+        #create-product-btn {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            z-index: 999 !important;
+            position: relative !important;
+        }
+        
+        #create-product-btn:hover {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+        }
     </style>
 </head>
 <body>
@@ -94,13 +107,23 @@
                     <h4><i class="fas fa-plus"></i> Add New Product</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" id="product-form">
+                    <form method="POST" action="" enctype="multipart/form-data" id="product-form">
                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                         
                         <!-- Step 1: Product Type Selection -->
                         <div class="step-indicator">
                             <h5 class="mb-0"><i class="fas fa-list"></i> Step 1: Choose Product Type</h5>
                             <p class="mb-0">Select the type of product you want to create</p>
+                        </div>
+                        
+                        <!-- Debug: Test button -->
+                        <div class="text-center mb-3">
+                            <button type="button" class="btn btn-warning" onclick="console.log('Test button clicked'); document.getElementById('product_type').value='standalone'; document.getElementById('product-details').style.display='block';">
+                                Debug: Show Form
+                            </button>
+                            <button type="button" class="btn btn-danger ml-2" onclick="console.log('Test submit clicked'); document.getElementById('product-form').submit();">
+                                Debug: Test Submit
+                            </button>
                         </div>
                         
                         <div class="row" id="product-type-selection">
@@ -272,7 +295,7 @@
                             
                             <!-- Submit Button -->
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-success btn-lg">
+                                <button type="submit" class="btn btn-success btn-lg" id="create-product-btn">
                                     <i class="fas fa-save"></i> Create Product
                                 </button>
                             </div>
@@ -393,11 +416,29 @@
             });
         });
         
+        // Button click debugging
+        const createBtn = document.getElementById('create-product-btn');
+        if (createBtn) {
+            console.log('Create button found:', createBtn);
+            createBtn.addEventListener('click', function(e) {
+                console.log('Create button clicked');
+                // Test if form is visible
+                const form = document.getElementById('product-form');
+                console.log('Form visible:', form.style.display !== 'none');
+                console.log('Form parent visible:', form.parentElement.style.display !== 'none');
+            });
+        } else {
+            console.error('Create button NOT found!');
+        }
+        
         // Form validation
         const form = document.getElementById('product-form');
         if (form) {
+            console.log('Form found:', form);
             form.addEventListener('submit', function(e) {
+                console.log('Form submit event triggered');
                 const productType = productTypeInput ? productTypeInput.value : '';
+                console.log('Product type:', productType);
                 
                 if (!productType) {
                     e.preventDefault();
