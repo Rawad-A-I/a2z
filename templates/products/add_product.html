@@ -116,15 +116,6 @@
                             <p class="mb-0">Select the type of product you want to create</p>
                         </div>
                         
-                        <!-- Debug: Test button -->
-                        <div class="text-center mb-3">
-                            <button type="button" class="btn btn-warning" onclick="console.log('Test button clicked'); document.getElementById('product_type').value='standalone'; document.getElementById('product-details').style.display='block';">
-                                Debug: Show Form
-                            </button>
-                            <button type="button" class="btn btn-danger ml-2" onclick="console.log('Test submit clicked'); document.getElementById('product-form').submit();">
-                                Debug: Test Submit
-                            </button>
-                        </div>
                         
                         <div class="row" id="product-type-selection">
                             <!-- Standalone Product -->
@@ -416,35 +407,27 @@
             });
         });
         
-        // Button click debugging
-        const createBtn = document.getElementById('create-product-btn');
-        if (createBtn) {
-            console.log('Create button found:', createBtn);
-            createBtn.addEventListener('click', function(e) {
-                console.log('Create button clicked');
-                // Test if form is visible
-                const form = document.getElementById('product-form');
-                console.log('Form visible:', form.style.display !== 'none');
-                console.log('Form parent visible:', form.parentElement.style.display !== 'none');
-            });
-        } else {
-            console.error('Create button NOT found!');
-        }
         
         // Form validation
         const form = document.getElementById('product-form');
         if (form) {
-            console.log('Form found:', form);
             form.addEventListener('submit', function(e) {
-                console.log('Form submit event triggered');
                 const productType = productTypeInput ? productTypeInput.value : '';
-                console.log('Product type:', productType);
                 
                 if (!productType) {
                     e.preventDefault();
                     alert('Please select a product type first!');
                     return;
                 }
+                
+                // Disable hidden form fields to prevent duplicate submissions
+                const allInputs = form.querySelectorAll('input, select, textarea');
+                allInputs.forEach(input => {
+                    const parentSection = input.closest('.form-section');
+                    if (parentSection && parentSection.style.display === 'none') {
+                        input.disabled = true;
+                    }
+                });
                 
                 // Additional validation based on product type
                 if (productType === 'standalone') {
@@ -485,6 +468,17 @@
                 }
             });
         }
+        
+        // Re-enable all fields when page loads (in case of validation errors)
+        function reEnableAllFields() {
+            const allInputs = form.querySelectorAll('input, select, textarea');
+            allInputs.forEach(input => {
+                input.disabled = false;
+            });
+        }
+        
+        // Re-enable fields on page load
+        reEnableAllFields();
     });
 })();
 </script>
