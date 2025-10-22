@@ -111,23 +111,40 @@ def view_excel_file(request, filename):
         return redirect('close_cash_dashboard')
     
     try:
-        # Load Excel file
-        workbook = load_workbook(file_path, data_only=False)
-        worksheet = workbook.active
+        # Load workbook with data_only=True to get calculated values
+        workbook_data = load_workbook(file_path, data_only=True)  # For values
+        workbook_formulas = load_workbook(file_path, data_only=False)  # For formulas
         
-        # Convert to simple 2D array for Handsontable
-        excel_data = []
-        max_row = worksheet.max_row or 1
-        max_col = worksheet.max_column or 1
+        # Get all sheet names
+        sheet_names = workbook_data.sheetnames
         
-        for row in range(1, max_row + 1):
-            row_data = []
-            for col in range(1, max_col + 1):
-                cell = worksheet.cell(row=row, column=col)
-                # Simple value for Handsontable
-                value = cell.value if cell.value is not None else ''
-                row_data.append(value)
-            excel_data.append(row_data)
+        # Load data for all sheets
+        all_sheets_data = {}
+        for sheet_name in sheet_names:
+            ws_data = workbook_data[sheet_name]
+            ws_formulas = workbook_formulas[sheet_name]
+            
+            sheet_data = []
+            max_row = ws_data.max_row or 1
+            max_col = ws_data.max_column or 1
+            
+            for row in range(1, max_row + 1):
+                row_data = []
+                for col in range(1, max_col + 1):
+                    cell_data = ws_data.cell(row=row, column=col)
+                    cell_formula = ws_formulas.cell(row=row, column=col)
+                    
+                    # Show calculated value, but track if it's a formula
+                    value = cell_data.value if cell_data.value is not None else ''
+                    has_formula = str(cell_formula.value).startswith('=') if cell_formula.value else False
+                    
+                    row_data.append({
+                        'value': value,
+                        'hasFormula': has_formula
+                    })
+                sheet_data.append(row_data)
+            
+            all_sheets_data[sheet_name] = sheet_data
         
         # Get file stats
         file_stats = os.stat(file_path)
@@ -137,10 +154,9 @@ def view_excel_file(request, filename):
             'filename': filename,
             'display_name': file_info['display_name'],
             'is_master': file_info['is_master'],
-            'excel_data': excel_data,
-            'excel_data_json': json.dumps(excel_data),
-            'max_row': max_row,
-            'max_col': max_col,
+            'all_sheets_data': json.dumps(all_sheets_data),
+            'sheet_names': sheet_names,
+            'active_sheet': sheet_names[0],
             'last_modified': last_modified,
             'file_size': file_stats.st_size,
         }
@@ -191,8 +207,11 @@ def save_excel_changes(request, filename):
             row = change.get('row')
             col = change.get('col')
             value = change.get('value')
+            sheet_name = change.get('sheet', workbook.sheetnames[0])
             
             if row and col and value is not None:
+                # Get the specific worksheet
+                worksheet = workbook[sheet_name]
                 cell = worksheet.cell(row=row, column=col)
                 
                 # Smart value conversion

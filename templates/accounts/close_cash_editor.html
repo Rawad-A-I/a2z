@@ -39,12 +39,12 @@
                     <div>
                         <h6 class="mb-1"><strong>Excel-like Features Available</strong></h6>
                         <ul class="mb-0">
+                            <li><strong>Multiple Sheets:</strong> Click sheet tabs below to switch between sheets</li>
                             <li><strong>Copy/Paste:</strong> Ctrl+C, Ctrl+V (works with real Excel!)</li>
                             <li><strong>Navigation:</strong> Arrow keys, Tab, Enter, Home, End</li>
+                            <li><strong>Formulas:</strong> Shows calculated values (100) not formula text (=A1+B1)</li>
                             <li><strong>Selection:</strong> Click and drag, Shift+Click, Ctrl+Click</li>
                             <li><strong>Undo/Redo:</strong> Ctrl+Z, Ctrl+Y</li>
-                            <li><strong>Resize:</strong> Drag column/row borders</li>
-                            <li><strong>Search:</strong> Ctrl+F to find</li>
                             <li><strong>Auto-save:</strong> Changes saved every 30 seconds</li>
                         </ul>
                     </div>
@@ -71,6 +71,19 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
+                    <!-- Sheet Tabs (Excel-like) -->
+                    <div class="sheet-tabs-container">
+                        <div class="sheet-tabs" id="sheetTabs">
+                            {% for sheet_name in sheet_names %}
+                            <button class="sheet-tab {% if forloop.first %}active{% endif %}" 
+                                    data-sheet="{{ sheet_name }}">
+                                {{ sheet_name }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Spreadsheet Container -->
                     <div id="excel-container" style="height: 70vh; width: 100%;"></div>
                 </div>
             </div>
@@ -90,6 +103,47 @@
     border: 1px solid #d1d5db;
     border-radius: 0.375rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Sheet Tabs Styling */
+.sheet-tabs-container {
+    background-color: #f8f9fa;
+    border-top: 1px solid #d1d5db;
+    border-bottom: 2px solid #d1d5db;
+    padding: 4px 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.sheet-tabs {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.sheet-tab {
+    padding: 6px 16px;
+    border: 1px solid #d1d5db;
+    border-bottom: none;
+    background-color: #e5e7eb;
+    color: #374151;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.2s;
+    border-radius: 4px 4px 0 0;
+}
+
+.sheet-tab:hover {
+    background-color: #d1d5db;
+}
+
+.sheet-tab.active {
+    background-color: white;
+    color: #007bff;
+    font-weight: 600;
+    border-color: #007bff;
+    border-bottom: 2px solid white;
+    margin-bottom: -2px;
 }
 
 /* Handsontable custom styling for Excel look */
@@ -127,6 +181,20 @@
     color: #6c757d !important;
 }
 
+/* Formula cell styling */
+.formula-cell {
+    background-color: #e7f3ff !important;
+    font-style: italic;
+}
+
+.formula-cell::after {
+    content: ' ƒx';
+    font-size: 10px;
+    color: #007bff;
+    opacity: 0.5;
+    margin-left: 4px;
+}
+
 /* Save status styling */
 #saveStatus {
     position: fixed;
@@ -162,45 +230,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Excel data from Django
-    const excelData = {{ excel_data_json|safe }};
-    const maxRow = {{ max_row }};
-    const maxCol = {{ max_col }};
-    
-    // Initialize Handsontable
-    const container = document.getElementById('excel-container');
-    const hot = new Handsontable(container, {
-        data: excelData,
-        rowHeaders: true,
-        colHeaders: true,
-        contextMenu: true,
-        manualColumnResize: true,
-        manualRowResize: true,
-        filters: false,
-        dropdownMenu: false,
-        copyPaste: true,
-        undo: true,
-        search: true,
-        height: '100%',
-        width: '100%',
-        stretchH: 'all',
-        licenseKey: 'non-commercial-and-evaluation',
-        afterChange: function(changes, source) {
-            if (source !== 'loadData') {
-                trackChanges(changes);
-            }
-        },
-        afterSelection: function(r, c, r2, c2) {
-            // Excel-like selection behavior
-        },
-        beforeKeyDown: function(event) {
-            // Excel-like keyboard shortcuts
-            if (event.ctrlKey && event.keyCode === 83) { // Ctrl+S
-                event.preventDefault();
-                saveChanges();
-            }
-        }
-    });
+    // All sheets data from Django
+    const allSheetsData = {{ all_sheets_data|safe }};
+    const sheetNames = {{ sheet_names|safe }};
+    let currentSheet = sheetNames[0];
+    let hot = null;
     
     // Track changes
     let changes = [];
@@ -209,7 +243,74 @@ document.addEventListener('DOMContentLoaded', function() {
     const resetBtn = document.getElementById('resetBtn');
     const saveStatus = document.getElementById('saveStatus');
     const saveMessage = document.getElementById('saveMessage');
+    const container = document.getElementById('excel-container');
     
+    // Initialize sheet
+    function initializeSheet(sheetName) {
+        const sheetData = allSheetsData[sheetName];
+        
+        // Extract just values for Handsontable
+        const tableData = sheetData.map(row => 
+            row.map(cell => cell.value)
+        );
+        
+        if (hot) {
+            // Update existing Handsontable
+            hot.loadData(tableData);
+        } else {
+            // Create new Handsontable
+            hot = new Handsontable(container, {
+                data: tableData,
+                rowHeaders: true,
+                colHeaders: true,
+                contextMenu: true,
+                manualColumnResize: true,
+                manualRowResize: true,
+                filters: false,
+                dropdownMenu: false,
+                copyPaste: true,
+                undo: true,
+                search: true,
+                height: '100%',
+                width: '100%',
+                stretchH: 'all',
+                licenseKey: 'non-commercial-and-evaluation',
+                afterChange: function(changesArray, source) {
+                    if (source !== 'loadData') {
+                        trackChanges(changesArray);
+                    }
+                },
+                afterSelection: function(r, c, r2, c2) {
+                    // Excel-like selection behavior
+                },
+                beforeKeyDown: function(event) {
+                    // Excel-like keyboard shortcuts
+                    if (event.ctrlKey && event.keyCode === 83) { // Ctrl+S
+                        event.preventDefault();
+                        saveChanges();
+                    }
+                }
+            });
+        }
+        
+        // Mark formula cells with different styling
+        setTimeout(() => {
+            sheetData.forEach((row, rowIndex) => {
+                row.forEach((cell, colIndex) => {
+                    if (cell.hasFormula) {
+                        // Add formula indicator styling
+                        const cellElement = hot.getCell(rowIndex, colIndex);
+                        if (cellElement) {
+                            cellElement.classList.add('formula-cell');
+                            cellElement.title = 'This cell contains a formula';
+                        }
+                    }
+                });
+            });
+        }, 100);
+    }
+    
+    // Track changes
     function trackChanges(changesArray) {
         if (!changesArray) return;
         
@@ -220,6 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Add new change
                 changes.push({
+                    sheet: currentSheet,  // Track which sheet
                     row: row + 1,  // Excel uses 1-based indexing
                     col: col + 1,
                     value: newValue
@@ -278,6 +380,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Sheet tab click handler
+    document.querySelectorAll('.sheet-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const sheetName = this.dataset.sheet;
+            
+            // Update active tab styling
+            document.querySelectorAll('.sheet-tab').forEach(t => 
+                t.classList.remove('active')
+            );
+            this.classList.add('active');
+            
+            // Load sheet data
+            currentSheet = sheetName;
+            initializeSheet(sheetName);
+            
+            // Clear changes when switching sheets
+            changes = [];
+            saveBtn.disabled = true;
+        });
+    });
+    
     // Save button click
     saveBtn.addEventListener('click', saveChanges);
     
@@ -303,6 +426,9 @@ document.addEventListener('DOMContentLoaded', function() {
             saveChanges();
         }
     });
+    
+    // Initialize first sheet on load
+    initializeSheet(currentSheet);
 });
 </script>
 
