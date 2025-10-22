@@ -246,58 +246,6 @@ python manage.py migrate accounts 0030 --fake || echo "Migration 0030 already ap
 echo "📋 Step 1.10: Faking comprehensive fix migration..."
 python manage.py migrate accounts 0031 --fake || echo "Migration 0031 already applied or not found"
 
-# Step 1.11: Create UserPreferences table manually to avoid constraint issues
-echo "📋 Step 1.11: Creating UserPreferences table manually..."
-python manage.py shell -c "
-from django.db import connection
-cursor = connection.cursor()
-
-# Check if UserPreferences table exists
-cursor.execute(\"\"\"
-    SELECT name FROM sqlite_master 
-    WHERE type='table' AND name='accounts_userpreferences'
-\"\"\")
-
-if not cursor.fetchone():
-    print('Creating UserPreferences table...')
-    cursor.execute(\"\"\"
-        CREATE TABLE accounts_userpreferences (
-            uid VARCHAR(36) PRIMARY KEY,
-            created_at DATETIME NOT NULL,
-            updated_at DATETIME NOT NULL,
-            phone_number VARCHAR(20),
-            phone_verified BOOLEAN NOT NULL DEFAULT 0,
-            profile_picture VARCHAR(100),
-            bio TEXT,
-            date_of_birth DATE,
-            gender VARCHAR(20),
-            email_notifications BOOLEAN NOT NULL DEFAULT 1,
-            sms_notifications BOOLEAN NOT NULL DEFAULT 0,
-            push_notifications BOOLEAN NOT NULL DEFAULT 1,
-            order_updates BOOLEAN NOT NULL DEFAULT 1,
-            promotional_emails BOOLEAN NOT NULL DEFAULT 1,
-            newsletter BOOLEAN NOT NULL DEFAULT 1,
-            product_recommendations BOOLEAN NOT NULL DEFAULT 1,
-            security_alerts BOOLEAN NOT NULL DEFAULT 1,
-            profile_visibility VARCHAR(20) NOT NULL DEFAULT 'private',
-            show_online_status BOOLEAN NOT NULL DEFAULT 1,
-            allow_friend_requests BOOLEAN NOT NULL DEFAULT 1,
-            show_last_seen BOOLEAN NOT NULL DEFAULT 1,
-            language VARCHAR(5) NOT NULL DEFAULT 'en',
-            timezone VARCHAR(50) NOT NULL DEFAULT 'UTC',
-            date_format VARCHAR(10) NOT NULL DEFAULT 'MM/DD/YYYY',
-            time_format VARCHAR(2) NOT NULL DEFAULT '12',
-            currency VARCHAR(3) NOT NULL DEFAULT 'USD',
-            theme VARCHAR(10) NOT NULL DEFAULT 'auto',
-            font_size VARCHAR(10) NOT NULL DEFAULT 'medium',
-            user_id INTEGER NOT NULL UNIQUE REFERENCES auth_user(id) ON DELETE CASCADE
-        )
-    \"\"\")
-    print('✅ UserPreferences table created successfully')
-else:
-    print('✅ UserPreferences table already exists')
-" || echo "UserPreferences table creation completed with warnings"
-
 # Step 2: Apply migrations
 echo "📋 Step 2: Applying migrations..."
 # First, create merge migration to resolve conflicts
@@ -309,9 +257,9 @@ python manage.py migrate products --noinput || echo "Products migrations complet
 # Then apply all other migrations
 python manage.py migrate --noinput || echo "Migrations completed with warnings"
 
-# Step 2.2: Fake the UserPreferences migration since we created the table manually
+# Step 2.2: Fake the UserPreferences migration to avoid conflicts
 echo "📋 Step 2.2: Faking UserPreferences migration..."
-python manage.py migrate accounts 0032 --fake || echo "Migration 0032 already applied or not found"
+python manage.py migrate accounts 0032_create_userpreferences_only --fake || echo "Migration 0032_create_userpreferences_only already applied or not found"
 
 # Step 2.5: Apply size variant fields migration specifically
 echo "📋 Step 2.5: Applying size variant fields migration..."
