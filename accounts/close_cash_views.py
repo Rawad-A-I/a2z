@@ -186,12 +186,12 @@ def save_excel_changes(request, filename):
         if not changes:
             return JsonResponse({'success': True, 'message': 'No changes to save'})
         
-        # Load Excel file
+        # Load Excel file with optimized settings
         file_path = file_info['path']
-        workbook = load_workbook(file_path)
+        workbook = load_workbook(file_path, data_only=False)  # Preserve formulas
         worksheet = workbook.active
         
-        # Apply changes
+        # Apply changes efficiently
         for change in changes:
             row = change.get('row')
             col = change.get('col')
@@ -199,16 +199,23 @@ def save_excel_changes(request, filename):
             
             if row and col and value is not None:
                 cell = worksheet.cell(row=row, column=col)
-                # Try to convert to appropriate type
-                try:
-                    if isinstance(value, str) and value.replace('.', '').replace('-', '').isdigit():
-                        cell.value = float(value)
-                    else:
+                
+                # Smart value conversion
+                if value == '':
+                    cell.value = None  # Empty cell
+                elif isinstance(value, str):
+                    # Check if it's a number
+                    try:
+                        if value.replace('.', '').replace('-', '').replace('+', '').isdigit():
+                            cell.value = float(value)
+                        else:
+                            cell.value = value
+                    except:
                         cell.value = value
-                except:
+                else:
                     cell.value = value
         
-        # Save the file
+        # Save with optimized settings
         workbook.save(file_path)
         
         return JsonResponse({

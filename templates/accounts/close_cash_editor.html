@@ -37,10 +37,11 @@
                 <div class="d-flex align-items-center">
                     <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
                     <div>
-                        <h6 class="mb-1"><strong>Important Notes</strong></h6>
+                        <h6 class="mb-1"><strong>Excel-like Editor</strong></h6>
                         <ul class="mb-0">
-                            <li>Formulas are preserved but not calculated in this web view</li>
-                            <li>Changes are saved automatically as you edit</li>
+                            <li>Use keyboard shortcuts: Ctrl+C (copy), Ctrl+V (paste), Ctrl+Z (undo)</li>
+                            <li>Arrow keys to navigate, Tab to move right, Enter to move down</li>
+                            <li>Changes are saved automatically every 30 seconds</li>
                             <li>For complex edits, download the file and upload it back</li>
                             {% if is_master %}
                                 <li><strong>Master File:</strong> This file contains INDIRECT formulas that reference other sheets</li>
@@ -56,10 +57,10 @@
                 <span id="saveMessage">Saving changes...</span>
             </div>
 
-            <!-- Excel Table Container -->
+            <!-- Excel Spreadsheet Container -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Excel Data</h5>
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Excel Spreadsheet</h5>
                     <div>
                         <button id="saveBtn" class="btn btn-success" disabled>
                             <i class="fas fa-save me-2"></i>Save Changes
@@ -70,77 +71,58 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height: 70vh; overflow: auto;">
-                        <table class="table table-bordered table-sm mb-0" id="excelTable">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th class="text-center" style="width: 50px;">#</th>
-                                    {% for col in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"|slice:":max_col" %}
-                                        <th class="text-center" style="min-width: 100px;">{{ col }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row_data in excel_data %}
-                                    <tr>
-                                        <td class="text-center fw-bold bg-light">{{ forloop.counter }}</td>
-                                        {% for cell_data in row_data %}
-                                            <td class="editable-cell" 
-                                                data-row="{{ cell_data.row }}" 
-                                                data-col="{{ cell_data.col }}"
-                                                data-coordinate="{{ cell_data.coordinate }}"
-                                                data-original-value="{{ cell_data.value|default:'' }}"
-                                                data-formula="{{ cell_data.formula|default:'' }}"
-                                                contenteditable="true">
-                                                {% if cell_data.formula %}
-                                                    <span class="text-muted small">{{ cell_data.formula }}</span>
-                                                {% else %}
-                                                    {{ cell_data.value|default:'' }}
-                                                {% endif %}
-                                            </td>
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                    <div id="spreadsheet-container" style="height: 70vh; width: 100%;"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- jspreadsheet CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet@latest/dist/jspreadsheet.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet@latest/dist/jspreadsheet.theme.css">
+
+<!-- jspreadsheet JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/jspreadsheet@latest/dist/jspreadsheet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspreadsheet@latest/dist/jspreadsheet.umd.js"></script>
+
 <style>
-.editable-cell {
-    min-width: 100px;
-    min-height: 30px;
-    padding: 8px !important;
-    position: relative;
-}
-
-.editable-cell:focus {
-    outline: 2px solid #007bff;
-    background-color: #f8f9fa;
-}
-
-.editable-cell.changed {
-    background-color: #fff3cd;
-    border-color: #ffc107;
-}
-
-.editable-cell.formula {
-    background-color: #e7f3ff;
-    border-color: #007bff;
-}
-
-.table-responsive {
+#spreadsheet-container {
     border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
 }
 
-.sticky-top {
-    position: sticky;
-    top: 0;
-    z-index: 10;
+.jexcel_container {
+    border: none !important;
+}
+
+.jexcel_container table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+.jexcel_container td {
+    border: 1px solid #d1d5db !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.jexcel_container td.selected {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.jexcel_container td:hover {
+    background-color: #f8f9fa !important;
+}
+
+.jexcel_container th {
+    background-color: #f8f9fa !important;
+    border: 1px solid #d1d5db !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    padding: 8px 4px !important;
 }
 
 #saveStatus {
@@ -158,43 +140,119 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const table = document.getElementById('excelTable');
+    // Excel data from Django
+    const excelData = {{ excel_data|safe }};
+    const maxRow = {{ max_row }};
+    const maxCol = {{ max_col }};
+    
+    // Convert Django data to jspreadsheet format
+    const spreadsheetData = [];
+    for (let row = 0; row < maxRow; row++) {
+        const rowData = [];
+        for (let col = 0; col < maxCol; col++) {
+            if (excelData[row] && excelData[row][col]) {
+                const cell = excelData[row][col];
+                // Show formula if present, otherwise show value
+                rowData.push(cell.formula || cell.value || '');
+            } else {
+                rowData.push('');
+            }
+        }
+        spreadsheetData.push(rowData);
+    }
+    
+    // Initialize jspreadsheet
+    const spreadsheet = jspreadsheet(document.getElementById('spreadsheet-container'), {
+        data: spreadsheetData,
+        columns: maxCol,
+        rows: maxRow,
+        allowInsertRow: false,
+        allowInsertColumn: false,
+        allowDeleteRow: false,
+        allowDeleteColumn: false,
+        allowRenameColumn: false,
+        allowComments: false,
+        allowSort: false,
+        allowExport: false,
+        allowImport: false,
+        allowCopy: true,
+        allowPaste: true,
+        allowUndo: true,
+        allowRedo: true,
+        allowInsert: true,
+        allowDelete: true,
+        allowMove: true,
+        allowResize: true,
+        allowSelect: true,
+        allowEdit: true,
+        allowInsertRow: false,
+        allowInsertColumn: false,
+        allowDeleteRow: false,
+        allowDeleteColumn: false,
+        allowRenameColumn: false,
+        allowComments: false,
+        allowSort: false,
+        allowExport: false,
+        allowImport: false,
+        allowCopy: true,
+        allowPaste: true,
+        allowUndo: true,
+        allowRedo: true,
+        allowInsert: true,
+        allowDelete: true,
+        allowMove: true,
+        allowResize: true,
+        allowSelect: true,
+        allowEdit: true,
+        tableOverflow: true,
+        tableHeight: '70vh',
+        tableWidth: '100%',
+        wordWrap: false,
+        columnResize: true,
+        rowResize: true,
+        columnSorting: false,
+        columnDrag: false,
+        rowDrag: false,
+        contextMenu: true,
+        toolbar: true,
+        search: true,
+        pagination: false,
+        fullscreen: false,
+        lazyLoading: false,
+        updateTable: function(instance, cell, x, y, value) {
+            // Track changes
+            trackChanges(x, y, value);
+        }
+    });
+    
+    // Track changes
+    let changes = [];
+    let isSaving = false;
     const saveBtn = document.getElementById('saveBtn');
     const resetBtn = document.getElementById('resetBtn');
     const saveStatus = document.getElementById('saveStatus');
     const saveMessage = document.getElementById('saveMessage');
     
-    let changes = [];
-    let isSaving = false;
-    
-    // Track changes in cells
-    table.addEventListener('input', function(e) {
-        if (e.target.classList.contains('editable-cell')) {
-            const cell = e.target;
-            const row = parseInt(cell.dataset.row);
-            const col = parseInt(cell.dataset.col);
-            const originalValue = cell.dataset.originalValue;
-            const currentValue = cell.textContent.trim();
-            
-            // Remove existing change for this cell
-            changes = changes.filter(change => !(change.row === row && change.col === col));
-            
-            // Add new change if different from original
-            if (currentValue !== originalValue) {
-                changes.push({
-                    row: row,
-                    col: col,
-                    value: currentValue
-                });
-                cell.classList.add('changed');
-            } else {
-                cell.classList.remove('changed');
-            }
-            
-            // Enable/disable save button
-            saveBtn.disabled = changes.length === 0 || isSaving;
+    function trackChanges(x, y, value) {
+        // Remove existing change for this cell
+        changes = changes.filter(change => !(change.row === y && change.col === x));
+        
+        // Get original value
+        const originalValue = excelData[y] && excelData[y][x] ? 
+            (excelData[y][x].formula || excelData[y][x].value || '') : '';
+        
+        // Add new change if different from original
+        if (value !== originalValue) {
+            changes.push({
+                row: y,
+                col: x,
+                value: value
+            });
         }
-    });
+        
+        // Enable/disable save button
+        saveBtn.disabled = changes.length === 0 || isSaving;
+    }
     
     // Save changes
     saveBtn.addEventListener('click', function() {
@@ -219,12 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 saveMessage.innerHTML = '<i class="fas fa-check me-2"></i>' + data.message;
                 saveStatus.className = 'alert alert-success';
                 
-                // Remove changed class from all cells
-                document.querySelectorAll('.changed').forEach(cell => {
-                    cell.classList.remove('changed');
-                    cell.dataset.originalValue = cell.textContent.trim();
-                });
-                
+                // Clear changes
                 changes = [];
                 saveBtn.disabled = true;
                 
@@ -251,13 +304,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reset changes
     resetBtn.addEventListener('click', function() {
         if (confirm('Are you sure you want to reset all changes? This will restore the original values.')) {
-            document.querySelectorAll('.editable-cell').forEach(cell => {
-                const originalValue = cell.dataset.originalValue;
-                cell.textContent = originalValue;
-                cell.classList.remove('changed');
-            });
-            changes = [];
-            saveBtn.disabled = true;
+            // Reload the page to reset everything
+            window.location.reload();
         }
     });
     
@@ -267,23 +315,9 @@ document.addEventListener('DOMContentLoaded', function() {
             saveBtn.click();
         }
     }, 30000);
-    
-    // Handle formula cells
-    document.querySelectorAll('.editable-cell').forEach(cell => {
-        if (cell.dataset.formula) {
-            cell.classList.add('formula');
-            cell.title = 'Formula: ' + cell.dataset.formula;
-        }
-    });
-    
-    // Prevent editing formula cells
-    document.querySelectorAll('.formula').forEach(cell => {
-        cell.addEventListener('focus', function(e) {
-            e.preventDefault();
-            alert('This cell contains a formula and cannot be edited directly. Please download the file for complex edits.');
-            cell.blur();
-        });
-    });
 });
 </script>
+
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
 {% endblock %}
