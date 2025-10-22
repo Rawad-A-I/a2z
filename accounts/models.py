@@ -144,7 +144,14 @@ class Cart(BaseModel):
     is_paid = models.BooleanField(default=False)
     
     class Meta:
-        unique_together = [['user', 'is_paid'], ['session_key', 'is_paid']]
+        # Using indexes instead of unique_together to handle NULL values properly
+        indexes = [
+            models.Index(fields=['user', 'is_paid'], name='cart_user_paid_idx'),
+            models.Index(fields=['session_key', 'is_paid'], name='cart_session_paid_idx'),
+        ]
+        constraints = [
+            # Partial unique constraints are handled via database migration (0031)
+        ]
 
     def get_cart_total(self):
         cart_items = self.cart_items.all()
