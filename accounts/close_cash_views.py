@@ -115,7 +115,7 @@ def view_excel_file(request, filename):
         workbook = load_workbook(file_path, data_only=False)
         worksheet = workbook.active
         
-        # Convert to JSON structure
+        # Convert to simple 2D array for Handsontable
         excel_data = []
         max_row = worksheet.max_row or 1
         max_col = worksheet.max_column or 1
@@ -124,15 +124,9 @@ def view_excel_file(request, filename):
             row_data = []
             for col in range(1, max_col + 1):
                 cell = worksheet.cell(row=row, column=col)
-                cell_data = {
-                    'value': cell.value if cell.value is not None else '',
-                    'formula': cell.value if str(cell.value).startswith('=') else None,
-                    'row': row,
-                    'col': col,
-                    'coordinate': cell.coordinate,
-                    'data_type': str(cell.data_type),
-                }
-                row_data.append(cell_data)
+                # Simple value for Handsontable
+                value = cell.value if cell.value is not None else ''
+                row_data.append(value)
             excel_data.append(row_data)
         
         # Get file stats
@@ -144,6 +138,7 @@ def view_excel_file(request, filename):
             'display_name': file_info['display_name'],
             'is_master': file_info['is_master'],
             'excel_data': excel_data,
+            'excel_data_json': json.dumps(excel_data),
             'max_row': max_row,
             'max_col': max_col,
             'last_modified': last_modified,

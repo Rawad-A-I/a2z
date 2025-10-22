@@ -32,20 +32,20 @@
                 </div>
             </div>
 
-            <!-- Warning Alert -->
-            <div class="alert alert-warning mb-4">
+            <!-- Excel Features Info -->
+            <div class="alert alert-info mb-4">
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+                    <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
                     <div>
-                        <h6 class="mb-1"><strong>Excel-like Editor</strong></h6>
+                        <h6 class="mb-1"><strong>Excel-like Features Available</strong></h6>
                         <ul class="mb-0">
-                            <li>Use keyboard shortcuts: Ctrl+C (copy), Ctrl+V (paste), Ctrl+Z (undo)</li>
-                            <li>Arrow keys to navigate, Tab to move right, Enter to move down</li>
-                            <li>Changes are saved automatically every 30 seconds</li>
-                            <li>For complex edits, download the file and upload it back</li>
-                            {% if is_master %}
-                                <li><strong>Master File:</strong> This file contains INDIRECT formulas that reference other sheets</li>
-                            {% endif %}
+                            <li><strong>Copy/Paste:</strong> Ctrl+C, Ctrl+V (works with real Excel!)</li>
+                            <li><strong>Navigation:</strong> Arrow keys, Tab, Enter, Home, End</li>
+                            <li><strong>Selection:</strong> Click and drag, Shift+Click, Ctrl+Click</li>
+                            <li><strong>Undo/Redo:</strong> Ctrl+Z, Ctrl+Y</li>
+                            <li><strong>Resize:</strong> Drag column/row borders</li>
+                            <li><strong>Search:</strong> Ctrl+F to find</li>
+                            <li><strong>Auto-save:</strong> Changes saved every 30 seconds</li>
                         </ul>
                     </div>
                 </div>
@@ -71,60 +71,63 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div id="spreadsheet-container" style="height: 70vh; width: 100%;"></div>
+                    <div id="excel-container" style="height: 70vh; width: 100%;"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- jspreadsheet CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet@latest/dist/jspreadsheet.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet@latest/dist/jspreadsheet.theme.css">
+<!-- Handsontable CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
 
-<!-- jspreadsheet JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/jspreadsheet@latest/dist/jspreadsheet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspreadsheet@latest/dist/jspreadsheet.umd.js"></script>
+<!-- Handsontable JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
 
 <style>
-#spreadsheet-container {
-    border: 1px solid #dee2e6;
+/* Excel-like styling */
+#excel-container {
+    border: 1px solid #d1d5db;
     border-radius: 0.375rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.jexcel_container {
-    border: none !important;
-}
-
-.jexcel_container table {
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-}
-
-.jexcel_container td {
-    border: 1px solid #d1d5db !important;
-    padding: 4px 8px !important;
-    font-size: 13px !important;
+/* Handsontable custom styling for Excel look */
+.handsontable {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 13px !important;
 }
 
-.jexcel_container td.selected {
-    background-color: #007bff !important;
-    color: white !important;
-}
-
-.jexcel_container td:hover {
-    background-color: #f8f9fa !important;
-}
-
-.jexcel_container th {
+.handsontable th {
     background-color: #f8f9fa !important;
     border: 1px solid #d1d5db !important;
     font-weight: 600 !important;
     text-align: center !important;
-    padding: 8px 4px !important;
+    color: #374151 !important;
 }
 
+.handsontable td {
+    border: 1px solid #d1d5db !important;
+    padding: 4px 8px !important;
+    background-color: white !important;
+}
+
+.handsontable td.current {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.handsontable td.area {
+    background-color: #e3f2fd !important;
+    border-color: #2196f3 !important;
+}
+
+.handsontable td.htDimmed {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+}
+
+/* Save status styling */
 #saveStatus {
     position: fixed;
     top: 20px;
@@ -136,92 +139,66 @@
 .btn:disabled {
     opacity: 0.6;
 }
+
+/* Excel-like scrollbars */
+#excel-container::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+#excel-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#excel-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 6px;
+}
+
+#excel-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Excel data from Django
-    const excelData = {{ excel_data|safe }};
+    const excelData = {{ excel_data_json|safe }};
     const maxRow = {{ max_row }};
     const maxCol = {{ max_col }};
     
-    // Convert Django data to jspreadsheet format
-    const spreadsheetData = [];
-    for (let row = 0; row < maxRow; row++) {
-        const rowData = [];
-        for (let col = 0; col < maxCol; col++) {
-            if (excelData[row] && excelData[row][col]) {
-                const cell = excelData[row][col];
-                // Show formula if present, otherwise show value
-                rowData.push(cell.formula || cell.value || '');
-            } else {
-                rowData.push('');
-            }
-        }
-        spreadsheetData.push(rowData);
-    }
-    
-    // Initialize jspreadsheet
-    const spreadsheet = jspreadsheet(document.getElementById('spreadsheet-container'), {
-        data: spreadsheetData,
-        columns: maxCol,
-        rows: maxRow,
-        allowInsertRow: false,
-        allowInsertColumn: false,
-        allowDeleteRow: false,
-        allowDeleteColumn: false,
-        allowRenameColumn: false,
-        allowComments: false,
-        allowSort: false,
-        allowExport: false,
-        allowImport: false,
-        allowCopy: true,
-        allowPaste: true,
-        allowUndo: true,
-        allowRedo: true,
-        allowInsert: true,
-        allowDelete: true,
-        allowMove: true,
-        allowResize: true,
-        allowSelect: true,
-        allowEdit: true,
-        allowInsertRow: false,
-        allowInsertColumn: false,
-        allowDeleteRow: false,
-        allowDeleteColumn: false,
-        allowRenameColumn: false,
-        allowComments: false,
-        allowSort: false,
-        allowExport: false,
-        allowImport: false,
-        allowCopy: true,
-        allowPaste: true,
-        allowUndo: true,
-        allowRedo: true,
-        allowInsert: true,
-        allowDelete: true,
-        allowMove: true,
-        allowResize: true,
-        allowSelect: true,
-        allowEdit: true,
-        tableOverflow: true,
-        tableHeight: '70vh',
-        tableWidth: '100%',
-        wordWrap: false,
-        columnResize: true,
-        rowResize: true,
-        columnSorting: false,
-        columnDrag: false,
-        rowDrag: false,
+    // Initialize Handsontable
+    const container = document.getElementById('excel-container');
+    const hot = new Handsontable(container, {
+        data: excelData,
+        rowHeaders: true,
+        colHeaders: true,
         contextMenu: true,
-        toolbar: true,
+        manualColumnResize: true,
+        manualRowResize: true,
+        filters: false,
+        dropdownMenu: false,
+        copyPaste: true,
+        undo: true,
         search: true,
-        pagination: false,
-        fullscreen: false,
-        lazyLoading: false,
-        updateTable: function(instance, cell, x, y, value) {
-            // Track changes
-            trackChanges(x, y, value);
+        height: '100%',
+        width: '100%',
+        stretchH: 'all',
+        licenseKey: 'non-commercial-and-evaluation',
+        afterChange: function(changes, source) {
+            if (source !== 'loadData') {
+                trackChanges(changes);
+            }
+        },
+        afterSelection: function(r, c, r2, c2) {
+            // Excel-like selection behavior
+        },
+        beforeKeyDown: function(event) {
+            // Excel-like keyboard shortcuts
+            if (event.ctrlKey && event.keyCode === 83) { // Ctrl+S
+                event.preventDefault();
+                saveChanges();
+            }
         }
     });
     
@@ -233,29 +210,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveStatus = document.getElementById('saveStatus');
     const saveMessage = document.getElementById('saveMessage');
     
-    function trackChanges(x, y, value) {
-        // Remove existing change for this cell
-        changes = changes.filter(change => !(change.row === y && change.col === x));
+    function trackChanges(changesArray) {
+        if (!changesArray) return;
         
-        // Get original value
-        const originalValue = excelData[y] && excelData[y][x] ? 
-            (excelData[y][x].formula || excelData[y][x].value || '') : '';
-        
-        // Add new change if different from original
-        if (value !== originalValue) {
-            changes.push({
-                row: y,
-                col: x,
-                value: value
-            });
-        }
+        changesArray.forEach(([row, col, oldValue, newValue]) => {
+            if (oldValue !== newValue) {
+                // Remove existing change for this cell
+                changes = changes.filter(change => !(change.row === row + 1 && change.col === col + 1));
+                
+                // Add new change
+                changes.push({
+                    row: row + 1,  // Excel uses 1-based indexing
+                    col: col + 1,
+                    value: newValue
+                });
+            }
+        });
         
         // Enable/disable save button
         saveBtn.disabled = changes.length === 0 || isSaving;
     }
     
     // Save changes
-    saveBtn.addEventListener('click', function() {
+    function saveChanges() {
         if (changes.length === 0 || isSaving) return;
         
         isSaving = true;
@@ -299,7 +276,10 @@ document.addEventListener('DOMContentLoaded', function() {
             isSaving = false;
             saveBtn.disabled = changes.length === 0;
         });
-    });
+    }
+    
+    // Save button click
+    saveBtn.addEventListener('click', saveChanges);
     
     // Reset changes
     resetBtn.addEventListener('click', function() {
@@ -312,9 +292,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-save every 30 seconds if there are changes
     setInterval(function() {
         if (changes.length > 0 && !isSaving) {
-            saveBtn.click();
+            saveChanges();
         }
     }, 30000);
+    
+    // Add Excel-like keyboard shortcuts
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.keyCode === 83) { // Ctrl+S
+            event.preventDefault();
+            saveChanges();
+        }
+    });
 });
 </script>
 
