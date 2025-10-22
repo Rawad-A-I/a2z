@@ -193,7 +193,7 @@ try:
         ''')
         if not cursor.fetchone():
             print('Adding missing coupon_id column...')
-            cursor.execute('ALTER TABLE accounts_cart ADD COLUMN coupon_id INTEGER NULL;')
+            cursor.execute('ALTER TABLE accounts_cart ADD COLUMN coupon_id UUID NULL;')
             print('✅ Added coupon_id column to cart table')
         else:
             print('✅ coupon_id column already exists')
@@ -241,6 +241,10 @@ python manage.py migrate accounts 0027 --fake || echo "Migration 0027 already ap
 # Step 1.9: Fake the coupon column migration to avoid duplication warning
 echo "📋 Step 1.9: Faking coupon column migration..."
 python manage.py migrate accounts 0030 --fake || echo "Migration 0030 already applied or not found"
+
+# Step 1.10: Fake the comprehensive fix migration to avoid foreign key issues
+echo "📋 Step 1.10: Faking comprehensive fix migration..."
+python manage.py migrate accounts 0031 --fake || echo "Migration 0031 already applied or not found"
 
 # Step 2: Apply migrations
 echo "📋 Step 2: Applying migrations..."
