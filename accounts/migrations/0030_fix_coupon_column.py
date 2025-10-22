@@ -16,17 +16,7 @@ class Migration(migrations.Migration):
     operations = [
         # Attempt to add coupon_id column (will be fully handled by 0031)
         migrations.RunSQL(
-            sql="""
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name='accounts_cart' AND column_name='coupon_id'
-                    ) THEN
-                        ALTER TABLE accounts_cart ADD COLUMN coupon_id UUID NULL;
-                    END IF;
-                END $$;
-            """,
+            sql="ALTER TABLE accounts_cart ADD COLUMN coupon_id INTEGER NULL;",
             reverse_sql=migrations.RunSQL.noop
         ),
     ]

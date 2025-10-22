@@ -13,11 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Drop the existing assigned_employee column to fix type mismatch
-        migrations.RunSQL(
-            "ALTER TABLE accounts_order DROP COLUMN IF EXISTS assigned_employee_id;",
-            reverse_sql="-- No reverse operation needed"
-        ),
         # Re-add the assigned_employee field with correct type
         migrations.AddField(
             model_name='order',
