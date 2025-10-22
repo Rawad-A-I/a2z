@@ -238,6 +238,10 @@ python manage.py migrate products 0025 --fake || echo "Migration 0025 already ap
 python manage.py migrate products 0027 --fake || echo "Migration 0027 already applied or not found"
 python manage.py migrate accounts 0027 --fake || echo "Migration 0027 already applied or not found"
 
+# Step 1.9: Fake the coupon column migration to avoid duplication warning
+echo "📋 Step 1.9: Faking coupon column migration..."
+python manage.py migrate accounts 0030 --fake || echo "Migration 0030 already applied or not found"
+
 # Step 2: Apply migrations
 echo "📋 Step 2: Applying migrations..."
 # First, create merge migration to resolve conflicts
