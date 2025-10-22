@@ -140,7 +140,7 @@ class Coupon(BaseModel):
 class Cart(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart", null=True, blank=True)
     session_key = models.CharField(max_length=40, null=True, blank=True, help_text="Session key for anonymous users")
-    coupon = models.ForeignKey('accounts.Coupon', on_delete=models.SET_NULL, null=True, blank=True)
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)
     is_paid = models.BooleanField(default=False)
     
     class Meta:
@@ -217,7 +217,7 @@ class Order(BaseModel):
     shipping_address = models.TextField(blank=True, null=True)
     payment_mode = models.CharField(max_length=100)
     order_total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)
     grand_total = models.DecimalField(max_digits=10, decimal_places=2)
     
     # Employee management fields
