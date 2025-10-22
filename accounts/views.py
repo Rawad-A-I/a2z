@@ -108,10 +108,13 @@ def register_page(request):
             messages.info(request, 'Username or email already exists!')
             return HttpResponseRedirect(request.path_info)
 
-        user_obj = User.objects.create(
-            username=username, first_name=first_name, last_name=last_name, email=email)
-        user_obj.set_password(password)
-        user_obj.save()
+        user_obj = User.objects.create_user(
+            username=username, 
+            first_name=first_name, 
+            last_name=last_name, 
+            email=email,
+            password=password
+        )
 
         profile = Profile.objects.get(user=user_obj)
         profile.email_token = str(uuid.uuid4())
