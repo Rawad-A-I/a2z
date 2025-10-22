@@ -12,6 +12,7 @@ from accounts.address_management_views import *
 from accounts.admin_views import *
 from accounts.modern_dashboard_views import *
 from accounts.business_form_views import business_form, submit_business_form, get_business_data, business_form_admin
+from accounts.close_cash_views import *
 # Settings views are now in accounts.views
 from django.contrib.auth import views as auth_views
 
@@ -75,6 +76,13 @@ urlpatterns = [
     path('employee/order/<str:order_id>/confirm/', confirm_order, name='confirm_order'),
     path('employee/order/<str:order_id>/update-status/', update_order_status, name='update_order_status'),
     path('employee/order/<str:order_id>/cancel/', cancel_order, name='cancel_order'),
+    
+    # Close Cash Management URLs
+    path('employee/close-cash/', close_cash_dashboard, name='close_cash_dashboard'),
+    path('employee/close-cash/view/<str:filename>/', view_excel_file, name='view_excel_file'),
+    path('employee/close-cash/save/<str:filename>/', save_excel_changes, name='save_excel_changes'),
+    path('employee/close-cash/download/<str:filename>/', download_excel_file, name='download_excel_file'),
+    path('employee/close-cash/upload/<str:filename>/', upload_excel_file, name='upload_excel_file'),
     
     # Inventory Management URLs
     path('inventory/dashboard/', inventory_dashboard, name='inventory_dashboard'),

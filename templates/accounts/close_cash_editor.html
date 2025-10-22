@@ -1,0 +1,289 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Edit {{ display_name }} - Close Cash{% endblock %}
+
+{% block start %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-file-excel text-warning me-2"></i>
+                        {{ display_name }}
+                        {% if is_master %}
+                            <span class="badge bg-warning text-dark ms-2">Master Analytics</span>
+                        {% endif %}
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Last modified: {{ last_modified|date:"M d, Y H:i" }} | 
+                        Size: {{ file_size|filesizeformat }}
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'close_cash_dashboard' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                    <a href="{% url 'download_excel_file' filename %}" class="btn btn-outline-primary">
+                        <i class="fas fa-download me-2"></i>Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- Warning Alert -->
+            <div class="alert alert-warning mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+                    <div>
+                        <h6 class="mb-1"><strong>Important Notes</strong></h6>
+                        <ul class="mb-0">
+                            <li>Formulas are preserved but not calculated in this web view</li>
+                            <li>Changes are saved automatically as you edit</li>
+                            <li>For complex edits, download the file and upload it back</li>
+                            {% if is_master %}
+                                <li><strong>Master File:</strong> This file contains INDIRECT formulas that reference other sheets</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Status -->
+            <div id="saveStatus" class="alert alert-info mb-3" style="display: none;">
+                <i class="fas fa-spinner fa-spin me-2"></i>
+                <span id="saveMessage">Saving changes...</span>
+            </div>
+
+            <!-- Excel Table Container -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Excel Data</h5>
+                    <div>
+                        <button id="saveBtn" class="btn btn-success" disabled>
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <button id="resetBtn" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 70vh; overflow: auto;">
+                        <table class="table table-bordered table-sm mb-0" id="excelTable">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="text-center" style="width: 50px;">#</th>
+                                    {% for col in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"|slice:":max_col" %}
+                                        <th class="text-center" style="min-width: 100px;">{{ col }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row_data in excel_data %}
+                                    <tr>
+                                        <td class="text-center fw-bold bg-light">{{ forloop.counter }}</td>
+                                        {% for cell_data in row_data %}
+                                            <td class="editable-cell" 
+                                                data-row="{{ cell_data.row }}" 
+                                                data-col="{{ cell_data.col }}"
+                                                data-coordinate="{{ cell_data.coordinate }}"
+                                                data-original-value="{{ cell_data.value|default:'' }}"
+                                                data-formula="{{ cell_data.formula|default:'' }}"
+                                                contenteditable="true">
+                                                {% if cell_data.formula %}
+                                                    <span class="text-muted small">{{ cell_data.formula }}</span>
+                                                {% else %}
+                                                    {{ cell_data.value|default:'' }}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.editable-cell {
+    min-width: 100px;
+    min-height: 30px;
+    padding: 8px !important;
+    position: relative;
+}
+
+.editable-cell:focus {
+    outline: 2px solid #007bff;
+    background-color: #f8f9fa;
+}
+
+.editable-cell.changed {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+}
+
+.editable-cell.formula {
+    background-color: #e7f3ff;
+    border-color: #007bff;
+}
+
+.table-responsive {
+    border: 1px solid #dee2e6;
+}
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#saveStatus {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    min-width: 300px;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('excelTable');
+    const saveBtn = document.getElementById('saveBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const saveStatus = document.getElementById('saveStatus');
+    const saveMessage = document.getElementById('saveMessage');
+    
+    let changes = [];
+    let isSaving = false;
+    
+    // Track changes in cells
+    table.addEventListener('input', function(e) {
+        if (e.target.classList.contains('editable-cell')) {
+            const cell = e.target;
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+            const originalValue = cell.dataset.originalValue;
+            const currentValue = cell.textContent.trim();
+            
+            // Remove existing change for this cell
+            changes = changes.filter(change => !(change.row === row && change.col === col));
+            
+            // Add new change if different from original
+            if (currentValue !== originalValue) {
+                changes.push({
+                    row: row,
+                    col: col,
+                    value: currentValue
+                });
+                cell.classList.add('changed');
+            } else {
+                cell.classList.remove('changed');
+            }
+            
+            // Enable/disable save button
+            saveBtn.disabled = changes.length === 0 || isSaving;
+        }
+    });
+    
+    // Save changes
+    saveBtn.addEventListener('click', function() {
+        if (changes.length === 0 || isSaving) return;
+        
+        isSaving = true;
+        saveBtn.disabled = true;
+        saveStatus.style.display = 'block';
+        saveMessage.textContent = 'Saving changes...';
+        
+        fetch(`{% url 'save_excel_changes' filename %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ changes: changes })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                saveMessage.innerHTML = '<i class="fas fa-check me-2"></i>' + data.message;
+                saveStatus.className = 'alert alert-success';
+                
+                // Remove changed class from all cells
+                document.querySelectorAll('.changed').forEach(cell => {
+                    cell.classList.remove('changed');
+                    cell.dataset.originalValue = cell.textContent.trim();
+                });
+                
+                changes = [];
+                saveBtn.disabled = true;
+                
+                // Hide status after 3 seconds
+                setTimeout(() => {
+                    saveStatus.style.display = 'none';
+                    saveStatus.className = 'alert alert-info';
+                }, 3000);
+            } else {
+                saveMessage.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Error: ' + data.error;
+                saveStatus.className = 'alert alert-danger';
+            }
+        })
+        .catch(error => {
+            saveMessage.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Error: ' + error;
+            saveStatus.className = 'alert alert-danger';
+        })
+        .finally(() => {
+            isSaving = false;
+            saveBtn.disabled = changes.length === 0;
+        });
+    });
+    
+    // Reset changes
+    resetBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to reset all changes? This will restore the original values.')) {
+            document.querySelectorAll('.editable-cell').forEach(cell => {
+                const originalValue = cell.dataset.originalValue;
+                cell.textContent = originalValue;
+                cell.classList.remove('changed');
+            });
+            changes = [];
+            saveBtn.disabled = true;
+        }
+    });
+    
+    // Auto-save every 30 seconds if there are changes
+    setInterval(function() {
+        if (changes.length > 0 && !isSaving) {
+            saveBtn.click();
+        }
+    }, 30000);
+    
+    // Handle formula cells
+    document.querySelectorAll('.editable-cell').forEach(cell => {
+        if (cell.dataset.formula) {
+            cell.classList.add('formula');
+            cell.title = 'Formula: ' + cell.dataset.formula;
+        }
+    });
+    
+    // Prevent editing formula cells
+    document.querySelectorAll('.formula').forEach(cell => {
+        cell.addEventListener('focus', function(e) {
+            e.preventDefault();
+            alert('This cell contains a formula and cannot be edited directly. Please download the file for complex edits.');
+            cell.blur();
+        });
+    });
+});
+</script>
+{% endblock %}

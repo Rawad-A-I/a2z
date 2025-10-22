@@ -1,0 +1,211 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Close Cash Management{% endblock %}
+
+{% block start %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-file-excel text-warning me-2"></i>Close Cash Management</h2>
+                    <p class="text-muted mb-0">Manage your daily close cash Excel sheets</p>
+                </div>
+                <div>
+                    <a href="{% url 'employee_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Info Alert -->
+            <div class="alert alert-info mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+                    <div>
+                        <h6 class="mb-1"><strong>Close Cash System</strong></h6>
+                        <p class="mb-0">
+                            {% if is_admin %}
+                                As an admin, you can view and edit all employee files plus the master "A to Z Format" analytics file.
+                            {% else %}
+                                View and edit your personal close cash Excel sheet. You can edit directly in the browser or download for offline editing.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Files Grid -->
+            {% if files %}
+                <div class="row">
+                    {% for file in files %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm {% if file.is_master %}border-warning{% endif %}">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            {% if file.is_master %}
+                                                <i class="fas fa-chart-line fa-2x text-warning"></i>
+                                            {% else %}
+                                                <i class="fas fa-file-excel fa-2x text-success"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title mb-1">
+                                                {{ file.display_name }}
+                                                {% if file.is_master %}
+                                                    <span class="badge bg-warning text-dark ms-2">Master Analytics</span>
+                                                {% endif %}
+                                            </h5>
+                                            <p class="text-muted mb-0 small">
+                                                {% if file.is_master %}
+                                                    Master file with INDIRECT formulas
+                                                {% else %}
+                                                    Employee close cash sheet
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'view_excel_file' file.filename %}" class="btn btn-primary">
+                                            <i class="fas fa-edit me-2"></i>View & Edit
+                                        </a>
+                                        <a href="{% url 'download_excel_file' file.filename %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-download me-2"></i>Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- No Files Available -->
+                <div class="text-center py-5">
+                    <i class="fas fa-file-excel fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Excel Files Available</h4>
+                    <p class="text-muted">
+                        {% if is_admin %}
+                            No close cash files found in the system.
+                        {% else %}
+                            Your close cash Excel file is not available. Please contact your administrator.
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+
+            <!-- Upload Section (for employees) -->
+            {% if not is_admin and files %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-upload"></i> Upload Modified File</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-3">
+                                    If you've made complex changes to your Excel file offline, you can upload the modified file here.
+                                </p>
+                                <form id="uploadForm" enctype="multipart/form-data">
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="fileInput" accept=".xlsx" required>
+                                        <button class="btn btn-warning" type="submit" id="uploadBtn">
+                                            <i class="fas fa-upload me-2"></i>Upload
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.border-warning {
+    border-color: #ffc107 !important;
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
+
+<script>
+// Upload functionality
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Please select a file to upload.');
+        return;
+    }
+    
+    if (!file.name.endsWith('.xlsx')) {
+        alert('Please select a valid Excel file (.xlsx).');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Disable button and show loading
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Uploading...';
+    
+    // Get the first available file for upload
+    const firstFile = {{ files.0.filename|default:"null" }};
+    if (!firstFile) {
+        alert('No file available for upload.');
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload me-2"></i>Upload';
+        return;
+    }
+    
+    fetch(`{% url 'upload_excel_file' 'PLACEHOLDER' %}`.replace('PLACEHOLDER', firstFile), {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('File uploaded successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error uploading file: ' + error);
+    })
+    .finally(() => {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload me-2"></i>Upload';
+    });
+});
+</script>
+{% endblock %}
