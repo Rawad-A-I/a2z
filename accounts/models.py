@@ -140,7 +140,7 @@ class Coupon(BaseModel):
 class Cart(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart", null=True, blank=True)
     session_key = models.CharField(max_length=40, null=True, blank=True, help_text="Session key for anonymous users")
-    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
+    coupon = models.ForeignKey('accounts.Coupon', on_delete=models.SET_NULL, null=True, blank=True)
     is_paid = models.BooleanField(default=False)
     
     class Meta:
