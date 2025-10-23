@@ -236,6 +236,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentSheet = sheetNames[0];
     let hot = null;
     
+    // Debug logging
+    console.log('All sheets data:', allSheetsData);
+    console.log('Sheet names:', sheetNames);
+    console.log('Current sheet:', currentSheet);
+    
     // Track changes
     let changes = [];
     let isSaving = false;
@@ -247,7 +252,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize sheet
     function initializeSheet(sheetName) {
+        console.log('Initializing sheet:', sheetName);
+        
         const sheetData = allSheetsData[sheetName];
+        if (!sheetData) {
+            console.error('No data found for sheet:', sheetName);
+            alert('Error: No data found for sheet ' + sheetName);
+            return;
+        }
+        
+        console.log('Sheet data rows:', sheetData.length);
         
         // Extract just values for Handsontable
         const tableData = sheetData.map(row => 
@@ -271,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 copyPaste: true,
                 undo: true,
                 search: true,
-                height: '100%',
+                height: 600,  // CHANGE FROM '100%' to fixed pixels
                 width: '100%',
                 stretchH: 'all',
                 licenseKey: 'non-commercial-and-evaluation',
@@ -291,6 +305,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+        }
+        
+        // Add initialization success check
+        if (hot) {
+            console.log('Handsontable initialized successfully');
+            console.log('Data loaded:', hot.countRows(), 'rows x', hot.countCols(), 'cols');
+        } else {
+            console.error('Failed to initialize Handsontable');
         }
         
         // Mark formula cells with different styling

@@ -144,6 +144,11 @@ def view_excel_file(request, filename):
                     })
                 sheet_data.append(row_data)
             
+            # Ensure data has valid structure - add empty row if sheet is completely empty
+            if not sheet_data or len(sheet_data) == 0:
+                # Add at least one empty row if sheet is completely empty
+                sheet_data = [[{'value': '', 'hasFormula': False}] * 10]
+            
             all_sheets_data[sheet_name] = sheet_data
         
         # Get file stats
@@ -155,7 +160,7 @@ def view_excel_file(request, filename):
             'display_name': file_info['display_name'],
             'is_master': file_info['is_master'],
             'all_sheets_data': json.dumps(all_sheets_data),
-            'sheet_names': sheet_names,
+            'sheet_names': json.dumps(sheet_names),  # ADD JSON SERIALIZATION
             'active_sheet': sheet_names[0],
             'last_modified': last_modified,
             'file_size': file_stats.st_size,
