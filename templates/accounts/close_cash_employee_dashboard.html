@@ -74,10 +74,17 @@
                                                                     </small>
                                                                 </div>
                                                             </div>
-                                                            <div class="d-grid">
+                                                            <div class="d-grid gap-2">
                                                                 <a href="{% url 'employee_edit_close_cash_form' submission.sheet_name %}" class="btn btn-outline-primary btn-sm">
                                                                     <i class="fas fa-edit me-1"></i>View/Edit
                                                                 </a>
+                                                                <!-- Add Delete Button (admin only) -->
+                                                                <button class="btn btn-outline-danger btn-sm delete-submission-btn" 
+                                                                        data-sheet-name="{{ submission.sheet_name }}"
+                                                                        data-username="{{ username }}"
+                                                                        data-date="{{ date }}">
+                                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -157,4 +164,44 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete submission
+    const deleteButtons = document.querySelectorAll('.delete-submission-btn');
+    
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const sheetName = this.dataset.sheetName;
+            const username = this.dataset.username;
+            const date = this.dataset.date;
+            
+            // Confirm deletion
+            if (confirm(`Are you sure you want to delete ${username}'s submission for ${date}?\n\nThis action cannot be undone.`)) {
+                // Send delete request
+                fetch(`/accounts/employee/close-cash/forms/${sheetName}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        // Reload page to refresh submission list
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    alert('Error deleting submission: ' + error);
+                });
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

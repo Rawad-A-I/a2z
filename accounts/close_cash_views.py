@@ -926,3 +926,33 @@ def upload_excel_file(request, filename):
         
     except Exception as e:
         return JsonResponse({'error': f'Error uploading file: {str(e)}'}, status=500)
+
+
+@login_required
+@require_POST
+def employee_delete_submission(request, sheet_name):
+    """Delete a specific submission (admin only)."""
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Access denied. Admin only.'}, status=403)
+    
+    try:
+        # Find and delete the submission by sheet_name
+        entry = CloseCashEntry.objects.get(
+            workbook='Employee_Close_Cash.xlsx',
+            sheet_name=sheet_name
+        )
+        
+        username = entry.user.username
+        entry_date = entry.entry_date.strftime('%Y-%m-%d')
+        
+        entry.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Submission deleted successfully for {username} on {entry_date}'
+        })
+        
+    except CloseCashEntry.DoesNotExist:
+        return JsonResponse({'error': 'Submission not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'Error deleting submission: {str(e)}'}, status=500)

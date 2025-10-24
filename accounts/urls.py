@@ -90,6 +90,7 @@ urlpatterns = [
     # Employee Close Cash Forms (all 4 employees)
     path('employee/close-cash/forms/', employee_forms_dashboard, name='employee_forms_dashboard'),
     path('employee/close-cash/forms/export/', employee_export_excel, name='employee_export_excel'),  # Must be BEFORE sheet_name pattern
+    path('employee/close-cash/forms/<str:sheet_name>/delete/', employee_delete_submission, name='employee_delete_submission'),  # Add this
     path('employee/close-cash/forms/<str:sheet_name>/', employee_edit_close_cash_form, name='employee_edit_close_cash_form'),
     path('employee/close-cash/forms/<str:sheet_name>/submit/', employee_submit_close_cash_form, name='employee_submit_close_cash_form'),
     
