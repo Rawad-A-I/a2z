@@ -619,36 +619,38 @@ def employee_export_excel(request):
             
             # General Section (A2:B5 - no header)
             row = 2  # Start at row 2
+            general_data = data.get('general', {})
             ws.cell(row, 1, "Black Market Daily Rate")
-            ws.cell(row, 2, data.get('black_market_daily_rate', ''))
+            ws.cell(row, 2, general_data.get('black_market_daily_rate', ''))
             row += 1
             ws.cell(row, 1, "Cashier Name")
-            ws.cell(row, 2, data.get('cashier_name', ''))
+            ws.cell(row, 2, general_data.get('cashier_name', ''))
             row += 1
             ws.cell(row, 1, "Date")
-            ws.cell(row, 2, data.get('date', ''))
+            ws.cell(row, 2, general_data.get('date', ''))
             row += 1
             ws.cell(row, 1, "Shift Time")
-            ws.cell(row, 2, data.get('shift_time', ''))
+            ws.cell(row, 2, general_data.get('shift_time', ''))
             row += 2  # Add space before next section
             
             # Special Credit Section
             ws.cell(row, 1, "Special Credit").font = section_font
             row += 1
+            special_credit_data = data.get('special_credit', {})
             ws.cell(row, 1, "Rayan Invoices Credit")
-            ws.cell(row, 2, data.get('rayan_invoices_credit', ''))
+            ws.cell(row, 2, special_credit_data.get('rayan_invoices_credit', ''))
             row += 1
             ws.cell(row, 1, "Employee Invoice Credit")
-            ws.cell(row, 2, data.get('employee_invoice_credit', ''))
+            ws.cell(row, 2, special_credit_data.get('employee_invoice_credit', ''))
             row += 1
             ws.cell(row, 1, "Delivery Shabeb co.")
-            ws.cell(row, 2, data.get('delivery_shabeb_co', ''))
+            ws.cell(row, 2, special_credit_data.get('delivery_shabeb_co', ''))
             row += 1
             ws.cell(row, 1, "Delivery Employee")
-            ws.cell(row, 2, data.get('delivery_employee', ''))
+            ws.cell(row, 2, special_credit_data.get('delivery_employee', ''))
             row += 1
             ws.cell(row, 1, "Waste Goods")
-            ws.cell(row, 2, data.get('waste_goods', ''))
+            ws.cell(row, 2, special_credit_data.get('waste_goods', ''))
             row += 1
             ws.cell(row, 1, "Special Credit Total")
             ws.cell(row, 2, data.get('special_credit_total', ''))
@@ -660,12 +662,13 @@ def employee_export_excel(request):
             ws.cell(2, 6, "Total")
 
             # Bills (D3:F7)
+            lebanese_cash_data = data.get('lebanese_cash', {})
             lbp_bills = [
-                ('5,000', data.get('lebanese_5000_qty', 0), 5000),
-                ('10,000', data.get('lebanese_10000_qty', 0), 10000),
-                ('20,000', data.get('lebanese_20000_qty', 0), 20000),
-                ('50,000', data.get('lebanese_50000_qty', 0), 50000),
-                ('100,000', data.get('lebanese_100000_qty', 0), 100000),
+                ('5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
+                ('10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
+                ('20,000', lebanese_cash_data.get('lebanese_20000_qty', 0), 20000),
+                ('50,000', lebanese_cash_data.get('lebanese_50000_qty', 0), 50000),
+                ('100,000', lebanese_cash_data.get('lebanese_100000_qty', 0), 100000),
             ]
 
             lbp_row = 3
@@ -686,17 +689,18 @@ def employee_export_excel(request):
             
             # Dollar Cash Section (H2:I11)
             # Header - Rate
+            dollar_cash_data = data.get('dollar_cash', {})
             ws.cell(2, 8, "Rate")
-            ws.cell(2, 9, data.get('dollar_rate', 0))
+            ws.cell(2, 9, dollar_cash_data.get('dollar_rate', 0))
 
             # Bills (H3:I8) - 6 denominations
             dollar_bills = [
-                ('1', data.get('dollar_1_qty', 0), 1),
-                ('5', data.get('dollar_5_qty', 0), 5),
-                ('10', data.get('dollar_10_qty', 0), 10),
-                ('20', data.get('dollar_20_qty', 0), 20),
-                ('50', data.get('dollar_50_qty', 0), 50),
-                ('100', data.get('dollar_100_qty', 0), 100),
+                ('1', dollar_cash_data.get('dollar_1_qty', 0), 1),
+                ('5', dollar_cash_data.get('dollar_5_qty', 0), 5),
+                ('10', dollar_cash_data.get('dollar_10_qty', 0), 10),
+                ('20', dollar_cash_data.get('dollar_20_qty', 0), 20),
+                ('50', dollar_cash_data.get('dollar_50_qty', 0), 50),
+                ('100', dollar_cash_data.get('dollar_100_qty', 0), 100),
             ]
 
             dollar_row = 3
@@ -714,7 +718,7 @@ def employee_export_excel(request):
 
             # H10:I10 - empty
             # H11:I11 - Total in Lebanese
-            dollar_rate = data.get('dollar_rate', 0)
+            dollar_rate = dollar_cash_data.get('dollar_rate', 0)
             dollar_total_lbp = dollar_total_usd * dollar_rate
             ws.cell(11, 8, "total in lebanese")
             ws.cell(11, 9, dollar_total_lbp)
