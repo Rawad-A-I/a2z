@@ -82,10 +82,22 @@ def close_cash_dashboard(request):
     # Show Rawad entrypoint for Rawad/admin, blank for others
     context = {}
     if is_rawad_or_admin(request.user):
-        # Get available date sheets for Rawad
-        schemas = CloseCashSchema.objects.filter(workbook__iexact='Rawad.xlsx').order_by('sheet_name')
-        context['rawad_schemas'] = schemas
-        context['show_rawad_entry'] = True
+        # Check if Rawad.xlsx exists
+        rawad_path = os.path.join(get_close_cash_directory(), 'Rawad.xlsx')
+        if os.path.exists(rawad_path):
+            try:
+                # Get sheet names directly from Excel
+                from openpyxl import load_workbook
+                wb = load_workbook(rawad_path, data_only=True)
+                sheet_names = wb.sheetnames
+                context['rawad_schemas'] = sheet_names
+                context['show_rawad_entry'] = True
+            except Exception as e:
+                context['rawad_error'] = f'Error reading Rawad.xlsx: {str(e)}'
+                context['show_rawad_entry'] = True
+        else:
+            context['rawad_error'] = 'Rawad.xlsx file not found'
+            context['show_rawad_entry'] = True
     
     return render(request, 'accounts/close_cash_dashboard.html', context)
 
