@@ -610,6 +610,11 @@ document.addEventListener('DOMContentLoaded', function() {
         data.cash_out_of_hand = data.special_credit_total + data.credit_grand_total;
         data.grand_total = data.cash_in_hand_dollar + data.cash_in_hand_lebanese + data.cash_out_of_hand;
         
+        // Log the data structure before sending
+        console.log('Submitting data:', JSON.stringify(data, null, 2));
+        console.log('Entry date:', document.getElementById('entryDate').value);
+        console.log('Sheet name from URL:', window.location.pathname);
+        
         // Submit via AJAX
         fetch(window.location.pathname + 'submit/', {
             method: 'POST',
@@ -622,8 +627,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 entry_date: document.getElementById('entryDate').value
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
             if (data.success) {
                 document.getElementById('statusBox').className = 'alert alert-success';
                 document.getElementById('statusBox').innerHTML = '<i class="fas fa-check me-2"></i>Saved successfully';
@@ -633,17 +642,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     setTimeout(() => {
                         window.location.href = data.redirect_url;
                     }, 1000);
+                } else {
+                    // For edit mode, scroll to top to see success message
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } else {
                 document.getElementById('statusBox').className = 'alert alert-danger';
                 document.getElementById('statusBox').innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>' + (data.error || 'Error saving');
                 document.getElementById('statusBox').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         })
         .catch(error => {
+            console.error('Fetch error:', error);
             document.getElementById('statusBox').className = 'alert alert-danger';
             document.getElementById('statusBox').innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Error: ' + error;
             document.getElementById('statusBox').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
 });

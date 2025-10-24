@@ -492,13 +492,18 @@ def employee_submit_close_cash_form(request, sheet_name):
         entry_date_obj = timezone.now().date()
     
     # Clean up dynamic list data - remove empty entries
-    dynamic_list_keys = ['credit']
+    dynamic_list_keys = ['credit', 'coffee_machine']
 
     for key in dynamic_list_keys:
         if key in data and isinstance(data[key], list):
-            # Filter out empty entries
-            data[key] = [entry for entry in data[key] if entry and
-                        (entry.get('amount') or entry.get('name'))]
+            if key == 'credit':
+                # Filter out empty credit entries
+                data[key] = [entry for entry in data[key] if entry and
+                            (entry.get('amount') or entry.get('name'))]
+            elif key == 'coffee_machine':
+                # Filter out empty coffee machine entries
+                data[key] = [entry for entry in data[key] if entry and
+                            (entry.get('current_amount') or entry.get('daily_add') or entry.get('tag'))]
 
     # Validate required calculations are present
     calculated_fields = [
@@ -531,14 +536,20 @@ def employee_submit_close_cash_form(request, sheet_name):
             created = True
         else:
             # Edit existing - find by sheet_name (allows admin to edit any submission)
-            entry = CloseCashEntry.objects.get(
-                workbook='Employee_Close_Cash.xlsx',
-                sheet_name=sheet_name
-            )
-            entry.entry_date = entry_date_obj
-            entry.data_json = data
-            entry.save()
-            created = False
+            try:
+                entry = CloseCashEntry.objects.get(
+                    workbook='Employee_Close_Cash.xlsx',
+                    sheet_name=sheet_name
+                )
+                entry.entry_date = entry_date_obj
+                entry.data_json = data
+                entry.save()
+                created = False
+            except CloseCashEntry.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Submission with sheet_name "{sheet_name}" not found'
+                }, status=404)
         
         action = 'created' if created else 'updated'
         
