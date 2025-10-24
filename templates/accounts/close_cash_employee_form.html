@@ -150,6 +150,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalKey = fields[1]?.key;
         const listData = values[sectionKey] || [];
         
+        // Check if we have a total field to render
+        const hasTotalField = fields[1] && fields[1].label;
+        
         sectionDiv.innerHTML = `
             <div class="accordion-item">
                 <h2 class="accordion-header" id="heading-${sectionIndex}">
@@ -169,13 +172,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             </button>
                         </div>
                         <div id="dynamic-list-${sectionKey}" class="mb-3"></div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">${section.fields[1].label}</label>
-                                <input type="number" class="form-control" name="${totalKey}" readonly 
-                                       style="background-color: #f8f9fa; border-color: #dee2e6;" />
+                        ${hasTotalField ? `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">${fields[1].label}</label>
+                                    <input type="number" class="form-control" name="${totalKey}" readonly 
+                                           style="background-color: #f8f9fa; border-color: #dee2e6;" />
+                                </div>
                             </div>
-                        </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>
