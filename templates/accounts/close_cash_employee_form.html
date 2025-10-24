@@ -347,17 +347,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getDynamicListData(sectionKey) {
         const container = document.getElementById(`dynamic-list-${sectionKey}`);
+        if (!container) return [];
+        
         const entries = [];
         const rows = container.querySelectorAll('.row.mb-2');
         
         rows.forEach(row => {
-            const amount = row.querySelector('input[name$="[amount]"]')?.value;
-            const currency = row.querySelector('select[name$="[currency]"]')?.value;
-            const name = row.querySelector('input[name$="[name]"]')?.value;
-            
-            // For Credit section, also get the tag field
-            if (sectionKey === 'credit') {
+            // Handle Coffee Machine section (different field structure)
+            if (sectionKey === 'coffee_machine') {
+                const currentAmount = row.querySelector('input[name$="[current_amount]"]')?.value;
+                const dailyAdd = row.querySelector('input[name$="[daily_add]"]')?.value;
                 const tag = row.querySelector('select[name$="[tag]"]')?.value;
+                
+                if (currentAmount || dailyAdd || tag) {
+                    entries.push({
+                        current_amount: parseFloat(currentAmount) || 0,
+                        daily_add: parseFloat(dailyAdd) || 0,
+                        tag: tag || ''
+                    });
+                }
+            }
+            // Handle Credit section (has amount, currency, tag, name)
+            else if (sectionKey === 'credit') {
+                const amount = row.querySelector('input[name$="[amount]"]')?.value;
+                const currency = row.querySelector('select[name$="[currency]"]')?.value;
+                const tag = row.querySelector('select[name$="[tag]"]')?.value;
+                const name = row.querySelector('input[name$="[name]"]')?.value;
                 
                 if (amount || currency || name || tag) {
                     entries.push({
@@ -367,7 +382,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         name: name || ''
                     });
                 }
-            } else {
+            }
+            // Handle other dynamic list sections (generic fallback)
+            else {
+                const amount = row.querySelector('input[name$="[amount]"]')?.value;
+                const currency = row.querySelector('select[name$="[currency]"]')?.value;
+                const name = row.querySelector('input[name$="[name]"]')?.value;
+                
                 if (amount || currency || name) {
                     entries.push({
                         amount: parseFloat(amount) || 0,
@@ -600,6 +621,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Explicitly collect dynamic list data for Credit section
         data['credit'] = getDynamicListData('credit');
+        
+        // Explicitly collect dynamic list data for Coffee Machine section
+        data['coffee_machine'] = getDynamicListData('coffee_machine');
 
         const payload = {
             data: data,
