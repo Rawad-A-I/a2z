@@ -355,12 +355,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const currency = row.querySelector('select[name$="[currency]"]')?.value;
             const name = row.querySelector('input[name$="[name]"]')?.value;
             
-            if (amount || currency || name) {
-                entries.push({
-                    amount: parseFloat(amount) || 0,
-                    currency: currency || 'lebanese',
-                    name: name || ''
-                });
+            // For Credit section, also get the tag field
+            if (sectionKey === 'credit') {
+                const tag = row.querySelector('select[name$="[tag]"]')?.value;
+                
+                if (amount || currency || name || tag) {
+                    entries.push({
+                        amount: parseFloat(amount) || 0,
+                        currency: currency || 'lebanese',
+                        tag: tag || '',
+                        name: name || ''
+                    });
+                }
+            } else {
+                if (amount || currency || name) {
+                    entries.push({
+                        amount: parseFloat(amount) || 0,
+                        currency: currency || 'lebanese',
+                        name: name || ''
+                    });
+                }
             }
         });
         
@@ -419,7 +433,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update individual tag totals
         Object.keys(tagTotals).forEach(tag => {
-            const fieldName = tag.toLowerCase().replace(' ', '_').replace('oth', 'oth');
+            // Map tag names to field names
+            const fieldNameMap = {
+                'Cash purchase': 'cash_purchase',
+                'Credit invoices': 'credit_invoices',
+                'Employee OTH': 'employee_oth',
+                'Customer OTH': 'customer_oth',
+                'Bar OTH': 'bar_oth',
+                'Store': 'store'
+            };
+            const fieldName = fieldNameMap[tag];
             const totalField = document.querySelector(`input[name="${fieldName}_total"]`);
             if (totalField) {
                 totalField.value = tagTotals[tag].toFixed(2);
