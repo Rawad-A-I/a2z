@@ -381,8 +381,14 @@ def employee_forms_dashboard(request):
             date_key = entry.entry_date.strftime('%Y-%m-%d')
             submissions_by_user[username][date_key].append(entry)
         
+        # Convert nested defaultdict to regular dict (both levels)
+        submissions_by_user_dict = {
+            username: dict(dates_dict) 
+            for username, dates_dict in submissions_by_user.items()
+        }
+        
         context = {
-            'submissions_by_user': dict(submissions_by_user),
+            'submissions_by_user': submissions_by_user_dict,
             'is_admin': True,
             'workbook_name': 'Employee_Close_Cash.xlsx',
         }
