@@ -13,14 +13,18 @@ python manage.py create_superuser
 echo "Running database migrations..."
 python manage.py migrate --noinput || true
 
-# Import Close Cash schemas if Close Cash folder exists
-echo "Importing Close Cash schemas..."
-if [ -d "Close Cash" ]; then
-    echo "Close Cash folder found, importing schemas..."
-    python manage.py import_close_cash_from_excel || echo "Close Cash import failed, continuing..."
-else
-    echo "Close Cash folder not found, skipping import..."
-fi
+# Fake the 0033 migration if tables already exist
+echo "Checking for existing Close Cash tables..."
+python manage.py migrate accounts 0033_close_cash_models --fake || echo "Migration 0033 already applied or not needed"
+
+# Import Close Cash schemas if Close Cash folder exists (DISABLED - using new employee forms system)
+# echo "Importing Close Cash schemas..."
+# if [ -d "Close Cash" ]; then
+#     echo "Close Cash folder found, importing schemas..."
+#     python manage.py import_close_cash_from_excel || echo "Close Cash import failed, continuing..."
+# else
+#     echo "Close Cash folder not found, skipping import..."
+# fi
 
 # Collect static files
 echo "Collecting static files..."
