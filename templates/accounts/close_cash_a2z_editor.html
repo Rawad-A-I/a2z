@@ -1,0 +1,150 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}A to Z Master - Editable{% endblock %}
+
+{% block start %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-chart-line text-warning me-2"></i>{{ master_filename }}</h2>
+                    <p class="text-muted mb-0">Editable mirror of the master workbook</p>
+                </div>
+                <div>
+                    <a href="{% url 'close_cash_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back
+                    </a>
+                </div>
+            </div>
+
+            <div id="statusBox" class="alert" style="display:none;"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Workbook</h5>
+                </div>
+                <div class="card-body">
+                    <div class="sheet-tabs" id="sheetTabs"></div>
+                    <div id="gridContainer" style="height:70vh; width:100%;"></div>
+                    <button id="saveBtn" class="btn btn-success mt-3"><i class="fas fa-save me-2"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+<script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mapping = {{ mapping_json|safe }};
+    const container = document.getElementById('gridContainer');
+    const tabs = document.getElementById('sheetTabs');
+    const saveBtn = document.getElementById('saveBtn');
+    const statusBox = document.getElementById('statusBox');
+    let currentSheet = Object.keys(mapping)[0];
+    let hot = null;
+
+    function showStatus(kind, html) {
+        statusBox.className = `alert alert-${kind}`;
+        statusBox.innerHTML = html;
+        statusBox.style.display = 'block';
+        if (kind === 'success') {
+            setTimeout(() => { statusBox.style.display = 'none'; }, 3000);
+        }
+    }
+
+    function renderTabs() {
+        tabs.innerHTML = '';
+        Object.keys(mapping).forEach(name => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-sm ' + (name === currentSheet ? 'btn-primary' : 'btn-outline-primary');
+            btn.textContent = name;
+            btn.style.marginRight = '6px';
+            btn.addEventListener('click', () => {
+                currentSheet = name;
+                renderTabs();
+                renderGrid();
+            });
+            tabs.appendChild(btn);
+        });
+    }
+
+    function renderGrid() {
+        const { schema, values } = mapping[currentSheet];
+        if (!schema || !schema.fields) return;
+
+        if (schema.mode === 'kv') {
+            const rows = schema.fields.map(f => [f.label || f.key, values[f.key] || '']);
+            const headers = ['Field', 'Value'];
+            initHot(rows, headers);
+        } else {
+            // table mode: single data row
+            const headers = schema.fields.map(f => f.label || f.key);
+            const row = schema.fields.map(f => values[f.key] || '');
+            initHot([row], headers);
+        }
+    }
+
+    function initHot(rows, headers) {
+        if (hot) {
+            hot.loadData(rows);
+            hot.updateSettings({ colHeaders: headers });
+            return;
+        }
+        hot = new Handsontable(container, {
+            data: rows,
+            rowHeaders: true,
+            colHeaders: headers,
+            contextMenu: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            height: 600,
+            width: '100%',
+            stretchH: 'all',
+            licenseKey: 'non-commercial-and-evaluation',
+        });
+    }
+
+    saveBtn.addEventListener('click', function() {
+        const { schema } = mapping[currentSheet];
+        const rows = hot.getData();
+        let data = {};
+        if (schema.mode === 'kv') {
+            schema.fields.forEach((f, i) => { data[f.key] = rows[i] ? rows[i][1] : null; });
+        } else {
+            const row = rows[0] || [];
+            schema.fields.forEach((f, i) => { data[f.key] = row[i] || null; });
+        }
+
+        fetch(window.location.pathname, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ sheet_name: currentSheet, data: data })
+        }).then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                showStatus('success', '<i class="fas fa-check me-2"></i>Saved successfully');
+            } else {
+                showStatus('danger', res.error || 'Unknown error');
+            }
+        }).catch(err => {
+            showStatus('danger', 'Error: ' + err);
+        });
+    });
+
+    renderTabs();
+    renderGrid();
+});
+</script>
+
+{% csrf_token %}
+{% endblock %}
+
+

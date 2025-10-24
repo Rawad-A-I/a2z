@@ -667,3 +667,56 @@ class PhoneVerification(BaseModel):
     
     def __str__(self):
         return f"{self.user.username} - {self.phone_number} verification"
+
+
+# Close Cash models
+class CloseCashSchema(BaseModel):
+    """Detected schema per workbook and sheet (date)."""
+    workbook = models.CharField(max_length=100)  # e.g., "Ahmad.xlsx"
+    sheet_name = models.CharField(max_length=100)  # typically date label
+    schema_json = models.JSONField(default=dict)  # field definitions
+    version = models.CharField(max_length=20, default="v1")
+
+    class Meta:
+        unique_together = ["workbook", "sheet_name", "version"]
+        indexes = [
+            models.Index(fields=["workbook", "sheet_name"]),
+        ]
+
+    def __str__(self):
+        return f"Schema {self.workbook} / {self.sheet_name} ({self.version})"
+
+
+class CloseCashEntry(BaseModel):
+    """One submission per user/sheet/date with arbitrary fields in JSON."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="close_cash_entries")
+    workbook = models.CharField(max_length=100)
+    sheet_name = models.CharField(max_length=100)
+    entry_date = models.DateField()
+    data_json = models.JSONField(default=dict)
+    source_version = models.CharField(max_length=20, default="v1")
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "entry_date"]),
+            models.Index(fields=["workbook", "sheet_name"]),
+        ]
+        unique_together = [
+            ("user", "workbook", "sheet_name", "entry_date", "source_version"),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} {self.workbook} {self.sheet_name} {self.entry_date}"
+
+
+class A2ZSnapshot(BaseModel):
+    """Optional snapshot of the A to Z master workbook (for audit/history)."""
+    snapshot_at = models.DateTimeField(auto_now_add=True)
+    data_json = models.JSONField(default=dict)
+    note = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        ordering = ["-snapshot_at"]
+
+    def __str__(self):
+        return f"A2Z Snapshot {self.snapshot_at.isoformat()}"

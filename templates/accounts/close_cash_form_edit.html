@@ -1,0 +1,156 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Close Cash - {{ sheet_name }}{% endblock %}
+
+{% block start %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-file-alt text-warning me-2"></i>{{ sheet_name }}</h2>
+                    <p class="text-muted mb-0">Fill in the required details and submit</p>
+                </div>
+                <div>
+                    <a href="{% url 'close_cash_forms_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>All Forms
+                    </a>
+                </div>
+            </div>
+
+            <div id="statusBox" class="alert" style="display:none;"></div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Form</h5>
+                    <div>
+                        <input type="date" id="entryDate" class="form-control" style="display:inline-block; width:auto;" />
+                        <button id="submitBtn" class="btn btn-success ms-2">
+                            <i class="fas fa-save me-2"></i>Submit
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="dynamicForm">
+                        <div id="formFields" class="row g-3"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const schema = {{ schema|safe }};
+    const values = {{ values|safe }};
+    const sheetName = {{ sheet_name|json_script:"sheetName" }};
+
+    const formFields = document.getElementById('formFields');
+    const statusBox = document.getElementById('statusBox');
+    const submitBtn = document.getElementById('submitBtn');
+    const entryDate = document.getElementById('entryDate');
+
+    function renderField(field) {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'col-md-6';
+
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+
+        const label = document.createElement('label');
+        label.className = 'form-label';
+        label.textContent = field.label || field.key;
+
+        let input = document.createElement('input');
+        input.className = 'form-control';
+        input.name = field.key;
+        input.required = !!field.required;
+        const v = values[field.key];
+
+        switch ((field.type || 'text').toLowerCase()) {
+            case 'number':
+                input.type = 'number';
+                input.step = 'any';
+                if (v !== undefined && v !== null) input.value = v;
+                break;
+            case 'date':
+                input.type = 'date';
+                try {
+                    if (v) {
+                        const d = new Date(v);
+                        if (!isNaN(d)) input.valueAsDate = d;
+                    }
+                } catch (e) {}
+                break;
+            default:
+                input.type = 'text';
+                if (v !== undefined && v !== null) input.value = v;
+        }
+
+        formGroup.appendChild(label);
+        formGroup.appendChild(input);
+        colDiv.appendChild(formGroup);
+        return colDiv;
+    }
+
+    function buildForm() {
+        formFields.innerHTML = '';
+        const fields = schema.fields || [];
+        fields.forEach(f => formFields.appendChild(renderField(f)));
+    }
+
+    function showStatus(kind, html) {
+        statusBox.className = `alert alert-${kind}`;
+        statusBox.innerHTML = html;
+        statusBox.style.display = 'block';
+        if (kind === 'success') {
+            setTimeout(() => { statusBox.style.display = 'none'; }, 3000);
+        }
+    }
+
+    submitBtn.addEventListener('click', function() {
+        const data = {};
+        const inputs = document.querySelectorAll('#dynamicForm input[name]');
+        inputs.forEach(inp => {
+            data[inp.name] = inp.value;
+        });
+
+        const payload = {
+            data: data,
+            entry_date: entryDate.value || null,
+        };
+
+        submitBtn.disabled = true;
+        fetch(window.location.pathname + 'submit/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(payload)
+        }).then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                showStatus('success', '<i class="fas fa-check me-2"></i>Saved successfully');
+            } else if (res.warning) {
+                showStatus('warning', res.warning);
+            } else {
+                showStatus('danger', res.error || 'Unknown error');
+            }
+        }).catch(err => {
+            showStatus('danger', 'Error: ' + err);
+        }).finally(() => {
+            submitBtn.disabled = false;
+        });
+    });
+
+    buildForm();
+});
+</script>
+
+{% csrf_token %}
+{% endblock %}
+
+

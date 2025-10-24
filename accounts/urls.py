@@ -77,12 +77,20 @@ urlpatterns = [
     path('employee/order/<str:order_id>/update-status/', update_order_status, name='update_order_status'),
     path('employee/order/<str:order_id>/cancel/', cancel_order, name='cancel_order'),
     
-    # Close Cash Management URLs
+    # Close Cash Management URLs (legacy editor retained for admin/master)
     path('employee/close-cash/', close_cash_dashboard, name='close_cash_dashboard'),
     path('employee/close-cash/view/<str:filename>/', view_excel_file, name='view_excel_file'),
     path('employee/close-cash/save/<str:filename>/', save_excel_changes, name='save_excel_changes'),
     path('employee/close-cash/download/<str:filename>/', download_excel_file, name='download_excel_file'),
     path('employee/close-cash/upload/<str:filename>/', upload_excel_file, name='upload_excel_file'),
+
+    # New: DB-backed Close Cash Forms for employees
+    path('employee/close-cash/forms/', close_cash_form_dashboard, name='close_cash_forms_dashboard'),
+    path('employee/close-cash/forms/<str:sheet_name>/', edit_close_cash_form, name='edit_close_cash_form'),
+    path('employee/close-cash/forms/<str:sheet_name>/submit/', submit_close_cash_form, name='submit_close_cash_form'),
+
+    # New: A to Z master editor (editable mirror)
+    path('employee/close-cash/a2z/', a2z_master_editor, name='a2z_master_editor'),
     
     # Inventory Management URLs
     path('inventory/dashboard/', inventory_dashboard, name='inventory_dashboard'),

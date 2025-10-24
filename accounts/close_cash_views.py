@@ -14,6 +14,15 @@ from django.utils import timezone
 from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
 import mimetypes
+from django.views.decorators.http import require_POST
+from django.db import transaction
+
+from .models import CloseCashSchema, CloseCashEntry, A2ZSnapshot
+from .close_cash_excel import (
+    get_close_cash_directory,
+    build_workbook_schema_and_data,
+    write_values_to_workbook,
+)
 
 
 def is_employee(user):
@@ -170,6 +179,173 @@ def view_excel_file(request, filename):
         
     except Exception as e:
         messages.error(request, f'Error reading Excel file: {str(e)}')
+        return redirect('close_cash_dashboard')
+
+
+# =====================
+# DB-backed Forms (New)
+# =====================
+
+@login_required
+def close_cash_form_dashboard(request):
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+
+    # Determine employee workbook name by username.xlsx
+    employee_filename = f"{request.user.username}.xlsx".lower()
+    schemas = CloseCashSchema.objects.filter(workbook__iexact=employee_filename).order_by('sheet_name')
+    entries = CloseCashEntry.objects.filter(user=request.user, workbook__iexact=employee_filename)
+    latest_by_sheet = {e.sheet_name: e for e in entries}
+
+    context = {
+        'schemas': schemas,
+        'latest_by_sheet': latest_by_sheet,
+        'employee_filename': employee_filename,
+    }
+    return render(request, 'accounts/close_cash_form_dashboard.html', context)
+
+
+@login_required
+def edit_close_cash_form(request, sheet_name):
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+
+    employee_filename = f"{request.user.username}.xlsx".lower()
+    try:
+        schema_obj = CloseCashSchema.objects.get(workbook__iexact=employee_filename, sheet_name=sheet_name, version='v1')
+    except CloseCashSchema.DoesNotExist:
+        messages.error(request, 'Form schema not found for this sheet.')
+        return redirect('close_cash_forms_dashboard')
+
+    # Load latest entry for prefill
+    entry = CloseCashEntry.objects.filter(
+        user=request.user,
+        workbook__iexact=employee_filename,
+        sheet_name=sheet_name,
+        source_version='v1'
+    ).order_by('-created_at').first()
+
+    context = {
+        'sheet_name': sheet_name,
+        'schema': schema_obj.schema_json,
+        'values': entry.data_json if entry else {},
+    }
+    return render(request, 'accounts/close_cash_form_edit.html', context)
+
+
+@login_required
+@require_POST
+@transaction.atomic
+def submit_close_cash_form(request, sheet_name):
+    if not is_employee(request.user):
+        return JsonResponse({'error': 'Access denied'}, status=403)
+
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON payload'}, status=400)
+
+    data = payload.get('data', {})
+    entry_date = payload.get('entry_date')  # ISO date string optional
+    employee_filename = f"{request.user.username}.xlsx".lower()
+
+    try:
+        schema_obj = CloseCashSchema.objects.get(workbook__iexact=employee_filename, sheet_name=sheet_name, version='v1')
+    except CloseCashSchema.DoesNotExist:
+        return JsonResponse({'error': 'Form schema not found'}, status=404)
+
+    # Convert entry_date
+    from django.utils import timezone
+    if entry_date:
+        try:
+            from datetime import date
+            entry_date_obj = timezone.datetime.fromisoformat(entry_date).date()
+        except Exception:
+            return JsonResponse({'error': 'Invalid entry_date'}, status=400)
+    else:
+        entry_date_obj = timezone.now().date()
+
+    # Persist DB entry
+    entry = CloseCashEntry.objects.create(
+        user=request.user,
+        workbook=employee_filename,
+        sheet_name=sheet_name,
+        entry_date=entry_date_obj,
+        data_json=data,
+        source_version='v1',
+    )
+
+    # Sync back to employee workbook
+    try:
+        employee_workbook_path = os.path.join(get_close_cash_directory(), employee_filename)
+        write_values_to_workbook(employee_workbook_path, sheet_name, schema_obj.schema_json, data)
+    except Exception as e:
+        # Do not rollback DB write; report sync failure
+        return JsonResponse({'success': True, 'warning': f'Data saved but Excel sync failed: {str(e)}'})
+
+    return JsonResponse({'success': True, 'message': 'Form saved successfully'})
+
+
+# =====================
+# A to Z Master Editor
+# =====================
+
+@login_required
+def a2z_master_editor(request):
+    if not is_employee(request.user):
+        messages.error(request, 'You do not have employee access.')
+        return redirect('index')
+
+    master_filename = 'A to Z Format.xlsx'
+    master_path = os.path.join(get_close_cash_directory(), master_filename)
+    if not os.path.exists(master_path):
+        if request.method == 'POST':
+            return JsonResponse({'error': 'Master A to Z workbook not found.'}, status=404)
+        else:
+            messages.error(request, 'Master A to Z workbook not found.')
+            return redirect('close_cash_dashboard')
+
+    if request.method == 'POST':
+        # Save edits back to master workbook
+        try:
+            payload = json.loads(request.body.decode('utf-8'))
+            sheet_name = payload.get('sheet_name')
+            data = payload.get('data') or {}
+            if not sheet_name:
+                return JsonResponse({'error': 'sheet_name is required'}, status=400)
+
+            # Rebuild schema for the target sheet, then write values
+            mapping = build_workbook_schema_and_data(master_path)
+            sheet_payload = mapping.get(sheet_name)
+            if not sheet_payload or 'schema' not in sheet_payload:
+                return JsonResponse({'error': 'Schema not found for sheet'}, status=404)
+
+            schema = sheet_payload['schema']
+            write_values_to_workbook(master_path, sheet_name, schema, data)
+
+            # Optional: snapshot full workbook after save
+            try:
+                updated_mapping = build_workbook_schema_and_data(master_path)
+                A2ZSnapshot.objects.create(data_json=updated_mapping, note=f"Edited by {request.user.username}")
+            except Exception:
+                # Snapshot failure should not block save
+                pass
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'error': f'Failed to save: {str(e)}'}, status=500)
+
+    # GET: render editor
+    try:
+        mapping = build_workbook_schema_and_data(master_path)
+        return render(request, 'accounts/close_cash_a2z_editor.html', {
+            'master_filename': master_filename,
+            'mapping_json': json.dumps(mapping),
+        })
+    except Exception as e:
+        messages.error(request, f'Error reading A to Z workbook: {str(e)}')
         return redirect('close_cash_dashboard')
 
 
