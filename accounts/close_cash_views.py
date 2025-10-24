@@ -639,50 +639,70 @@ def employee_export_excel(request):
             ws.cell(row, 2, data.get('special_credit_total', ''))
             row += 2
             
-            # Lebanese Cash Bills
-            ws.cell(row, 1, "Lebanese Cash Bills").font = section_font
-            row += 1
-            lebanese_bills = [
-                ('lebanese_5000_qty', '5,000 LBP'),
-                ('lebanese_10000_qty', '10,000 LBP'),
-                ('lebanese_20000_qty', '20,000 LBP'),
-                ('lebanese_50000_qty', '50,000 LBP'),
-                ('lebanese_100000_qty', '100,000 LBP')
+            # Lebanese Cash Section (D2:F9)
+            # Header
+            ws.cell(2, 4, "LBP.")
+            ws.cell(2, 6, "Total")
+
+            # Bills (D3:F7)
+            lbp_bills = [
+                ('5,000', data.get('lebanese_5000_qty', 0), 5000),
+                ('10,000', data.get('lebanese_10000_qty', 0), 10000),
+                ('20,000', data.get('lebanese_20000_qty', 0), 20000),
+                ('50,000', data.get('lebanese_50000_qty', 0), 50000),
+                ('100,000', data.get('lebanese_100000_qty', 0), 100000),
             ]
-            for key, label in lebanese_bills:
-                qty = data.get(key, 0) or 0
-                value = qty * int(label.split(',')[0].replace(' ', ''))
-                ws.cell(row, 1, f"{label} × {qty} qty = {value:,} LBP")
-                row += 1
-            ws.cell(row, 1, "Lebanese Cash Total")
-            ws.cell(row, 2, data.get('lebanese_cash_total', ''))
-            row += 2
+
+            lbp_row = 3
+            lbp_total = 0
+            for bill_label, qty, denomination in lbp_bills:
+                ws.cell(lbp_row, 4, bill_label)  # D column
+                bill_value = qty * denomination
+                ws.cell(lbp_row, 6, bill_value)  # F column
+                lbp_total += bill_value
+                lbp_row += 1
+
+            # D8:F8 are empty (lbp_row is now 8)
+            lbp_row += 1  # Skip to row 9
+
+            # Total row (D9:F9)
+            ws.cell(lbp_row, 4, "total")
+            ws.cell(lbp_row, 6, lbp_total)
             
-            # Dollar Cash Bills
-            ws.cell(row, 1, "Dollar Cash Bills").font = section_font
-            row += 1
+            # Dollar Cash Section (H2:I11)
+            # Header - Rate
+            ws.cell(2, 8, "Rate")
+            ws.cell(2, 9, data.get('dollar_rate', 0))
+
+            # Bills (H3:I8) - 6 denominations
             dollar_bills = [
-                ('dollar_1_qty', 1),
-                ('dollar_5_qty', 5),
-                ('dollar_10_qty', 10),
-                ('dollar_20_qty', 20),
-                ('dollar_50_qty', 50),
-                ('dollar_100_qty', 100)
+                ('1', data.get('dollar_1_qty', 0), 1),
+                ('5', data.get('dollar_5_qty', 0), 5),
+                ('10', data.get('dollar_10_qty', 0), 10),
+                ('20', data.get('dollar_20_qty', 0), 20),
+                ('50', data.get('dollar_50_qty', 0), 50),
+                ('100', data.get('dollar_100_qty', 0), 100),
             ]
-            for key, denomination in dollar_bills:
-                qty = data.get(key, 0) or 0
-                value = qty * denomination
-                ws.cell(row, 1, f"${denomination} × {qty} qty = ${value}")
-                row += 1
-            ws.cell(row, 1, "Dollar Rate")
-            ws.cell(row, 2, data.get('dollar_rate', ''))
-            row += 1
-            ws.cell(row, 1, "Dollar Cash Total (USD)")
-            ws.cell(row, 2, data.get('dollar_cash_total_usd', ''))
-            row += 1
-            ws.cell(row, 1, "Dollar Cash Total (LBP)")
-            ws.cell(row, 2, data.get('dollar_cash_total_lbp', ''))
-            row += 2
+
+            dollar_row = 3
+            dollar_total_usd = 0
+            for bill_label, qty, denomination in dollar_bills:
+                ws.cell(dollar_row, 8, bill_label)  # H column
+                bill_value = qty * denomination
+                ws.cell(dollar_row, 9, bill_value)  # I column
+                dollar_total_usd += bill_value
+                dollar_row += 1
+
+            # H9:I9 - Total in USD
+            ws.cell(9, 8, "total")
+            ws.cell(9, 9, dollar_total_usd)
+
+            # H10:I10 - empty
+            # H11:I11 - Total in Lebanese
+            dollar_rate = data.get('dollar_rate', 0)
+            dollar_total_lbp = dollar_total_usd * dollar_rate
+            ws.cell(11, 8, "total in lebanese")
+            ws.cell(11, 9, dollar_total_lbp)
             
             # Credit Section with Tags
             ws.cell(row, 1, "Credit").font = section_font
