@@ -432,8 +432,8 @@ def rawad_submit_close_cash_form(request, sheet_name):
     
     try:
         payload = json.loads(request.body.decode('utf-8'))
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON payload'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'Invalid JSON payload: {str(e)}'}, status=400)
     
     data = payload.get('data', {})
     entry_date = payload.get('entry_date')
@@ -444,22 +444,24 @@ def rawad_submit_close_cash_form(request, sheet_name):
         try:
             from datetime import date
             entry_date_obj = timezone.datetime.fromisoformat(entry_date).date()
-        except Exception:
-            return JsonResponse({'error': 'Invalid entry_date'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'Invalid entry_date: {str(e)}'}, status=400)
     else:
         entry_date_obj = timezone.now().date()
     
     # Persist DB entry
-    entry = CloseCashEntry.objects.create(
-        user=request.user,
-        workbook='Rawad.xlsx',
-        sheet_name=sheet_name,
-        entry_date=entry_date_obj,
-        data_json=data,
-        source_version='v1',
-    )
-    
-    return JsonResponse({'success': True, 'message': 'Form saved successfully'})
+    try:
+        entry = CloseCashEntry.objects.create(
+            user=request.user,
+            workbook='Rawad.xlsx',
+            sheet_name=sheet_name,
+            entry_date=entry_date_obj,
+            data_json=data,
+            source_version='v1',
+        )
+        return JsonResponse({'success': True, 'message': 'Form saved successfully'})
+    except Exception as e:
+        return JsonResponse({'error': f'Database error: {str(e)}'}, status=500)
 
 
 @login_required

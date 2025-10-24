@@ -41,11 +41,21 @@
     </div>
 </div>
 
+{{ schema|json_script:"schema-data" }}
+{{ values|json_script:"values-data" }}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const schema = {{ schema|safe }};
-    const values = {{ values|safe }};
-    const sheetName = {{ sheet_name|json_script:"sheetName" }};
+    let schema, values;
+    try {
+        schema = JSON.parse(document.getElementById('schema-data').textContent);
+        values = JSON.parse(document.getElementById('values-data').textContent);
+    } catch (e) {
+        console.error('Error parsing JSON:', e);
+        schema = { sections: [] };
+        values = {};
+    }
+    const sheetName = "{{ sheet_name }}";
 
     const formSections = document.getElementById('formSections');
     const statusBox = document.getElementById('statusBox');
@@ -98,8 +108,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function buildForm() {
         formSections.innerHTML = '';
         
+        // Debug logging
+        console.log('Schema:', schema);
+        console.log('Values:', values);
+        
         // Check if schema has sections
-        if (schema.sections && schema.sections.length > 0) {
+        if (schema && schema.sections && schema.sections.length > 0) {
             schema.sections.forEach((section, index) => {
                 const sectionDiv = document.createElement('div');
                 sectionDiv.className = 'accordion mb-3';
