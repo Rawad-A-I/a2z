@@ -558,8 +558,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Add event listeners for calculations
-        document.querySelectorAll('input[name*="qty"], input[name="dollar_rate"], input[name*="credit"]').forEach(input => {
+        document.querySelectorAll('input[name*="qty"], input[name="dollar_rate"], input[name*="credit"], input[name*="special"], input[name*="lebanese"], input[name*="dollar"]').forEach(input => {
             input.addEventListener('input', calculateAllTotals);
+        });
+        
+        // Add event listeners for Credit section dynamic entries
+        document.addEventListener('change', function(e) {
+            if (e.target.name && e.target.name.includes('credit[')) {
+                calculateAllTotals();
+            }
         });
         
         // Initial calculation
