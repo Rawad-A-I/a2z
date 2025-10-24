@@ -634,201 +634,212 @@ def employee_export_excel(request):
         
         # For each submission, create a sheet
         for entry in entries:
-            # Create sheet with date only (for specific user export)
-            sheet_name = entry.entry_date.strftime('%d-%m-%Y')
-            ws = wb.create_sheet(title=sheet_name)
+            try:
+                # Create sheet with date only (for specific user export)
+                sheet_name = entry.entry_date.strftime('%d-%m-%Y')
+                ws = wb.create_sheet(title=sheet_name)
+                
+                row = 1
+                data = entry.data_json
+                
+                logger.info(f"Processing entry for date: {sheet_name}")
+                logger.info(f"Data structure keys: {list(data.keys())}")
+                
+                # General Section (A2:B5 - no header)
+                row = 2  # Start at row 2
+                general_data = data.get('general', {})
+                ws.cell(row, 1, "Black Market Daily Rate")
+                ws.cell(row, 2, general_data.get('black_market_daily_rate', ''))
+                row += 1
+                ws.cell(row, 1, "Cashier Name")
+                ws.cell(row, 2, general_data.get('cashier_name', ''))
+                row += 1
+                ws.cell(row, 1, "Date")
+                ws.cell(row, 2, general_data.get('date', ''))
+                row += 1
+                ws.cell(row, 1, "Shift Time")
+                ws.cell(row, 2, general_data.get('shift_time', ''))
+                row += 2  # Add space before next section
+                
+                # Special Credit Section
+                ws.cell(row, 1, "Special Credit").font = section_font
+                row += 1
+                special_credit_data = data.get('special_credit', {})
+                ws.cell(row, 1, "Rayan Invoices Credit")
+                ws.cell(row, 2, special_credit_data.get('rayan_invoices_credit', ''))
+                row += 1
+                ws.cell(row, 1, "Employee Invoice Credit")
+                ws.cell(row, 2, special_credit_data.get('employee_invoice_credit', ''))
+                row += 1
+                ws.cell(row, 1, "Delivery Shabeb co.")
+                ws.cell(row, 2, special_credit_data.get('delivery_shabeb_co', ''))
+                row += 1
+                ws.cell(row, 1, "Delivery Employee")
+                ws.cell(row, 2, special_credit_data.get('delivery_employee', ''))
+                row += 1
+                ws.cell(row, 1, "Waste Goods")
+                ws.cell(row, 2, special_credit_data.get('waste_goods', ''))
+                row += 1
+                ws.cell(row, 1, "Special Credit Total")
+                ws.cell(row, 2, data.get('special_credit_total', ''))
+                row += 2
             
-            row = 1
-            data = entry.data_json
-            
-            # General Section (A2:B5 - no header)
-            row = 2  # Start at row 2
-            general_data = data.get('general', {})
-            ws.cell(row, 1, "Black Market Daily Rate")
-            ws.cell(row, 2, general_data.get('black_market_daily_rate', ''))
-            row += 1
-            ws.cell(row, 1, "Cashier Name")
-            ws.cell(row, 2, general_data.get('cashier_name', ''))
-            row += 1
-            ws.cell(row, 1, "Date")
-            ws.cell(row, 2, general_data.get('date', ''))
-            row += 1
-            ws.cell(row, 1, "Shift Time")
-            ws.cell(row, 2, general_data.get('shift_time', ''))
-            row += 2  # Add space before next section
-            
-            # Special Credit Section
-            ws.cell(row, 1, "Special Credit").font = section_font
-            row += 1
-            special_credit_data = data.get('special_credit', {})
-            ws.cell(row, 1, "Rayan Invoices Credit")
-            ws.cell(row, 2, special_credit_data.get('rayan_invoices_credit', ''))
-            row += 1
-            ws.cell(row, 1, "Employee Invoice Credit")
-            ws.cell(row, 2, special_credit_data.get('employee_invoice_credit', ''))
-            row += 1
-            ws.cell(row, 1, "Delivery Shabeb co.")
-            ws.cell(row, 2, special_credit_data.get('delivery_shabeb_co', ''))
-            row += 1
-            ws.cell(row, 1, "Delivery Employee")
-            ws.cell(row, 2, special_credit_data.get('delivery_employee', ''))
-            row += 1
-            ws.cell(row, 1, "Waste Goods")
-            ws.cell(row, 2, special_credit_data.get('waste_goods', ''))
-            row += 1
-            ws.cell(row, 1, "Special Credit Total")
-            ws.cell(row, 2, data.get('special_credit_total', ''))
-            row += 2
-            
-            # Lebanese Cash Section (D2:F9)
-            # Header
-            ws.cell(2, 4, "LBP.")
-            ws.cell(2, 6, "Total")
+                # Lebanese Cash Section (D2:F9)
+                # Header
+                ws.cell(2, 4, "LBP.")
+                ws.cell(2, 6, "Total")
 
-            # Bills (D3:F7)
-            lebanese_cash_data = data.get('lebanese_cash', {})
-            lbp_bills = [
-                ('5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
-                ('10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
-                ('20,000', lebanese_cash_data.get('lebanese_20000_qty', 0), 20000),
-                ('50,000', lebanese_cash_data.get('lebanese_50000_qty', 0), 50000),
-                ('100,000', lebanese_cash_data.get('lebanese_100000_qty', 0), 100000),
-            ]
+                # Bills (D3:F7)
+                lebanese_cash_data = data.get('lebanese_cash', {})
+                lbp_bills = [
+                    ('5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
+                    ('10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
+                    ('20,000', lebanese_cash_data.get('lebanese_20000_qty', 0), 20000),
+                    ('50,000', lebanese_cash_data.get('lebanese_50000_qty', 0), 50000),
+                    ('100,000', lebanese_cash_data.get('lebanese_100000_qty', 0), 100000),
+                ]
 
-            lbp_row = 3
-            lbp_total = 0
-            for bill_label, qty, denomination in lbp_bills:
-                ws.cell(lbp_row, 4, bill_label)  # D column
-                bill_value = qty * denomination
-                ws.cell(lbp_row, 6, bill_value)  # F column
-                lbp_total += bill_value
-                lbp_row += 1
+                lbp_row = 3
+                lbp_total = 0
+                for bill_label, qty, denomination in lbp_bills:
+                    ws.cell(lbp_row, 4, bill_label)  # D column
+                    bill_value = qty * denomination
+                    ws.cell(lbp_row, 6, bill_value)  # F column
+                    lbp_total += bill_value
+                    lbp_row += 1
 
-            # D8:F8 are empty (lbp_row is now 8)
-            lbp_row += 1  # Skip to row 9
+                # D8:F8 are empty (lbp_row is now 8)
+                lbp_row += 1  # Skip to row 9
 
-            # Total row (D9:F9)
-            ws.cell(lbp_row, 4, "total")
-            ws.cell(lbp_row, 6, lbp_total)
-            
-            # Dollar Cash Section (H2:I11)
-            # Header - Rate
-            dollar_cash_data = data.get('dollar_cash', {})
-            ws.cell(2, 8, "Rate")
-            ws.cell(2, 9, dollar_cash_data.get('dollar_rate', 0))
+                # Total row (D9:F9)
+                ws.cell(lbp_row, 4, "total")
+                ws.cell(lbp_row, 6, lbp_total)
+                
+                # Dollar Cash Section (H2:I11)
+                # Header - Rate
+                dollar_cash_data = data.get('dollar_cash', {})
+                ws.cell(2, 8, "Rate")
+                ws.cell(2, 9, dollar_cash_data.get('dollar_rate', 0))
 
-            # Bills (H3:I8) - 6 denominations
-            dollar_bills = [
-                ('1', dollar_cash_data.get('dollar_1_qty', 0), 1),
-                ('5', dollar_cash_data.get('dollar_5_qty', 0), 5),
-                ('10', dollar_cash_data.get('dollar_10_qty', 0), 10),
-                ('20', dollar_cash_data.get('dollar_20_qty', 0), 20),
-                ('50', dollar_cash_data.get('dollar_50_qty', 0), 50),
-                ('100', dollar_cash_data.get('dollar_100_qty', 0), 100),
-            ]
+                # Bills (H3:I8) - 6 denominations
+                dollar_bills = [
+                    ('1', dollar_cash_data.get('dollar_1_qty', 0), 1),
+                    ('5', dollar_cash_data.get('dollar_5_qty', 0), 5),
+                    ('10', dollar_cash_data.get('dollar_10_qty', 0), 10),
+                    ('20', dollar_cash_data.get('dollar_20_qty', 0), 20),
+                    ('50', dollar_cash_data.get('dollar_50_qty', 0), 50),
+                    ('100', dollar_cash_data.get('dollar_100_qty', 0), 100),
+                ]
 
-            dollar_row = 3
-            dollar_total_usd = 0
-            for bill_label, qty, denomination in dollar_bills:
-                ws.cell(dollar_row, 8, bill_label)  # H column
-                bill_value = qty * denomination
-                ws.cell(dollar_row, 9, bill_value)  # I column
-                dollar_total_usd += bill_value
-                dollar_row += 1
+                dollar_row = 3
+                dollar_total_usd = 0
+                for bill_label, qty, denomination in dollar_bills:
+                    ws.cell(dollar_row, 8, bill_label)  # H column
+                    bill_value = qty * denomination
+                    ws.cell(dollar_row, 9, bill_value)  # I column
+                    dollar_total_usd += bill_value
+                    dollar_row += 1
 
-            # H9:I9 - Total in USD
-            ws.cell(9, 8, "total")
-            ws.cell(9, 9, dollar_total_usd)
+                # H9:I9 - Total in USD
+                ws.cell(9, 8, "total")
+                ws.cell(9, 9, dollar_total_usd)
 
-            # H10:I10 - empty
-            # H11:I11 - Total in Lebanese
-            dollar_rate = dollar_cash_data.get('dollar_rate', 0)
-            dollar_total_lbp = dollar_total_usd * dollar_rate
-            ws.cell(11, 8, "total in lebanese")
-            ws.cell(11, 9, dollar_total_lbp)
-            
-            # Credit Section with Tags
-            ws.cell(row, 1, "Credit").font = section_font
-            row += 1
-
-            credit_entries = data.get('credit', [])
-            if credit_entries:
-                # Headers
-                ws.cell(row, 1, "Amount")
-                ws.cell(row, 2, "Currency")
-                ws.cell(row, 3, "Tag")
-                ws.cell(row, 4, "Name")
+                # H10:I10 - empty
+                # H11:I11 - Total in Lebanese
+                dollar_rate = dollar_cash_data.get('dollar_rate', 0)
+                dollar_total_lbp = dollar_total_usd * dollar_rate
+                ws.cell(11, 8, "total in lebanese")
+                ws.cell(11, 9, dollar_total_lbp)
+                
+                # Credit Section with Tags
+                ws.cell(row, 1, "Credit").font = section_font
                 row += 1
 
-                # Entries
-                for entry_item in credit_entries:
-                    ws.cell(row, 1, entry_item.get('amount', ''))
-                    ws.cell(row, 2, entry_item.get('currency', ''))
-                    ws.cell(row, 3, entry_item.get('tag', ''))
-                    ws.cell(row, 4, entry_item.get('name', ''))
+                credit_entries = data.get('credit', [])
+                if credit_entries:
+                    # Headers
+                    ws.cell(row, 1, "Amount")
+                    ws.cell(row, 2, "Currency")
+                    ws.cell(row, 3, "Tag")
+                    ws.cell(row, 4, "Name")
                     row += 1
-            else:
-                ws.cell(row, 1, "No entries")
-                row += 1
 
-            # Credit Subtotals by Tag
-            tag_totals = [
-                ('cash_purchase_total', 'Cash Purchase Total'),
-                ('credit_invoices_total', 'Credit Invoices Total'),
-                ('employee_oth_total', 'Employee OTH Total'),
-                ('customer_oth_total', 'Customer OTH Total'),
-                ('bar_oth_total', 'Bar OTH Total'),
-                ('store_total', 'Store Total')
-            ]
-
-            for total_key, total_label in tag_totals:
-                ws.cell(row, 1, total_label)
-                ws.cell(row, 2, data.get(total_key, ''))
-                row += 1
-
-            # Credit Grand Total
-            ws.cell(row, 1, "Credit Grand Total")
-            ws.cell(row, 2, data.get('credit_grand_total', ''))
-            row += 2
-            
-            # Coffee Machine Section
-            ws.cell(row, 1, "Coffee Machine").font = section_font
-            row += 1
-            
-            ws.cell(row, 1, "Tag")
-            ws.cell(row, 2, "Current Amount")
-            ws.cell(row, 3, "Daily Add")
-            row += 1
-            
-            coffee_items = data.get('coffee_machine', [])
-            if coffee_items:
-                for item in coffee_items:
-                    if item.get('tag'):  # Only show non-empty entries
-                        ws.cell(row, 1, item.get('tag', ''))
-                        ws.cell(row, 2, item.get('current_amount', ''))
-                        ws.cell(row, 3, item.get('daily_add', ''))
+                    # Entries
+                    for entry_item in credit_entries:
+                        ws.cell(row, 1, entry_item.get('amount', ''))
+                        ws.cell(row, 2, entry_item.get('currency', ''))
+                        ws.cell(row, 3, entry_item.get('tag', ''))
+                        ws.cell(row, 4, entry_item.get('name', ''))
                         row += 1
-            row += 1
-            
-            # Summary Results
-            ws.cell(row, 1, "Summary Results").font = section_font
-            row += 1
-            summary_fields = [
-                ('cash_in_hand_dollar', 'Cash in Hand (Dollar)'),
-                ('cash_in_hand_lebanese', 'Cash in Hand (Lebanese)'),
-                ('cash_out_of_hand', 'Cash Out of Hand'),
-                ('grand_total', 'Grand Total')
-            ]
-            
-            for key, label in summary_fields:
-                ws.cell(row, 1, label)
-                ws.cell(row, 2, data.get(key, ''))
-                if key == 'grand_total':
-                    ws.cell(row, 1).font = total_font
-                    ws.cell(row, 1).fill = total_fill
-                    ws.cell(row, 2).font = total_font
-                    ws.cell(row, 2).fill = total_fill
+                else:
+                    ws.cell(row, 1, "No entries")
+                    row += 1
+
+                # Credit Subtotals by Tag
+                tag_totals = [
+                    ('cash_purchase_total', 'Cash Purchase Total'),
+                    ('credit_invoices_total', 'Credit Invoices Total'),
+                    ('employee_oth_total', 'Employee OTH Total'),
+                    ('customer_oth_total', 'Customer OTH Total'),
+                    ('bar_oth_total', 'Bar OTH Total'),
+                    ('store_total', 'Store Total')
+                ]
+
+                for total_key, total_label in tag_totals:
+                    ws.cell(row, 1, total_label)
+                    ws.cell(row, 2, data.get(total_key, ''))
+                    row += 1
+
+                # Credit Grand Total
+                ws.cell(row, 1, "Credit Grand Total")
+                ws.cell(row, 2, data.get('credit_grand_total', ''))
+                row += 2
+                
+                # Coffee Machine Section
+                ws.cell(row, 1, "Coffee Machine").font = section_font
                 row += 1
+                
+                ws.cell(row, 1, "Tag")
+                ws.cell(row, 2, "Current Amount")
+                ws.cell(row, 3, "Daily Add")
+                row += 1
+                
+                coffee_items = data.get('coffee_machine', [])
+                if coffee_items:
+                    for item in coffee_items:
+                        if item.get('tag'):  # Only show non-empty entries
+                            ws.cell(row, 1, item.get('tag', ''))
+                            ws.cell(row, 2, item.get('current_amount', ''))
+                            ws.cell(row, 3, item.get('daily_add', ''))
+                            row += 1
+                row += 1
+                
+                # Summary Results
+                ws.cell(row, 1, "Summary Results").font = section_font
+                row += 1
+                summary_fields = [
+                    ('cash_in_hand_dollar', 'Cash in Hand (Dollar)'),
+                    ('cash_in_hand_lebanese', 'Cash in Hand (Lebanese)'),
+                    ('cash_out_of_hand', 'Cash Out of Hand'),
+                    ('grand_total', 'Grand Total')
+                ]
+                
+                for key, label in summary_fields:
+                    ws.cell(row, 1, label)
+                    ws.cell(row, 2, data.get(key, ''))
+                    if key == 'grand_total':
+                        ws.cell(row, 1).font = total_font
+                        ws.cell(row, 1).fill = total_fill
+                        ws.cell(row, 2).font = total_font
+                        ws.cell(row, 2).fill = total_fill
+                    row += 1
+                
+            except Exception as sheet_error:
+                logger.error(f"Error processing sheet {sheet_name}: {str(sheet_error)}")
+                import traceback
+                logger.error(f"Sheet traceback: {traceback.format_exc()}")
+                # Continue to next entry instead of failing completely
+                continue
         
         # Convert to bytes
         from io import BytesIO
