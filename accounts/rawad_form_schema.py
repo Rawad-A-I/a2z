@@ -309,45 +309,44 @@ RAWAD_FORM_SCHEMA = {
         {
             "title": "Coffee Machine",
             "type": "dynamic_list",
-            "item_schema": [
+            "fields": [
                 {
-                    "key": "current_amount",
-                    "label": "Current Amount",
-                    "type": "number",
-                    "required": False
+                    "key": "coffee_machine",
+                    "label": "Coffee Machine Entries",
+                    "type": "dynamic_list",
+                    "list_fields": [
+                        {"key": "current_amount", "label": "Current Amount", "type": "number"},
+                        {"key": "daily_add", "label": "Daily Add", "type": "number"},
+                        {"key": "tag", "label": "Tag", "type": "select", "options": [
+                            "Paper Cup Small",
+                            "Paper Cup Big",
+                            "Plastic Cup Small",
+                            "Cover Cup Big",
+                            "Cover Cup Small",
+                            "Small Sticks",
+                            "Big Sticks",
+                            "Nescafe Shalimon",
+                            "Coffee Kg.",
+                            "Nescafe Kg.",
+                            "Coffee Mate Kg.",
+                            "Cadbury Pouder Kg.",
+                            "Sugar kg.",
+                            "Tea Bags.",
+                            "Nestle kg.",
+                            "Galon 10L.",
+                            "Zanjabil w 3asal",
+                            "Gaz 12.5 kg.",
+                            "Gaz 10 kg."
+                        ]}
+                    ]
                 },
                 {
-                    "key": "daily_add",
-                    "label": "Daily Add",
+                    "key": "coffee_machine_total",
+                    "label": "Coffee Machine Total",
                     "type": "number",
-                    "required": False
-                },
-                {
-                    "key": "tag",
-                    "label": "Tag",
-                    "type": "select",
-                    "options": [
-                        "Paper Cup Small",
-                        "Paper Cup Big",
-                        "Plastic Cup Small",
-                        "Cover Cup Big",
-                        "Cover Cup Small",
-                        "Small Sticks",
-                        "Big Sticks",
-                        "Nescafe Shalimon",
-                        "Coffee Kg.",
-                        "Nescafe Kg.",
-                        "Coffee Mate Kg.",
-                        "Cadbury Pouder Kg.",
-                        "Sugar kg.",
-                        "Tea Bags.",
-                        "Nestle kg.",
-                        "Galon 10L.",
-                        "Zanjabil w 3asal",
-                        "Gaz 12.5 kg.",
-                        "Gaz 10 kg."
-                    ],
-                    "required": False
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
                 }
             ]
         }
