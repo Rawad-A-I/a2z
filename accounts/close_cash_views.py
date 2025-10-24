@@ -421,6 +421,11 @@ def employee_edit_close_cash_form(request, sheet_name):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
+    # If sheet_name is 'export', redirect to export view
+    # This shouldn't happen due to URL ordering, but as a safeguard
+    if sheet_name == 'export':
+        return redirect('employee_export_excel')
+    
     from .close_cash_forms import (
         GeneralSectionForm, LebaneseCashForm, DollarCashForm, 
         SpecialCreditForm, CreditEntryFormSet, CoffeeMachineEntryFormSet

@@ -41,7 +41,8 @@
                             <h4 class="mb-0 text-white d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-user me-2"></i>{{ username }}</span>
                                 <a href="{% url 'employee_export_excel' %}?username={{ username }}" 
-                                   class="btn btn-light btn-sm">
+                                   class="btn btn-light btn-sm"
+                                   download>
                                     <i class="fas fa-file-excel me-1"></i>Export {{ username }}
                                 </a>
                             </h4>
