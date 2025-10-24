@@ -582,28 +582,36 @@ def employee_export_excel(request):
     try:
         from openpyxl import Workbook
         from openpyxl.styles import Font, PatternFill, Alignment
-        from .rawad_form_schema import RAWAD_FORM_SCHEMA
         from django.contrib.auth.models import User
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        logger.info(f"Export request from user: {request.user.username}")
         
         # Determine which user's data to export
         username = request.GET.get('username', None)
+        logger.info(f"Requested username: {username}")
         
         if username and request.user.is_superuser:
             # Admin exporting specific employee's data
             try:
                 export_user = User.objects.get(username=username)
+                logger.info(f"Admin exporting data for: {export_user.username}")
             except User.DoesNotExist:
                 messages.error(request, f'User {username} not found.')
                 return redirect('employee_forms_dashboard')
         else:
             # Export logged-in user's own data (admin or employee)
             export_user = request.user
+            logger.info(f"User exporting their own data: {export_user.username}")
         
         # Get submissions for the specific user
         entries = CloseCashEntry.objects.filter(
             user=export_user,
             workbook__iexact='Employee_Close_Cash.xlsx'
         ).order_by('entry_date')
+        
+        logger.info(f"Found {entries.count()} entries for user {export_user.username}")
         
         if not entries.exists():
             messages.error(request, f'No submissions found for {export_user.username}.')
@@ -829,9 +837,13 @@ def employee_export_excel(request):
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         response['Content-Disposition'] = f'attachment; filename="{export_user.username}_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        logger.info(f"Successfully generated Excel file for {export_user.username}")
         return response
         
     except Exception as e:
+        import traceback
+        logger.error(f'Error generating Excel: {str(e)}')
+        logger.error(f'Traceback: {traceback.format_exc()}')
         messages.error(request, f'Error generating Excel: {str(e)}')
         return redirect('employee_forms_dashboard')
 
