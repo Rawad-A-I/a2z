@@ -598,7 +598,7 @@ def employee_submit_close_cash_form(request, sheet_name):
 
 @login_required
 def employee_export_excel(request):
-    """Export employee submissions as Excel file."""
+    """Export employee submissions as Excel file - completely rewritten."""
     if not is_employee_or_admin(request.user):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
@@ -607,6 +607,8 @@ def employee_export_excel(request):
         from openpyxl import Workbook
         from openpyxl.styles import Font, PatternFill, Alignment
         from django.contrib.auth.models import User
+        from django.utils import timezone
+        from io import BytesIO
         import logging
         
         logger = logging.getLogger(__name__)
@@ -614,7 +616,6 @@ def employee_export_excel(request):
         
         # Determine which user's data to export
         username = request.GET.get('username', None)
-        logger.info(f"Requested username: {username}")
         
         if username and request.user.is_superuser:
             # Admin exporting specific employee's data
@@ -625,7 +626,7 @@ def employee_export_excel(request):
                 messages.error(request, f'User {username} not found.')
                 return redirect('employee_forms_dashboard')
         else:
-            # Export logged-in user's own data (admin or employee)
+            # Export logged-in user's own data
             export_user = request.user
             logger.info(f"User exporting their own data: {export_user.username}")
         
@@ -646,23 +647,19 @@ def employee_export_excel(request):
         wb.remove(wb.active)  # Remove default sheet
         
         # Style definitions
-        header_font = Font(bold=True, size=12)
         section_font = Font(bold=True, size=11)
         total_font = Font(bold=True, color="FFFFFF")
         total_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         
-        # For each submission, create a sheet
+        # Process each submission
         for entry in entries:
             try:
-                # Create sheet with date only (for specific user export)
+                # Create sheet with date only
                 sheet_name = entry.entry_date.strftime('%d-%m-%Y')
                 ws = wb.create_sheet(title=sheet_name)
                 
-                row = 1
                 data = entry.data_json
-                
                 logger.info(f"Processing entry for date: {sheet_name}")
-                logger.info(f"Data structure keys: {list(data.keys())}")
                 
                 # Handle both old flat structure and new nested structure
                 if 'general' in data:
@@ -672,30 +669,83 @@ def employee_export_excel(request):
                     dollar_cash_data = data.get('dollar_cash', {})
                     special_credit_data = data.get('special_credit', {})
                 else:
-                    # Old flat structure - data is directly accessible
+                    # Old flat structure
                     general_data = data
                     lebanese_cash_data = data
                     dollar_cash_data = data
                     special_credit_data = data
                 
-                logger.info(f"Using nested structure: {'general' in data}")
-                
                 # General Section (A2:B5 - no header)
-                row = 2  # Start at row 2
-                ws.cell(row, 1, "Black Market Daily Rate")
-                ws.cell(row, 2, general_data.get('black_market_daily_rate', ''))
-                row += 1
-                ws.cell(row, 1, "Cashier Name")
-                ws.cell(row, 2, general_data.get('cashier_name', ''))
-                row += 1
-                ws.cell(row, 1, "Date")
-                ws.cell(row, 2, general_data.get('date', ''))
-                row += 1
-                ws.cell(row, 1, "Shift Time")
-                ws.cell(row, 2, general_data.get('shift_time', ''))
-                row += 2  # Add space before next section
+                ws.cell(2, 1, "Black Market Daily Rate")
+                ws.cell(2, 2, general_data.get('black_market_daily_rate', ''))
+                ws.cell(3, 1, "Cashier Name")
+                ws.cell(3, 2, general_data.get('cashier_name', ''))
+                ws.cell(4, 1, "Date")
+                ws.cell(4, 2, general_data.get('date', ''))
+                ws.cell(5, 1, "Shift Time")
+                ws.cell(5, 2, general_data.get('shift_time', ''))
+                
+                # Lebanese Cash Section (D2:F9)
+                # Header
+                ws.cell(2, 4, "LBP.")
+                ws.cell(2, 6, "Total")
+                
+                # Bills (D3:F7)
+                lbp_bills = [
+                    ('5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
+                    ('10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
+                    ('20,000', lebanese_cash_data.get('lebanese_20000_qty', 0), 20000),
+                    ('50,000', lebanese_cash_data.get('lebanese_50000_qty', 0), 50000),
+                    ('100,000', lebanese_cash_data.get('lebanese_100000_qty', 0), 100000),
+                ]
+                
+                lbp_total = 0
+                for i, (bill_label, qty, denomination) in enumerate(lbp_bills):
+                    row = 3 + i
+                    ws.cell(row, 4, bill_label)  # D column
+                    bill_value = qty * denomination
+                    ws.cell(row, 6, bill_value)  # F column
+                    lbp_total += bill_value
+                
+                # Total row (D9:F9)
+                ws.cell(9, 4, "total")
+                ws.cell(9, 6, lbp_total)
+                
+                # Dollar Cash Section (H2:I11)
+                # Header - Rate
+                ws.cell(2, 8, "Rate")
+                ws.cell(2, 9, dollar_cash_data.get('dollar_rate', 0))
+                
+                # Bills (H3:I8) - 6 denominations
+                dollar_bills = [
+                    ('1', dollar_cash_data.get('dollar_1_qty', 0), 1),
+                    ('5', dollar_cash_data.get('dollar_5_qty', 0), 5),
+                    ('10', dollar_cash_data.get('dollar_10_qty', 0), 10),
+                    ('20', dollar_cash_data.get('dollar_20_qty', 0), 20),
+                    ('50', dollar_cash_data.get('dollar_50_qty', 0), 50),
+                    ('100', dollar_cash_data.get('dollar_100_qty', 0), 100),
+                ]
+                
+                dollar_total_usd = 0
+                for i, (bill_label, qty, denomination) in enumerate(dollar_bills):
+                    row = 3 + i
+                    ws.cell(row, 8, bill_label)  # H column
+                    bill_value = qty * denomination
+                    ws.cell(row, 9, bill_value)  # I column
+                    dollar_total_usd += bill_value
+                
+                # H9:I9 - Total in USD
+                ws.cell(9, 8, "total")
+                ws.cell(9, 9, dollar_total_usd)
+                
+                # H11:I11 - Total in Lebanese
+                dollar_rate = dollar_cash_data.get('dollar_rate', 0)
+                dollar_total_lbp = dollar_total_usd * dollar_rate
+                ws.cell(11, 8, "total in lebanese")
+                ws.cell(11, 9, dollar_total_lbp)
                 
                 # Special Credit Section
+                row = 12
                 ws.cell(row, 1, "Special Credit").font = section_font
                 row += 1
                 ws.cell(row, 1, "Rayan Invoices Credit")
@@ -716,76 +766,11 @@ def employee_export_excel(request):
                 ws.cell(row, 1, "Special Credit Total")
                 ws.cell(row, 2, data.get('special_credit_total', ''))
                 row += 2
-            
-                # Lebanese Cash Section (D2:F9)
-                # Header
-                ws.cell(2, 4, "LBP.")
-                ws.cell(2, 6, "Total")
-
-                # Bills (D3:F7)
-                lbp_bills = [
-                    ('5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
-                    ('10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
-                    ('20,000', lebanese_cash_data.get('lebanese_20000_qty', 0), 20000),
-                    ('50,000', lebanese_cash_data.get('lebanese_50000_qty', 0), 50000),
-                    ('100,000', lebanese_cash_data.get('lebanese_100000_qty', 0), 100000),
-                ]
-
-                lbp_row = 3
-                lbp_total = 0
-                for bill_label, qty, denomination in lbp_bills:
-                    ws.cell(lbp_row, 4, bill_label)  # D column
-                    bill_value = qty * denomination
-                    ws.cell(lbp_row, 6, bill_value)  # F column
-                    lbp_total += bill_value
-                    lbp_row += 1
-
-                # D8:F8 are empty (lbp_row is now 8)
-                lbp_row += 1  # Skip to row 9
-
-                # Total row (D9:F9)
-                ws.cell(lbp_row, 4, "total")
-                ws.cell(lbp_row, 6, lbp_total)
-                
-                # Dollar Cash Section (H2:I11)
-                # Header - Rate
-                ws.cell(2, 8, "Rate")
-                ws.cell(2, 9, dollar_cash_data.get('dollar_rate', 0))
-
-                # Bills (H3:I8) - 6 denominations
-                dollar_bills = [
-                    ('1', dollar_cash_data.get('dollar_1_qty', 0), 1),
-                    ('5', dollar_cash_data.get('dollar_5_qty', 0), 5),
-                    ('10', dollar_cash_data.get('dollar_10_qty', 0), 10),
-                    ('20', dollar_cash_data.get('dollar_20_qty', 0), 20),
-                    ('50', dollar_cash_data.get('dollar_50_qty', 0), 50),
-                    ('100', dollar_cash_data.get('dollar_100_qty', 0), 100),
-                ]
-
-                dollar_row = 3
-                dollar_total_usd = 0
-                for bill_label, qty, denomination in dollar_bills:
-                    ws.cell(dollar_row, 8, bill_label)  # H column
-                    bill_value = qty * denomination
-                    ws.cell(dollar_row, 9, bill_value)  # I column
-                    dollar_total_usd += bill_value
-                    dollar_row += 1
-
-                # H9:I9 - Total in USD
-                ws.cell(9, 8, "total")
-                ws.cell(9, 9, dollar_total_usd)
-
-                # H10:I10 - empty
-                # H11:I11 - Total in Lebanese
-                dollar_rate = dollar_cash_data.get('dollar_rate', 0)
-                dollar_total_lbp = dollar_total_usd * dollar_rate
-                ws.cell(11, 8, "total in lebanese")
-                ws.cell(11, 9, dollar_total_lbp)
                 
                 # Credit Section with Tags
                 ws.cell(row, 1, "Credit").font = section_font
                 row += 1
-
+                
                 credit_entries = data.get('credit', [])
                 if credit_entries:
                     # Headers
@@ -794,7 +779,7 @@ def employee_export_excel(request):
                     ws.cell(row, 3, "Tag")
                     ws.cell(row, 4, "Name")
                     row += 1
-
+                    
                     # Entries
                     for entry_item in credit_entries:
                         ws.cell(row, 1, entry_item.get('amount', ''))
@@ -805,7 +790,7 @@ def employee_export_excel(request):
                 else:
                     ws.cell(row, 1, "No entries")
                     row += 1
-
+                
                 # Credit Subtotals by Tag
                 tag_totals = [
                     ('cash_purchase_total', 'Cash Purchase Total'),
@@ -815,12 +800,12 @@ def employee_export_excel(request):
                     ('bar_oth_total', 'Bar OTH Total'),
                     ('store_total', 'Store Total')
                 ]
-
+                
                 for total_key, total_label in tag_totals:
                     ws.cell(row, 1, total_label)
                     ws.cell(row, 2, data.get(total_key, ''))
                     row += 1
-
+                
                 # Credit Grand Total
                 ws.cell(row, 1, "Credit Grand Total")
                 ws.cell(row, 2, data.get('credit_grand_total', ''))
@@ -869,11 +854,9 @@ def employee_export_excel(request):
                 logger.error(f"Error processing sheet {sheet_name}: {str(sheet_error)}")
                 import traceback
                 logger.error(f"Sheet traceback: {traceback.format_exc()}")
-                # Continue to next entry instead of failing completely
                 continue
         
         # Convert to bytes
-        from io import BytesIO
         output = BytesIO()
         wb.save(output)
         output.seek(0)
@@ -893,6 +876,8 @@ def employee_export_excel(request):
         logger.error(f'Traceback: {traceback.format_exc()}')
         messages.error(request, f'Error generating Excel: {str(e)}')
         return redirect('employee_forms_dashboard')
+
+
 
 
 @login_required
