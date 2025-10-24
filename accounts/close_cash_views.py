@@ -557,22 +557,30 @@ def employee_export_excel(request):
         from openpyxl import Workbook
         from openpyxl.styles import Font, PatternFill, Alignment
         from .rawad_form_schema import RAWAD_FORM_SCHEMA
+        from django.contrib.auth.models import User
         
-        # Get submissions from DB - user-specific or admin (all users)
-        if request.user.is_superuser:
-            # Admin can export all submissions
-            entries = CloseCashEntry.objects.filter(
-                workbook__iexact='Employee_Close_Cash.xlsx'
-            ).order_by('user__username', 'entry_date')
+        # Determine which user's data to export
+        username = request.GET.get('username', None)
+        
+        if username and request.user.is_superuser:
+            # Admin exporting specific employee's data
+            try:
+                export_user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                messages.error(request, f'User {username} not found.')
+                return redirect('employee_forms_dashboard')
         else:
-            # Employee can only export their own submissions
-            entries = CloseCashEntry.objects.filter(
-                user=request.user,
-                workbook__iexact='Employee_Close_Cash.xlsx'
-            ).order_by('entry_date')
+            # Export logged-in user's own data (admin or employee)
+            export_user = request.user
+        
+        # Get submissions for the specific user
+        entries = CloseCashEntry.objects.filter(
+            user=export_user,
+            workbook__iexact='Employee_Close_Cash.xlsx'
+        ).order_by('entry_date')
         
         if not entries.exists():
-            messages.error(request, 'No submissions found to export.')
+            messages.error(request, f'No submissions found for {export_user.username}.')
             return redirect('employee_forms_dashboard')
         
         # Create new workbook
@@ -587,13 +595,8 @@ def employee_export_excel(request):
         
         # For each submission, create a sheet
         for entry in entries:
-            # Create sheet with date and user info
-            if request.user.is_superuser:
-                # Admin export: include username in sheet name
-                sheet_name = f"{entry.user.username}_{entry.entry_date.strftime('%d-%m-%Y')}"
-            else:
-                # Employee export: just date
-                sheet_name = entry.entry_date.strftime('%d-%m-%Y')
+            # Create sheet with date only (for specific user export)
+            sheet_name = entry.entry_date.strftime('%d-%m-%Y')
             ws = wb.create_sheet(title=sheet_name)
             
             row = 1
@@ -602,11 +605,6 @@ def employee_export_excel(request):
             # General Section
             ws.cell(row, 1, "General").font = section_font
             row += 1
-            # Add user info for admin exports
-            if request.user.is_superuser:
-                ws.cell(row, 1, "Employee")
-                ws.cell(row, 2, entry.user.username)
-                row += 1
             ws.cell(row, 1, "Black Market Daily Rate")
             ws.cell(row, 2, data.get('black_market_daily_rate', ''))
             row += 1
@@ -757,15 +755,12 @@ def employee_export_excel(request):
         wb.save(output)
         output.seek(0)
         
-        # Return as download
+        # Return as download with username-based filename
         response = HttpResponse(
             output.getvalue(),
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        if request.user.is_superuser:
-            response['Content-Disposition'] = f'attachment; filename="All_Employees_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
-        else:
-            response['Content-Disposition'] = f'attachment; filename="{request.user.username}_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="{export_user.username}_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
         return response
         
     except Exception as e:
