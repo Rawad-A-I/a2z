@@ -167,38 +167,90 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`Section key: ${sectionKey}, Total key: ${totalKey}, Fields:`, fields);
         console.log(`Has total field: ${hasTotalField}`);
         
-        sectionDiv.innerHTML = `
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="heading-${sectionIndex}">
-                    <button class="accordion-button ${sectionIndex === 0 ? '' : 'collapsed'}" type="button" 
-                            data-bs-toggle="collapse" data-bs-target="#collapse-${sectionIndex}" 
-                            aria-expanded="${sectionIndex === 0 ? 'true' : 'false'}" 
-                            aria-controls="collapse-${sectionIndex}">
-                        <i class="fas fa-folder me-2"></i>${section.title}
-                    </button>
-                </h2>
-                <div id="collapse-${sectionIndex}" class="accordion-collapse collapse ${sectionIndex === 0 ? 'show' : ''}" 
-                     aria-labelledby="heading-${sectionIndex}" data-bs-parent="#formSections">
-                    <div class="accordion-body">
-                        <div class="mb-3">
-                            <button type="button" class="btn btn-sm btn-primary" onclick="addDynamicEntry('${sectionKey}')">
-                                <i class="fas fa-plus me-1"></i>Add Entry
-                            </button>
-                        </div>
-                        <div id="dynamic-list-${sectionKey}" class="mb-3"></div>
-                        ${hasTotalField ? `
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">${fields[1].label}</label>
-                                    <input type="number" class="form-control" name="${totalKey}" readonly 
-                                           style="background-color: #f8f9fa; border-color: #dee2e6;" />
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
+        // Create accordion structure using DOM manipulation to avoid CSP issues
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'accordion-item';
+        
+        const header = document.createElement('h2');
+        header.className = 'accordion-header';
+        header.id = 'heading-' + sectionIndex;
+        
+        const button = document.createElement('button');
+        button.className = 'accordion-button' + (sectionIndex === 0 ? '' : ' collapsed');
+        button.type = 'button';
+        button.setAttribute('data-bs-toggle', 'collapse');
+        button.setAttribute('data-bs-target', '#collapse-' + sectionIndex);
+        button.setAttribute('aria-expanded', sectionIndex === 0 ? 'true' : 'false');
+        button.setAttribute('aria-controls', 'collapse-' + sectionIndex);
+        
+        const buttonIcon = document.createElement('i');
+        buttonIcon.className = 'fas fa-folder me-2';
+        button.appendChild(buttonIcon);
+        button.appendChild(document.createTextNode(section.title));
+        
+        header.appendChild(button);
+        
+        const collapseDiv = document.createElement('div');
+        collapseDiv.id = 'collapse-' + sectionIndex;
+        collapseDiv.className = 'accordion-collapse collapse' + (sectionIndex === 0 ? ' show' : '');
+        collapseDiv.setAttribute('aria-labelledby', 'heading-' + sectionIndex);
+        collapseDiv.setAttribute('data-bs-parent', '#formSections');
+        
+        const accordionBody = document.createElement('div');
+        accordionBody.className = 'accordion-body';
+        
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'mb-3';
+        
+        const addButton = document.createElement('button');
+        addButton.type = 'button';
+        addButton.className = 'btn btn-sm btn-primary';
+        addButton.setAttribute('data-section-key', sectionKey);
+        addButton.onclick = function() { addDynamicEntry(sectionKey); };
+        
+        const addIcon = document.createElement('i');
+        addIcon.className = 'fas fa-plus me-1';
+        addButton.appendChild(addIcon);
+        addButton.appendChild(document.createTextNode('Add Entry'));
+        
+        buttonContainer.appendChild(addButton);
+        
+        const listContainer = document.createElement('div');
+        listContainer.id = 'dynamic-list-' + sectionKey;
+        listContainer.className = 'mb-3';
+        
+        accordionBody.appendChild(buttonContainer);
+        accordionBody.appendChild(listContainer);
+        
+        if (hasTotalField) {
+            const totalRow = document.createElement('div');
+            totalRow.className = 'row';
+            
+            const totalCol = document.createElement('div');
+            totalCol.className = 'col-md-6';
+            
+            const totalLabel = document.createElement('label');
+            totalLabel.className = 'form-label fw-bold';
+            totalLabel.textContent = fields[1].label;
+            
+            const totalInput = document.createElement('input');
+            totalInput.type = 'number';
+            totalInput.className = 'form-control';
+            totalInput.name = totalKey;
+            totalInput.readOnly = true;
+            totalInput.style.backgroundColor = '#f8f9fa';
+            totalInput.style.borderColor = '#dee2e6';
+            
+            totalCol.appendChild(totalLabel);
+            totalCol.appendChild(totalInput);
+            totalRow.appendChild(totalCol);
+            accordionBody.appendChild(totalRow);
+        }
+        
+        collapseDiv.appendChild(accordionBody);
+        accordionItem.appendChild(header);
+        accordionItem.appendChild(collapseDiv);
+        sectionDiv.appendChild(accordionItem);
         
         formSections.appendChild(sectionDiv);
         
@@ -217,48 +269,99 @@ document.addEventListener('DOMContentLoaded', function() {
             entryDiv.className = 'row mb-2 p-2 border rounded';
             
             if (sectionKey === 'coffee_machine') {
-                entryDiv.innerHTML = `
-                    <div class="col-md-3">
-                        <label class="form-label">Current Amount</label>
-                        <input type="number" class="form-control" name="${sectionKey}[${index}][current_amount]" 
-                               value="${entry.current_amount || ''}" step="any" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Daily Add</label>
-                        <input type="number" class="form-control" name="${sectionKey}[${index}][daily_add]" 
-                               value="${entry.daily_add || ''}" step="any" />
-                    </div>
-                    <div class="col-md-5">
-                        <label class="form-label">Tag</label>
-                        <select class="form-control" name="${sectionKey}[${index}][tag]">
-                            <option value="">Select Tag...</option>
-                            <option value="Paper Cup Small" ${entry.tag === 'Paper Cup Small' ? 'selected' : ''}>Paper Cup Small</option>
-                            <option value="Paper Cup Big" ${entry.tag === 'Paper Cup Big' ? 'selected' : ''}>Paper Cup Big</option>
-                            <option value="Plastic Cup Small" ${entry.tag === 'Plastic Cup Small' ? 'selected' : ''}>Plastic Cup Small</option>
-                            <option value="Cover Cup Big" ${entry.tag === 'Cover Cup Big' ? 'selected' : ''}>Cover Cup Big</option>
-                            <option value="Cover Cup Small" ${entry.tag === 'Cover Cup Small' ? 'selected' : ''}>Cover Cup Small</option>
-                            <option value="Small Sticks" ${entry.tag === 'Small Sticks' ? 'selected' : ''}>Small Sticks</option>
-                            <option value="Big Sticks" ${entry.tag === 'Big Sticks' ? 'selected' : ''}>Big Sticks</option>
-                            <option value="Nescafe Shalimon" ${entry.tag === 'Nescafe Shalimon' ? 'selected' : ''}>Nescafe Shalimon</option>
-                            <option value="Coffee Kg." ${entry.tag === 'Coffee Kg.' ? 'selected' : ''}>Coffee Kg.</option>
-                            <option value="Nescafe Kg." ${entry.tag === 'Nescafe Kg.' ? 'selected' : ''}>Nescafe Kg.</option>
-                            <option value="Coffee Mate Kg." ${entry.tag === 'Coffee Mate Kg.' ? 'selected' : ''}>Coffee Mate Kg.</option>
-                            <option value="Cadbury Pouder Kg." ${entry.tag === 'Cadbury Pouder Kg.' ? 'selected' : ''}>Cadbury Pouder Kg.</option>
-                            <option value="Sugar kg." ${entry.tag === 'Sugar kg.' ? 'selected' : ''}>Sugar kg.</option>
-                            <option value="Tea Bags." ${entry.tag === 'Tea Bags.' ? 'selected' : ''}>Tea Bags.</option>
-                            <option value="Nestle kg." ${entry.tag === 'Nestle kg.' ? 'selected' : ''}>Nestle kg.</option>
-                            <option value="Galon 10L." ${entry.tag === 'Galon 10L.' ? 'selected' : ''}>Galon 10L.</option>
-                            <option value="Zanjabil w 3asal" ${entry.tag === 'Zanjabil w 3asal' ? 'selected' : ''}>Zanjabil w 3asal</option>
-                            <option value="Gaz 12.5 kg." ${entry.tag === 'Gaz 12.5 kg.' ? 'selected' : ''}>Gaz 12.5 kg.</option>
-                            <option value="Gaz 10 kg." ${entry.tag === 'Gaz 10 kg.' ? 'selected' : ''}>Gaz 10 kg.</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1 d-flex align-items-end">
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
+                // Current Amount field
+                const currentAmountCol = document.createElement('div');
+                currentAmountCol.className = 'col-md-3';
+                
+                const currentAmountLabel = document.createElement('label');
+                currentAmountLabel.className = 'form-label';
+                currentAmountLabel.textContent = 'Current Amount';
+                
+                const currentAmountInput = document.createElement('input');
+                currentAmountInput.type = 'number';
+                currentAmountInput.className = 'form-control';
+                currentAmountInput.name = sectionKey + '[' + index + '][current_amount]';
+                currentAmountInput.value = entry.current_amount || '';
+                currentAmountInput.step = 'any';
+                
+                currentAmountCol.appendChild(currentAmountLabel);
+                currentAmountCol.appendChild(currentAmountInput);
+                entryDiv.appendChild(currentAmountCol);
+                
+                // Daily Add field
+                const dailyAddCol = document.createElement('div');
+                dailyAddCol.className = 'col-md-3';
+                
+                const dailyAddLabel = document.createElement('label');
+                dailyAddLabel.className = 'form-label';
+                dailyAddLabel.textContent = 'Daily Add';
+                
+                const dailyAddInput = document.createElement('input');
+                dailyAddInput.type = 'number';
+                dailyAddInput.className = 'form-control';
+                dailyAddInput.name = sectionKey + '[' + index + '][daily_add]';
+                dailyAddInput.value = entry.daily_add || '';
+                dailyAddInput.step = 'any';
+                
+                dailyAddCol.appendChild(dailyAddLabel);
+                dailyAddCol.appendChild(dailyAddInput);
+                entryDiv.appendChild(dailyAddCol);
+                
+                // Tag field
+                const tagCol = document.createElement('div');
+                tagCol.className = 'col-md-5';
+                
+                const tagLabel = document.createElement('label');
+                tagLabel.className = 'form-label';
+                tagLabel.textContent = 'Tag';
+                
+                const tagSelect = document.createElement('select');
+                tagSelect.className = 'form-control';
+                tagSelect.name = sectionKey + '[' + index + '][tag]';
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select Tag...';
+                tagSelect.appendChild(defaultOption);
+                
+                // Add all tag options
+                const tagOptions = [
+                    'Paper Cup Small', 'Paper Cup Big', 'Plastic Cup Small', 'Cover Cup Big',
+                    'Cover Cup Small', 'Small Sticks', 'Big Sticks', 'Nescafe Shalimon',
+                    'Coffee Kg.', 'Nescafe Kg.', 'Coffee Mate Kg.', 'Cadbury Pouder Kg.',
+                    'Sugar kg.', 'Tea Bags.', 'Nestle kg.', 'Galon 10L.',
+                    'Zanjabil w 3asal', 'Gaz 12.5 kg.', 'Gaz 10 kg.'
+                ];
+                
+                tagOptions.forEach(optionValue => {
+                    const option = document.createElement('option');
+                    option.value = optionValue;
+                    option.textContent = optionValue;
+                    if (entry.tag === optionValue) {
+                        option.selected = true;
+                    }
+                    tagSelect.appendChild(option);
+                });
+                
+                tagCol.appendChild(tagLabel);
+                tagCol.appendChild(tagSelect);
+                entryDiv.appendChild(tagCol);
+                
+                // Delete button
+                const deleteCol = document.createElement('div');
+                deleteCol.className = 'col-md-1 d-flex align-items-end';
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.className = 'btn btn-sm btn-danger';
+                deleteButton.onclick = function() { removeDynamicEntry(sectionKey, index); };
+                
+                const deleteIcon = document.createElement('i');
+                deleteIcon.className = 'fas fa-trash';
+                deleteButton.appendChild(deleteIcon);
+                
+                deleteCol.appendChild(deleteButton);
+                entryDiv.appendChild(deleteCol);
             } else if (sectionKey === 'credit') {
                 entryDiv.innerHTML = `
                     <div class="col-md-3">
@@ -336,48 +439,94 @@ document.addEventListener('DOMContentLoaded', function() {
         entryDiv.className = 'row mb-2 p-2 border rounded';
         
         if (sectionKey === 'coffee_machine') {
-            entryDiv.innerHTML = `
-                <div class="col-md-3">
-                    <label class="form-label">Current Amount</label>
-                    <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][current_amount]" 
-                           step="any" />
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Daily Add</label>
-                    <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][daily_add]" 
-                           step="any" />
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label">Tag</label>
-                    <select class="form-control" name="${sectionKey}[${currentEntries}][tag]">
-                        <option value="">Select Tag...</option>
-                        <option value="Paper Cup Small">Paper Cup Small</option>
-                        <option value="Paper Cup Big">Paper Cup Big</option>
-                        <option value="Plastic Cup Small">Plastic Cup Small</option>
-                        <option value="Cover Cup Big">Cover Cup Big</option>
-                        <option value="Cover Cup Small">Cover Cup Small</option>
-                        <option value="Small Sticks">Small Sticks</option>
-                        <option value="Big Sticks">Big Sticks</option>
-                        <option value="Nescafe Shalimon">Nescafe Shalimon</option>
-                        <option value="Coffee Kg.">Coffee Kg.</option>
-                        <option value="Nescafe Kg.">Nescafe Kg.</option>
-                        <option value="Coffee Mate Kg.">Coffee Mate Kg.</option>
-                        <option value="Cadbury Pouder Kg.">Cadbury Pouder Kg.</option>
-                        <option value="Sugar kg.">Sugar kg.</option>
-                        <option value="Tea Bags.">Tea Bags.</option>
-                        <option value="Nestle kg.">Nestle kg.</option>
-                        <option value="Galon 10L.">Galon 10L.</option>
-                        <option value="Zanjabil w 3asal">Zanjabil w 3asal</option>
-                        <option value="Gaz 12.5 kg.">Gaz 12.5 kg.</option>
-                        <option value="Gaz 10 kg.">Gaz 10 kg.</option>
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${currentEntries})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
+            // Current Amount field
+            const currentAmountCol = document.createElement('div');
+            currentAmountCol.className = 'col-md-3';
+            
+            const currentAmountLabel = document.createElement('label');
+            currentAmountLabel.className = 'form-label';
+            currentAmountLabel.textContent = 'Current Amount';
+            
+            const currentAmountInput = document.createElement('input');
+            currentAmountInput.type = 'number';
+            currentAmountInput.className = 'form-control';
+            currentAmountInput.name = sectionKey + '[' + currentEntries + '][current_amount]';
+            currentAmountInput.step = 'any';
+            
+            currentAmountCol.appendChild(currentAmountLabel);
+            currentAmountCol.appendChild(currentAmountInput);
+            entryDiv.appendChild(currentAmountCol);
+            
+            // Daily Add field
+            const dailyAddCol = document.createElement('div');
+            dailyAddCol.className = 'col-md-3';
+            
+            const dailyAddLabel = document.createElement('label');
+            dailyAddLabel.className = 'form-label';
+            dailyAddLabel.textContent = 'Daily Add';
+            
+            const dailyAddInput = document.createElement('input');
+            dailyAddInput.type = 'number';
+            dailyAddInput.className = 'form-control';
+            dailyAddInput.name = sectionKey + '[' + currentEntries + '][daily_add]';
+            dailyAddInput.step = 'any';
+            
+            dailyAddCol.appendChild(dailyAddLabel);
+            dailyAddCol.appendChild(dailyAddInput);
+            entryDiv.appendChild(dailyAddCol);
+            
+            // Tag field
+            const tagCol = document.createElement('div');
+            tagCol.className = 'col-md-5';
+            
+            const tagLabel = document.createElement('label');
+            tagLabel.className = 'form-label';
+            tagLabel.textContent = 'Tag';
+            
+            const tagSelect = document.createElement('select');
+            tagSelect.className = 'form-control';
+            tagSelect.name = sectionKey + '[' + currentEntries + '][tag]';
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select Tag...';
+            tagSelect.appendChild(defaultOption);
+            
+            // Add all tag options
+            const tagOptions = [
+                'Paper Cup Small', 'Paper Cup Big', 'Plastic Cup Small', 'Cover Cup Big',
+                'Cover Cup Small', 'Small Sticks', 'Big Sticks', 'Nescafe Shalimon',
+                'Coffee Kg.', 'Nescafe Kg.', 'Coffee Mate Kg.', 'Cadbury Pouder Kg.',
+                'Sugar kg.', 'Tea Bags.', 'Nestle kg.', 'Galon 10L.',
+                'Zanjabil w 3asal', 'Gaz 12.5 kg.', 'Gaz 10 kg.'
+            ];
+            
+            tagOptions.forEach(optionValue => {
+                const option = document.createElement('option');
+                option.value = optionValue;
+                option.textContent = optionValue;
+                tagSelect.appendChild(option);
+            });
+            
+            tagCol.appendChild(tagLabel);
+            tagCol.appendChild(tagSelect);
+            entryDiv.appendChild(tagCol);
+            
+            // Delete button
+            const deleteCol = document.createElement('div');
+            deleteCol.className = 'col-md-1 d-flex align-items-end';
+            
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'btn btn-sm btn-danger';
+            deleteButton.onclick = function() { removeDynamicEntry(sectionKey, currentEntries); };
+            
+            const deleteIcon = document.createElement('i');
+            deleteIcon.className = 'fas fa-trash';
+            deleteButton.appendChild(deleteIcon);
+            
+            deleteCol.appendChild(deleteButton);
+            entryDiv.appendChild(deleteCol);
         } else if (sectionKey === 'credit') {
             entryDiv.innerHTML = `
                 <div class="col-md-3">
