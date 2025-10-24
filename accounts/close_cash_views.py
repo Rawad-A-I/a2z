@@ -446,15 +446,34 @@ def employee_edit_close_cash_form(request, sheet_name):
         # Use DB values if available, otherwise empty
         form_data = entry.data_json if entry else {}
     
+    # Handle both old flat structure and new nested structure
+    # If data has 'general' key, it's new structure; otherwise it's old flat structure
+    if 'general' in form_data:
+        # New nested structure
+        general_initial = form_data.get('general', {})
+        lebanese_cash_initial = form_data.get('lebanese_cash', {})
+        dollar_cash_initial = form_data.get('dollar_cash', {})
+        special_credit_initial = form_data.get('special_credit', {})
+        credit_initial = form_data.get('credit', [])
+        coffee_machine_initial = form_data.get('coffee_machine', [])
+    else:
+        # Old flat structure - convert to nested
+        general_initial = {k: v for k, v in form_data.items() if k in ['black_market_daily_rate', 'cashier_name', 'date', 'shift_time']}
+        lebanese_cash_initial = {k: v for k, v in form_data.items() if k.startswith('lebanese_')}
+        dollar_cash_initial = {k: v for k, v in form_data.items() if k.startswith('dollar_')}
+        special_credit_initial = {k: v for k, v in form_data.items() if k in ['rayan_invoices_credit', 'employee_invoice_credit', 'delivery_shabeb_co', 'delivery_employee', 'waste_goods']}
+        credit_initial = form_data.get('credit', [])
+        coffee_machine_initial = form_data.get('coffee_machine', [])
+    
     # Initialize forms with data
-    general_form = GeneralSectionForm(initial=form_data.get('general', {}))
-    lebanese_cash_form = LebaneseCashForm(initial=form_data.get('lebanese_cash', {}))
-    dollar_cash_form = DollarCashForm(initial=form_data.get('dollar_cash', {}))
-    special_credit_form = SpecialCreditForm(initial=form_data.get('special_credit', {}))
+    general_form = GeneralSectionForm(initial=general_initial)
+    lebanese_cash_form = LebaneseCashForm(initial=lebanese_cash_initial)
+    dollar_cash_form = DollarCashForm(initial=dollar_cash_initial)
+    special_credit_form = SpecialCreditForm(initial=special_credit_initial)
     
     # Initialize formsets
-    credit_formset = CreditEntryFormSet(initial=form_data.get('credit', []))
-    coffee_machine_formset = CoffeeMachineEntryFormSet(initial=form_data.get('coffee_machine', []))
+    credit_formset = CreditEntryFormSet(initial=credit_initial)
+    coffee_machine_formset = CoffeeMachineEntryFormSet(initial=coffee_machine_initial)
     
     context = {
         'sheet_name': sheet_name,
@@ -645,9 +664,24 @@ def employee_export_excel(request):
                 logger.info(f"Processing entry for date: {sheet_name}")
                 logger.info(f"Data structure keys: {list(data.keys())}")
                 
+                # Handle both old flat structure and new nested structure
+                if 'general' in data:
+                    # New nested structure
+                    general_data = data.get('general', {})
+                    lebanese_cash_data = data.get('lebanese_cash', {})
+                    dollar_cash_data = data.get('dollar_cash', {})
+                    special_credit_data = data.get('special_credit', {})
+                else:
+                    # Old flat structure - data is directly accessible
+                    general_data = data
+                    lebanese_cash_data = data
+                    dollar_cash_data = data
+                    special_credit_data = data
+                
+                logger.info(f"Using nested structure: {'general' in data}")
+                
                 # General Section (A2:B5 - no header)
                 row = 2  # Start at row 2
-                general_data = data.get('general', {})
                 ws.cell(row, 1, "Black Market Daily Rate")
                 ws.cell(row, 2, general_data.get('black_market_daily_rate', ''))
                 row += 1
@@ -664,7 +698,6 @@ def employee_export_excel(request):
                 # Special Credit Section
                 ws.cell(row, 1, "Special Credit").font = section_font
                 row += 1
-                special_credit_data = data.get('special_credit', {})
                 ws.cell(row, 1, "Rayan Invoices Credit")
                 ws.cell(row, 2, special_credit_data.get('rayan_invoices_credit', ''))
                 row += 1
@@ -690,7 +723,6 @@ def employee_export_excel(request):
                 ws.cell(2, 6, "Total")
 
                 # Bills (D3:F7)
-                lebanese_cash_data = data.get('lebanese_cash', {})
                 lbp_bills = [
                     ('5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
                     ('10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
@@ -717,7 +749,6 @@ def employee_export_excel(request):
                 
                 # Dollar Cash Section (H2:I11)
                 # Header - Rate
-                dollar_cash_data = data.get('dollar_cash', {})
                 ws.cell(2, 8, "Rate")
                 ws.cell(2, 9, dollar_cash_data.get('dollar_rate', 0))
 
