@@ -144,8 +144,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const sectionDiv = document.createElement('div');
         sectionDiv.className = 'accordion mb-3';
         
-        const sectionKey = section.fields[0].key;
-        const totalKey = section.fields[1].key;
+        // Handle both 'fields' and 'item_schema' structures
+        const fields = section.fields || section.item_schema || [];
+        const sectionKey = fields[0]?.key || 'unknown';
+        const totalKey = fields[1]?.key;
         const listData = values[sectionKey] || [];
         
         sectionDiv.innerHTML = `
@@ -195,7 +197,50 @@ document.addEventListener('DOMContentLoaded', function() {
             const entryDiv = document.createElement('div');
             entryDiv.className = 'row mb-2 p-2 border rounded';
             
-            if (sectionKey === 'credit') {
+            if (sectionKey === 'coffee_machine') {
+                entryDiv.innerHTML = `
+                    <div class="col-md-3">
+                        <label class="form-label">Current Amount</label>
+                        <input type="number" class="form-control" name="${sectionKey}[${index}][current_amount]" 
+                               value="${entry.current_amount || ''}" step="any" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Daily Add</label>
+                        <input type="number" class="form-control" name="${sectionKey}[${index}][daily_add]" 
+                               value="${entry.daily_add || ''}" step="any" />
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Tag</label>
+                        <select class="form-control" name="${sectionKey}[${index}][tag]">
+                            <option value="">Select Tag...</option>
+                            <option value="Paper Cup Small" ${entry.tag === 'Paper Cup Small' ? 'selected' : ''}>Paper Cup Small</option>
+                            <option value="Paper Cup Big" ${entry.tag === 'Paper Cup Big' ? 'selected' : ''}>Paper Cup Big</option>
+                            <option value="Plastic Cup Small" ${entry.tag === 'Plastic Cup Small' ? 'selected' : ''}>Plastic Cup Small</option>
+                            <option value="Cover Cup Big" ${entry.tag === 'Cover Cup Big' ? 'selected' : ''}>Cover Cup Big</option>
+                            <option value="Cover Cup Small" ${entry.tag === 'Cover Cup Small' ? 'selected' : ''}>Cover Cup Small</option>
+                            <option value="Small Sticks" ${entry.tag === 'Small Sticks' ? 'selected' : ''}>Small Sticks</option>
+                            <option value="Big Sticks" ${entry.tag === 'Big Sticks' ? 'selected' : ''}>Big Sticks</option>
+                            <option value="Nescafe Shalimon" ${entry.tag === 'Nescafe Shalimon' ? 'selected' : ''}>Nescafe Shalimon</option>
+                            <option value="Coffee Kg." ${entry.tag === 'Coffee Kg.' ? 'selected' : ''}>Coffee Kg.</option>
+                            <option value="Nescafe Kg." ${entry.tag === 'Nescafe Kg.' ? 'selected' : ''}>Nescafe Kg.</option>
+                            <option value="Coffee Mate Kg." ${entry.tag === 'Coffee Mate Kg.' ? 'selected' : ''}>Coffee Mate Kg.</option>
+                            <option value="Cadbury Pouder Kg." ${entry.tag === 'Cadbury Pouder Kg.' ? 'selected' : ''}>Cadbury Pouder Kg.</option>
+                            <option value="Sugar kg." ${entry.tag === 'Sugar kg.' ? 'selected' : ''}>Sugar kg.</option>
+                            <option value="Tea Bags." ${entry.tag === 'Tea Bags.' ? 'selected' : ''}>Tea Bags.</option>
+                            <option value="Nestle kg." ${entry.tag === 'Nestle kg.' ? 'selected' : ''}>Nestle kg.</option>
+                            <option value="Galon 10L." ${entry.tag === 'Galon 10L.' ? 'selected' : ''}>Galon 10L.</option>
+                            <option value="Zanjabil w 3asal" ${entry.tag === 'Zanjabil w 3asal' ? 'selected' : ''}>Zanjabil w 3asal</option>
+                            <option value="Gaz 12.5 kg." ${entry.tag === 'Gaz 12.5 kg.' ? 'selected' : ''}>Gaz 12.5 kg.</option>
+                            <option value="Gaz 10 kg." ${entry.tag === 'Gaz 10 kg.' ? 'selected' : ''}>Gaz 10 kg.</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (sectionKey === 'credit') {
                 entryDiv.innerHTML = `
                     <div class="col-md-3">
                         <label class="form-label">Amount</label>
@@ -271,7 +316,50 @@ document.addEventListener('DOMContentLoaded', function() {
         const entryDiv = document.createElement('div');
         entryDiv.className = 'row mb-2 p-2 border rounded';
         
-        if (sectionKey === 'credit') {
+        if (sectionKey === 'coffee_machine') {
+            entryDiv.innerHTML = `
+                <div class="col-md-3">
+                    <label class="form-label">Current Amount</label>
+                    <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][current_amount]" 
+                           step="any" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Daily Add</label>
+                    <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][daily_add]" 
+                           step="any" />
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Tag</label>
+                    <select class="form-control" name="${sectionKey}[${currentEntries}][tag]">
+                        <option value="">Select Tag...</option>
+                        <option value="Paper Cup Small">Paper Cup Small</option>
+                        <option value="Paper Cup Big">Paper Cup Big</option>
+                        <option value="Plastic Cup Small">Plastic Cup Small</option>
+                        <option value="Cover Cup Big">Cover Cup Big</option>
+                        <option value="Cover Cup Small">Cover Cup Small</option>
+                        <option value="Small Sticks">Small Sticks</option>
+                        <option value="Big Sticks">Big Sticks</option>
+                        <option value="Nescafe Shalimon">Nescafe Shalimon</option>
+                        <option value="Coffee Kg.">Coffee Kg.</option>
+                        <option value="Nescafe Kg.">Nescafe Kg.</option>
+                        <option value="Coffee Mate Kg.">Coffee Mate Kg.</option>
+                        <option value="Cadbury Pouder Kg.">Cadbury Pouder Kg.</option>
+                        <option value="Sugar kg.">Sugar kg.</option>
+                        <option value="Tea Bags.">Tea Bags.</option>
+                        <option value="Nestle kg.">Nestle kg.</option>
+                        <option value="Galon 10L.">Galon 10L.</option>
+                        <option value="Zanjabil w 3asal">Zanjabil w 3asal</option>
+                        <option value="Gaz 12.5 kg.">Gaz 12.5 kg.</option>
+                        <option value="Gaz 10 kg.">Gaz 10 kg.</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${currentEntries})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+        } else if (sectionKey === 'credit') {
             entryDiv.innerHTML = `
                 <div class="col-md-3">
                     <label class="form-label">Amount</label>
