@@ -78,6 +78,10 @@ def close_cash_dashboard(request):
     if not is_employee(request.user):
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
+
+    # Redirect employees to the new form dashboard; keep legacy dashboard for admins only
+    if not request.user.is_superuser:
+        return redirect('close_cash_forms_dashboard')
     
     files = get_user_excel_files(request.user)
     
@@ -96,6 +100,11 @@ def view_excel_file(request, filename):
     if not is_employee(request.user):
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
+
+    # Restrict legacy grid editor to admins only
+    if not request.user.is_superuser:
+        messages.info(request, 'Please use the Close Cash form to submit your data.')
+        return redirect('close_cash_forms_dashboard')
     
     if not validate_filename(filename):
         messages.error(request, 'Invalid filename.')

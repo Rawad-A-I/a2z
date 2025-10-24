@@ -78,8 +78,8 @@ urlpatterns = [
     path('employee/order/<str:order_id>/cancel/', cancel_order, name='cancel_order'),
     
     # Close Cash Management URLs (legacy editor retained for admin/master)
-    path('employee/close-cash/', close_cash_dashboard, name='close_cash_dashboard'),
-    path('employee/close-cash/view/<str:filename>/', view_excel_file, name='view_excel_file'),
+    path('employee/close-cash/', close_cash_dashboard, name='close_cash_dashboard'),  # non-admins redirected to forms
+    path('employee/close-cash/view/<str:filename>/', view_excel_file, name='view_excel_file'),  # admin-only enforced in view
     path('employee/close-cash/save/<str:filename>/', save_excel_changes, name='save_excel_changes'),
     path('employee/close-cash/download/<str:filename>/', download_excel_file, name='download_excel_file'),
     path('employee/close-cash/upload/<str:filename>/', upload_excel_file, name='upload_excel_file'),
