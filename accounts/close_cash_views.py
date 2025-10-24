@@ -602,9 +602,8 @@ def employee_export_excel(request):
             row = 1
             data = entry.data_json
             
-            # General Section
-            ws.cell(row, 1, "General").font = section_font
-            row += 1
+            # General Section (A2:B5 - no header)
+            row = 2  # Start at row 2
             ws.cell(row, 1, "Black Market Daily Rate")
             ws.cell(row, 2, data.get('black_market_daily_rate', ''))
             row += 1
@@ -616,7 +615,7 @@ def employee_export_excel(request):
             row += 1
             ws.cell(row, 1, "Shift Time")
             ws.cell(row, 2, data.get('shift_time', ''))
-            row += 2
+            row += 2  # Add space before next section
             
             # Special Credit Section
             ws.cell(row, 1, "Special Credit").font = section_font
