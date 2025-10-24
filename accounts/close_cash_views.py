@@ -609,49 +609,49 @@ def rawad_export_excel(request):
             ws.cell(row, 2, data.get('dollar_cash_total_lbp', ''))
             row += 2
             
-                # Credit Section with Tags
-                ws.cell(row, 1, "Credit").font = section_font
+            # Credit Section with Tags
+            ws.cell(row, 1, "Credit").font = section_font
+            row += 1
+
+            credit_entries = data.get('credit', [])
+            if credit_entries:
+                # Headers
+                ws.cell(row, 1, "Amount")
+                ws.cell(row, 2, "Currency")
+                ws.cell(row, 3, "Tag")
+                ws.cell(row, 4, "Name")
                 row += 1
 
-                credit_entries = data.get('credit', [])
-                if credit_entries:
-                    # Headers
-                    ws.cell(row, 1, "Amount")
-                    ws.cell(row, 2, "Currency")
-                    ws.cell(row, 3, "Tag")
-                    ws.cell(row, 4, "Name")
+                # Entries
+                for entry_item in credit_entries:
+                    ws.cell(row, 1, entry_item.get('amount', ''))
+                    ws.cell(row, 2, entry_item.get('currency', ''))
+                    ws.cell(row, 3, entry_item.get('tag', ''))
+                    ws.cell(row, 4, entry_item.get('name', ''))
                     row += 1
+            else:
+                ws.cell(row, 1, "No entries")
+                row += 1
 
-                    # Entries
-                    for entry_item in credit_entries:
-                        ws.cell(row, 1, entry_item.get('amount', ''))
-                        ws.cell(row, 2, entry_item.get('currency', ''))
-                        ws.cell(row, 3, entry_item.get('tag', ''))
-                        ws.cell(row, 4, entry_item.get('name', ''))
-                        row += 1
-                else:
-                    ws.cell(row, 1, "No entries")
-                    row += 1
+            # Credit Subtotals by Tag
+            tag_totals = [
+                ('cash_purchase_total', 'Cash Purchase Total'),
+                ('credit_invoices_total', 'Credit Invoices Total'),
+                ('employee_oth_total', 'Employee OTH Total'),
+                ('customer_oth_total', 'Customer OTH Total'),
+                ('bar_oth_total', 'Bar OTH Total'),
+                ('store_total', 'Store Total')
+            ]
 
-                # Credit Subtotals by Tag
-                tag_totals = [
-                    ('cash_purchase_total', 'Cash Purchase Total'),
-                    ('credit_invoices_total', 'Credit Invoices Total'),
-                    ('employee_oth_total', 'Employee OTH Total'),
-                    ('customer_oth_total', 'Customer OTH Total'),
-                    ('bar_oth_total', 'Bar OTH Total'),
-                    ('store_total', 'Store Total')
-                ]
+            for total_key, total_label in tag_totals:
+                ws.cell(row, 1, total_label)
+                ws.cell(row, 2, data.get(total_key, ''))
+                row += 1
 
-                for total_key, total_label in tag_totals:
-                    ws.cell(row, 1, total_label)
-                    ws.cell(row, 2, data.get(total_key, ''))
-                    row += 1
-
-                # Credit Grand Total
-                ws.cell(row, 1, "Credit Grand Total")
-                ws.cell(row, 2, data.get('credit_grand_total', ''))
-                row += 2
+            # Credit Grand Total
+            ws.cell(row, 1, "Credit Grand Total")
+            ws.cell(row, 2, data.get('credit_grand_total', ''))
+            row += 2
             
             # Summary Results
             ws.cell(row, 1, "Summary Results").font = section_font
