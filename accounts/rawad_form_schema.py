@@ -270,6 +270,43 @@ RAWAD_FORM_SCHEMA = {
             ]
         },
         {
+            "title": "Summary Results",
+            "fields": [
+                {
+                    "key": "cash_in_hand_dollar",
+                    "label": "Cash in Hand (Dollar)",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                },
+                {
+                    "key": "cash_in_hand_lebanese",
+                    "label": "Cash in Hand (Lebanese)",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                },
+                {
+                    "key": "cash_out_of_hand",
+                    "label": "Cash Out of Hand",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                },
+                {
+                    "key": "grand_total",
+                    "label": "Grand Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
             "title": "Coffee Machine",
             "type": "dynamic_list",
             "item_schema": [
@@ -311,43 +348,6 @@ RAWAD_FORM_SCHEMA = {
                         "Gaz 10 kg."
                     ],
                     "required": False
-                }
-            ]
-        },
-        {
-            "title": "Summary Results",
-            "fields": [
-                {
-                    "key": "cash_in_hand_dollar",
-                    "label": "Cash in Hand (Dollar)",
-                    "type": "number",
-                    "required": False,
-                    "readonly": True,
-                    "calculated": True
-                },
-                {
-                    "key": "cash_in_hand_lebanese",
-                    "label": "Cash in Hand (Lebanese)",
-                    "type": "number",
-                    "required": False,
-                    "readonly": True,
-                    "calculated": True
-                },
-                {
-                    "key": "cash_out_of_hand",
-                    "label": "Cash Out of Hand",
-                    "type": "number",
-                    "required": False,
-                    "readonly": True,
-                    "calculated": True
-                },
-                {
-                    "key": "grand_total",
-                    "label": "Grand Total",
-                    "type": "number",
-                    "required": False,
-                    "readonly": True,
-                    "calculated": True
                 }
             ]
         }
