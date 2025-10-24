@@ -21,919 +21,526 @@
 
             <div id="statusBox" class="alert" style="display:none;"></div>
 
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Close Cash Form</h5>
-                    <div>
-                        <input type="date" id="entryDate" class="form-control" style="display:inline-block; width:auto;" />
-                        <button id="submitBtn" class="btn btn-success ms-2">
-                            <i class="fas fa-save me-2"></i>{% if sheet_name == 'new' or sheet_name == 'new_submission' %}Submit{% else %}Save Changes{% endif %}
-                        </button>
+            <form method="post" id="closeCashForm">
+                {% csrf_token %}
+                <input type="hidden" name="entry_date" id="entryDate" value="" />
+                
+                <div class="accordion" id="formSections">
+                    <!-- General Section -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-general">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse-general" aria-expanded="true" aria-controls="collapse-general">
+                                <i class="fas fa-folder me-2"></i>General
+                            </button>
+                        </h2>
+                        <div id="collapse-general" class="accordion-collapse collapse show" 
+                             aria-labelledby="heading-general" data-bs-parent="#formSections">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ general_form.black_market_daily_rate.label_tag }}
+                                        {{ general_form.black_market_daily_rate }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ general_form.cashier_name.label_tag }}
+                                        {{ general_form.cashier_name }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ general_form.date.label_tag }}
+                                        {{ general_form.date }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ general_form.shift_time.label_tag }}
+                                        {{ general_form.shift_time }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lebanese Cash Section -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-lebanese">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse-lebanese" aria-expanded="false" aria-controls="collapse-lebanese">
+                                <i class="fas fa-folder me-2"></i>Lebanese Cash
+                            </button>
+                        </h2>
+                        <div id="collapse-lebanese" class="accordion-collapse collapse" 
+                             aria-labelledby="heading-lebanese" data-bs-parent="#formSections">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        {{ lebanese_cash_form.lebanese_5000_qty.label_tag }}
+                                        {{ lebanese_cash_form.lebanese_5000_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ lebanese_cash_form.lebanese_10000_qty.label_tag }}
+                                        {{ lebanese_cash_form.lebanese_10000_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ lebanese_cash_form.lebanese_20000_qty.label_tag }}
+                                        {{ lebanese_cash_form.lebanese_20000_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ lebanese_cash_form.lebanese_50000_qty.label_tag }}
+                                        {{ lebanese_cash_form.lebanese_50000_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ lebanese_cash_form.lebanese_100000_qty.label_tag }}
+                                        {{ lebanese_cash_form.lebanese_100000_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Total</label>
+                                        <input type="number" class="form-control" id="lebanese-total" readonly 
+                                               style="background-color: #f8f9fa; border-color: #dee2e6;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dollar Cash Section -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-dollar">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse-dollar" aria-expanded="false" aria-controls="collapse-dollar">
+                                <i class="fas fa-folder me-2"></i>Dollar Cash
+                            </button>
+                        </h2>
+                        <div id="collapse-dollar" class="accordion-collapse collapse" 
+                             aria-labelledby="heading-dollar" data-bs-parent="#formSections">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        {{ dollar_cash_form.dollar_1_qty.label_tag }}
+                                        {{ dollar_cash_form.dollar_1_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ dollar_cash_form.dollar_5_qty.label_tag }}
+                                        {{ dollar_cash_form.dollar_5_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ dollar_cash_form.dollar_10_qty.label_tag }}
+                                        {{ dollar_cash_form.dollar_10_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ dollar_cash_form.dollar_20_qty.label_tag }}
+                                        {{ dollar_cash_form.dollar_20_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ dollar_cash_form.dollar_50_qty.label_tag }}
+                                        {{ dollar_cash_form.dollar_50_qty }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ dollar_cash_form.dollar_100_qty.label_tag }}
+                                        {{ dollar_cash_form.dollar_100_qty }}
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        {{ dollar_cash_form.dollar_rate.label_tag }}
+                                        {{ dollar_cash_form.dollar_rate }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Total USD</label>
+                                        <input type="number" class="form-control" id="dollar-total-usd" readonly 
+                                               style="background-color: #f8f9fa; border-color: #dee2e6;" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Total LBP</label>
+                                        <input type="number" class="form-control" id="dollar-total-lbp" readonly 
+                                               style="background-color: #f8f9fa; border-color: #dee2e6;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Special Credit Section -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-special">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse-special" aria-expanded="false" aria-controls="collapse-special">
+                                <i class="fas fa-folder me-2"></i>Special Credit
+                            </button>
+                        </h2>
+                        <div id="collapse-special" class="accordion-collapse collapse" 
+                             aria-labelledby="heading-special" data-bs-parent="#formSections">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ special_credit_form.rayan_invoices_credit.label_tag }}
+                                        {{ special_credit_form.rayan_invoices_credit }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ special_credit_form.employee_invoice_credit.label_tag }}
+                                        {{ special_credit_form.employee_invoice_credit }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ special_credit_form.delivery_shabeb_co.label_tag }}
+                                        {{ special_credit_form.delivery_shabeb_co }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ special_credit_form.delivery_employee.label_tag }}
+                                        {{ special_credit_form.delivery_employee }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ special_credit_form.waste_goods.label_tag }}
+                                        {{ special_credit_form.waste_goods }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Total</label>
+                                        <input type="number" class="form-control" id="special-credit-total" readonly 
+                                               style="background-color: #f8f9fa; border-color: #dee2e6;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credit Section -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-credit">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse-credit" aria-expanded="false" aria-controls="collapse-credit">
+                                <i class="fas fa-folder me-2"></i>Credit
+                            </button>
+                        </h2>
+                        <div id="collapse-credit" class="accordion-collapse collapse" 
+                             aria-labelledby="heading-credit" data-bs-parent="#formSections">
+                            <div class="accordion-body">
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-sm btn-primary" id="add-credit-entry">
+                                        <i class="fas fa-plus me-1"></i>Add Entry
+                                    </button>
+                                </div>
+                                <div id="credit-entries">
+                                    {{ credit_formset.management_form }}
+                                    {% for form in credit_formset %}
+                                        <div class="row mb-2 p-2 border rounded credit-entry">
+                                            <div class="col-md-2">
+                                                {{ form.amount.label_tag }}
+                                                {{ form.amount }}
+                                            </div>
+                                            <div class="col-md-2">
+                                                {{ form.currency.label_tag }}
+                                                {{ form.currency }}
+                                            </div>
+                                            <div class="col-md-3">
+                                                {{ form.name.label_tag }}
+                                                {{ form.name }}
+                                            </div>
+                                            <div class="col-md-4">
+                                                {{ form.tag.label_tag }}
+                                                {{ form.tag }}
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-danger remove-credit-entry">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coffee Machine Section -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-coffee">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse-coffee" aria-expanded="false" aria-controls="collapse-coffee">
+                                <i class="fas fa-folder me-2"></i>Coffee Machine
+                            </button>
+                        </h2>
+                        <div id="collapse-coffee" class="accordion-collapse collapse" 
+                             aria-labelledby="heading-coffee" data-bs-parent="#formSections">
+                            <div class="accordion-body">
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-sm btn-primary" id="add-coffee-entry">
+                                        <i class="fas fa-plus me-1"></i>Add Entry
+                                    </button>
+                                </div>
+                                <div id="coffee-entries">
+                                    {{ coffee_machine_formset.management_form }}
+                                    {% for form in coffee_machine_formset %}
+                                        <div class="row mb-2 p-2 border rounded coffee-entry">
+                                            <div class="col-md-3">
+                                                {{ form.current_amount.label_tag }}
+                                                {{ form.current_amount }}
+                                            </div>
+                                            <div class="col-md-3">
+                                                {{ form.daily_add.label_tag }}
+                                                {{ form.daily_add }}
+                                            </div>
+                                            <div class="col-md-5">
+                                                {{ form.tag.label_tag }}
+                                                {{ form.tag }}
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-danger remove-coffee-entry">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <form id="dynamicForm">
-                        <div id="formSections"></div>
-                    </form>
+
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Close Cash Form</h5>
+                        <div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>{% if sheet_name == 'new' or sheet_name == 'new_submission' %}Submit{% else %}Save Changes{% endif %}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 
-{{ schema|json_script:"schema-data" }}
-{{ values|json_script:"values-data" }}
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let schema, values;
-    try {
-        schema = JSON.parse(document.getElementById('schema-data').textContent);
-        values = JSON.parse(document.getElementById('values-data').textContent);
-    } catch (e) {
-        console.error('Error parsing JSON:', e);
-        schema = { sections: [] };
-        values = {};
-    }
-    const sheetName = "{{ sheet_name }}";
-
-    const formSections = document.getElementById('formSections');
-    const statusBox = document.getElementById('statusBox');
-    const submitBtn = document.getElementById('submitBtn');
-    const entryDate = document.getElementById('entryDate');
-
     // Set today's date as default
-    entryDate.value = new Date().toISOString().split('T')[0];
-
-    function renderField(field, sectionIndex) {
-        const colDiv = document.createElement('div');
-        colDiv.className = 'col-md-6';
-
-        const formGroup = document.createElement('div');
-        formGroup.className = 'form-group mb-3';
-
-        const label = document.createElement('label');
-        label.className = 'form-label fw-bold';
-        label.textContent = field.label || field.key;
-
-        let input;
-        const v = values[field.key];
-
-        if (field.type === 'select') {
-            input = document.createElement('select');
-            input.className = 'form-control';
-            input.name = field.key;
-            input.required = !!field.required;
-            
-            // Add default option
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select...';
-            input.appendChild(defaultOption);
-            
-            // Add options
-            if (field.options) {
-                field.options.forEach(option => {
-                    const optionElement = document.createElement('option');
-                    optionElement.value = option;
-                    optionElement.textContent = option;
-                    if (v === option) optionElement.selected = true;
-                    input.appendChild(optionElement);
-                });
-            }
-        } else {
-            input = document.createElement('input');
-            input.className = 'form-control';
-            input.name = field.key;
-            input.required = !!field.required;
-            
-            if (field.readonly) {
-                input.readOnly = true;
-                input.style.backgroundColor = '#f8f9fa';
-                input.style.borderColor = '#dee2e6';
-            }
-
-            switch ((field.type || 'text').toLowerCase()) {
-                case 'number':
-                    input.type = 'number';
-                    input.step = 'any';
-                    if (v !== undefined && v !== null) input.value = v;
-                    break;
-                case 'date':
-                    input.type = 'date';
-                    try {
-                        if (v) {
-                            const d = new Date(v);
-                            if (!isNaN(d)) input.valueAsDate = d;
-                        }
-                    } catch (e) {}
-                    break;
-                default:
-                    input.type = 'text';
-                    if (v !== undefined && v !== null) input.value = v;
-            }
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('entryDate').value = today;
+    
+    // Calculate Lebanese Cash total
+    function calculateLebaneseTotal() {
+        const qty5000 = parseFloat(document.querySelector('[name="lebanese_5000_qty"]').value) || 0;
+        const qty10000 = parseFloat(document.querySelector('[name="lebanese_10000_qty"]').value) || 0;
+        const qty20000 = parseFloat(document.querySelector('[name="lebanese_20000_qty"]').value) || 0;
+        const qty50000 = parseFloat(document.querySelector('[name="lebanese_50000_qty"]').value) || 0;
+        const qty100000 = parseFloat(document.querySelector('[name="lebanese_100000_qty"]').value) || 0;
+        
+        const total = (qty5000 * 5000) + (qty10000 * 10000) + (qty20000 * 20000) + (qty50000 * 50000) + (qty100000 * 100000);
+        document.getElementById('lebanese-total').value = total;
+    }
+    
+    // Calculate Dollar Cash totals
+    function calculateDollarTotals() {
+        const qty1 = parseFloat(document.querySelector('[name="dollar_1_qty"]').value) || 0;
+        const qty5 = parseFloat(document.querySelector('[name="dollar_5_qty"]').value) || 0;
+        const qty10 = parseFloat(document.querySelector('[name="dollar_10_qty"]').value) || 0;
+        const qty20 = parseFloat(document.querySelector('[name="dollar_20_qty"]').value) || 0;
+        const qty50 = parseFloat(document.querySelector('[name="dollar_50_qty"]').value) || 0;
+        const qty100 = parseFloat(document.querySelector('[name="dollar_100_qty"]').value) || 0;
+        const rate = parseFloat(document.querySelector('[name="dollar_rate"]').value) || 0;
+        
+        const totalUSD = qty1 + (qty5 * 5) + (qty10 * 10) + (qty20 * 20) + (qty50 * 50) + (qty100 * 100);
+        const totalLBP = totalUSD * rate;
+        
+        document.getElementById('dollar-total-usd').value = totalUSD;
+        document.getElementById('dollar-total-lbp').value = totalLBP;
+    }
+    
+    // Calculate Special Credit total
+    function calculateSpecialCreditTotal() {
+        const rayan = parseFloat(document.querySelector('[name="rayan_invoices_credit"]').value) || 0;
+        const employee = parseFloat(document.querySelector('[name="employee_invoice_credit"]').value) || 0;
+        const delivery = parseFloat(document.querySelector('[name="delivery_shabeb_co"]').value) || 0;
+        const deliveryEmp = parseFloat(document.querySelector('[name="delivery_employee"]').value) || 0;
+        const waste = parseFloat(document.querySelector('[name="waste_goods"]').value) || 0;
+        
+        const total = rayan + employee + delivery + deliveryEmp + waste;
+        document.getElementById('special-credit-total').value = total;
+    }
+    
+    // Add event listeners for calculations
+    document.querySelectorAll('[name*="lebanese_"]').forEach(input => {
+        input.addEventListener('input', calculateLebaneseTotal);
+    });
+    
+    document.querySelectorAll('[name*="dollar_"]').forEach(input => {
+        input.addEventListener('input', calculateDollarTotals);
+    });
+    
+    document.querySelectorAll('[name*="credit"]').forEach(input => {
+        input.addEventListener('input', calculateSpecialCreditTotal);
+    });
+    
+    // Add Credit Entry
+    document.getElementById('add-credit-entry').addEventListener('click', function() {
+        const container = document.getElementById('credit-entries');
+        const totalForms = document.querySelector('[name="form-TOTAL_FORMS"]');
+        const formCount = parseInt(totalForms.value);
+        
+        const newForm = document.createElement('div');
+        newForm.className = 'row mb-2 p-2 border rounded credit-entry';
+        newForm.innerHTML = `
+            <div class="col-md-2">
+                <label class="form-label">Amount</label>
+                <input type="number" class="form-control" name="form-${formCount}-amount" step="any" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Currency</label>
+                <select class="form-control" name="form-${formCount}-currency">
+                    <option value="">Select...</option>
+                    <option value="Lebanese">Lebanese</option>
+                    <option value="Dollar">Dollar</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" name="form-${formCount}-name" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Tag</label>
+                <select class="form-control" name="form-${formCount}-tag">
+                    <option value="">Select...</option>
+                    <option value="Cash purchase">Cash purchase</option>
+                    <option value="Credit invoices">Credit invoices</option>
+                    <option value="Employee OTH">Employee OTH</option>
+                    <option value="Customer OTH">Customer OTH</option>
+                    <option value="Bar OTH">Bar OTH</option>
+                    <option value="Store">Store</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-sm btn-danger remove-credit-entry">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(newForm);
+        totalForms.value = formCount + 1;
+    });
+    
+    // Add Coffee Machine Entry
+    document.getElementById('add-coffee-entry').addEventListener('click', function() {
+        const container = document.getElementById('coffee-entries');
+        const totalForms = document.querySelector('[name="form-TOTAL_FORMS"]');
+        const formCount = parseInt(totalForms.value);
+        
+        const newForm = document.createElement('div');
+        newForm.className = 'row mb-2 p-2 border rounded coffee-entry';
+        newForm.innerHTML = `
+            <div class="col-md-3">
+                <label class="form-label">Current Amount</label>
+                <input type="number" class="form-control" name="form-${formCount}-current_amount" step="any" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Daily Add</label>
+                <input type="number" class="form-control" name="form-${formCount}-daily_add" step="any" />
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Tag</label>
+                <select class="form-control" name="form-${formCount}-tag">
+                    <option value="">Select...</option>
+                    <option value="Paper Cup Small">Paper Cup Small</option>
+                    <option value="Paper Cup Big">Paper Cup Big</option>
+                    <option value="Plastic Cup Small">Plastic Cup Small</option>
+                    <option value="Cover Cup Big">Cover Cup Big</option>
+                    <option value="Cover Cup Small">Cover Cup Small</option>
+                    <option value="Small Sticks">Small Sticks</option>
+                    <option value="Big Sticks">Big Sticks</option>
+                    <option value="Nescafe Shalimon">Nescafe Shalimon</option>
+                    <option value="Coffee Kg.">Coffee Kg.</option>
+                    <option value="Nescafe Kg.">Nescafe Kg.</option>
+                    <option value="Coffee Mate Kg.">Coffee Mate Kg.</option>
+                    <option value="Cadbury Pouder Kg.">Cadbury Pouder Kg.</option>
+                    <option value="Sugar kg.">Sugar kg.</option>
+                    <option value="Tea Bags.">Tea Bags.</option>
+                    <option value="Nestle kg.">Nestle kg.</option>
+                    <option value="Galon 10L.">Galon 10L.</option>
+                    <option value="Zanjabil w 3asal">Zanjabil w 3asal</option>
+                    <option value="Gaz 12.5 kg.">Gaz 12.5 kg.</option>
+                    <option value="Gaz 10 kg.">Gaz 10 kg.</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-sm btn-danger remove-coffee-entry">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(newForm);
+        totalForms.value = formCount + 1;
+    });
+    
+    // Remove entry handlers
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-credit-entry')) {
+            e.target.closest('.credit-entry').remove();
         }
-
-        formGroup.appendChild(label);
-        formGroup.appendChild(input);
-        colDiv.appendChild(formGroup);
-        return colDiv;
-    }
-
-    function renderDynamicList(section, sectionIndex) {
-        console.log(`Rendering dynamic list: ${section.title}`, section);
-        const sectionDiv = document.createElement('div');
-        sectionDiv.className = 'accordion mb-3';
-        
-        // Handle both 'fields' and 'item_schema' structures
-        const fields = section.fields || section.item_schema || [];
-        let sectionKey, totalKey, listData, hasTotalField;
-        
-        // Check if this is a nested structure (like Coffee Machine)
-        if (fields[0] && fields[0].type === 'dynamic_list' && fields[0].list_fields) {
-            // Nested structure: fields[0] contains the list definition
-            sectionKey = fields[0].key;
-            totalKey = fields[1]?.key;
-            listData = values[sectionKey] || [];
-            hasTotalField = fields[1] && fields[1].label;
-        } else {
-            // Simple structure: fields[0] is the list key
-            sectionKey = fields[0]?.key || 'unknown';
-            totalKey = fields[1]?.key;
-            listData = values[sectionKey] || [];
-            hasTotalField = fields[1] && fields[1].label;
+        if (e.target.closest('.remove-coffee-entry')) {
+            e.target.closest('.coffee-entry').remove();
         }
+    });
+    
+    // Form submission
+    document.getElementById('closeCashForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        console.log(`Section key: ${sectionKey}, Total key: ${totalKey}, Fields:`, fields);
-        console.log(`Has total field: ${hasTotalField}`);
-        
-        // Create accordion structure using DOM manipulation to avoid CSP issues
-        const accordionItem = document.createElement('div');
-        accordionItem.className = 'accordion-item';
-        
-        const header = document.createElement('h2');
-        header.className = 'accordion-header';
-        header.id = 'heading-' + sectionIndex;
-        
-        const button = document.createElement('button');
-        button.className = 'accordion-button' + (sectionIndex === 0 ? '' : ' collapsed');
-        button.type = 'button';
-        button.setAttribute('data-bs-toggle', 'collapse');
-        button.setAttribute('data-bs-target', '#collapse-' + sectionIndex);
-        button.setAttribute('aria-expanded', sectionIndex === 0 ? 'true' : 'false');
-        button.setAttribute('aria-controls', 'collapse-' + sectionIndex);
-        
-        const buttonIcon = document.createElement('i');
-        buttonIcon.className = 'fas fa-folder me-2';
-        button.appendChild(buttonIcon);
-        button.appendChild(document.createTextNode(section.title));
-        
-        header.appendChild(button);
-        
-        const collapseDiv = document.createElement('div');
-        collapseDiv.id = 'collapse-' + sectionIndex;
-        collapseDiv.className = 'accordion-collapse collapse' + (sectionIndex === 0 ? ' show' : '');
-        collapseDiv.setAttribute('aria-labelledby', 'heading-' + sectionIndex);
-        collapseDiv.setAttribute('data-bs-parent', '#formSections');
-        
-        const accordionBody = document.createElement('div');
-        accordionBody.className = 'accordion-body';
-        
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'mb-3';
-        
-        const addButton = document.createElement('button');
-        addButton.type = 'button';
-        addButton.className = 'btn btn-sm btn-primary';
-        addButton.setAttribute('data-section-key', sectionKey);
-        addButton.onclick = function() { addDynamicEntry(sectionKey); };
-        
-        const addIcon = document.createElement('i');
-        addIcon.className = 'fas fa-plus me-1';
-        addButton.appendChild(addIcon);
-        addButton.appendChild(document.createTextNode('Add Entry'));
-        
-        buttonContainer.appendChild(addButton);
-        
-        const listContainer = document.createElement('div');
-        listContainer.id = 'dynamic-list-' + sectionKey;
-        listContainer.className = 'mb-3';
-        
-        accordionBody.appendChild(buttonContainer);
-        accordionBody.appendChild(listContainer);
-        
-        if (hasTotalField) {
-            const totalRow = document.createElement('div');
-            totalRow.className = 'row';
-            
-            const totalCol = document.createElement('div');
-            totalCol.className = 'col-md-6';
-            
-            const totalLabel = document.createElement('label');
-            totalLabel.className = 'form-label fw-bold';
-            totalLabel.textContent = fields[1].label;
-            
-            const totalInput = document.createElement('input');
-            totalInput.type = 'number';
-            totalInput.className = 'form-control';
-            totalInput.name = totalKey;
-            totalInput.readOnly = true;
-            totalInput.style.backgroundColor = '#f8f9fa';
-            totalInput.style.borderColor = '#dee2e6';
-            
-            totalCol.appendChild(totalLabel);
-            totalCol.appendChild(totalInput);
-            totalRow.appendChild(totalCol);
-            accordionBody.appendChild(totalRow);
-        }
-        
-        collapseDiv.appendChild(accordionBody);
-        accordionItem.appendChild(header);
-        accordionItem.appendChild(collapseDiv);
-        sectionDiv.appendChild(accordionItem);
-        
-        formSections.appendChild(sectionDiv);
-        
-        // Render existing entries
-        renderDynamicListEntries(sectionKey, listData);
-        
-        return sectionDiv;
-    }
-
-    function renderDynamicListEntries(sectionKey, entries) {
-        const container = document.getElementById(`dynamic-list-${sectionKey}`);
-        container.innerHTML = '';
-        
-        entries.forEach((entry, index) => {
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'row mb-2 p-2 border rounded';
-            
-            if (sectionKey === 'coffee_machine') {
-                // Current Amount field
-                const currentAmountCol = document.createElement('div');
-                currentAmountCol.className = 'col-md-3';
-                
-                const currentAmountLabel = document.createElement('label');
-                currentAmountLabel.className = 'form-label';
-                currentAmountLabel.textContent = 'Current Amount';
-                
-                const currentAmountInput = document.createElement('input');
-                currentAmountInput.type = 'number';
-                currentAmountInput.className = 'form-control';
-                currentAmountInput.name = sectionKey + '[' + index + '][current_amount]';
-                currentAmountInput.value = entry.current_amount || '';
-                currentAmountInput.step = 'any';
-                
-                currentAmountCol.appendChild(currentAmountLabel);
-                currentAmountCol.appendChild(currentAmountInput);
-                entryDiv.appendChild(currentAmountCol);
-                
-                // Daily Add field
-                const dailyAddCol = document.createElement('div');
-                dailyAddCol.className = 'col-md-3';
-                
-                const dailyAddLabel = document.createElement('label');
-                dailyAddLabel.className = 'form-label';
-                dailyAddLabel.textContent = 'Daily Add';
-                
-                const dailyAddInput = document.createElement('input');
-                dailyAddInput.type = 'number';
-                dailyAddInput.className = 'form-control';
-                dailyAddInput.name = sectionKey + '[' + index + '][daily_add]';
-                dailyAddInput.value = entry.daily_add || '';
-                dailyAddInput.step = 'any';
-                
-                dailyAddCol.appendChild(dailyAddLabel);
-                dailyAddCol.appendChild(dailyAddInput);
-                entryDiv.appendChild(dailyAddCol);
-                
-                // Tag field
-                const tagCol = document.createElement('div');
-                tagCol.className = 'col-md-5';
-                
-                const tagLabel = document.createElement('label');
-                tagLabel.className = 'form-label';
-                tagLabel.textContent = 'Tag';
-                
-                const tagSelect = document.createElement('select');
-                tagSelect.className = 'form-control';
-                tagSelect.name = sectionKey + '[' + index + '][tag]';
-                
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.textContent = 'Select Tag...';
-                tagSelect.appendChild(defaultOption);
-                
-                // Add all tag options
-                const tagOptions = [
-                    'Paper Cup Small', 'Paper Cup Big', 'Plastic Cup Small', 'Cover Cup Big',
-                    'Cover Cup Small', 'Small Sticks', 'Big Sticks', 'Nescafe Shalimon',
-                    'Coffee Kg.', 'Nescafe Kg.', 'Coffee Mate Kg.', 'Cadbury Pouder Kg.',
-                    'Sugar kg.', 'Tea Bags.', 'Nestle kg.', 'Galon 10L.',
-                    'Zanjabil w 3asal', 'Gaz 12.5 kg.', 'Gaz 10 kg.'
-                ];
-                
-                tagOptions.forEach(optionValue => {
-                    const option = document.createElement('option');
-                    option.value = optionValue;
-                    option.textContent = optionValue;
-                    if (entry.tag === optionValue) {
-                        option.selected = true;
-                    }
-                    tagSelect.appendChild(option);
-                });
-                
-                tagCol.appendChild(tagLabel);
-                tagCol.appendChild(tagSelect);
-                entryDiv.appendChild(tagCol);
-                
-                // Delete button
-                const deleteCol = document.createElement('div');
-                deleteCol.className = 'col-md-1 d-flex align-items-end';
-                
-                const deleteButton = document.createElement('button');
-                deleteButton.type = 'button';
-                deleteButton.className = 'btn btn-sm btn-danger';
-                deleteButton.onclick = function() { removeDynamicEntry(sectionKey, index); };
-                
-                const deleteIcon = document.createElement('i');
-                deleteIcon.className = 'fas fa-trash';
-                deleteButton.appendChild(deleteIcon);
-                
-                deleteCol.appendChild(deleteButton);
-                entryDiv.appendChild(deleteCol);
-            } else if (sectionKey === 'credit') {
-                entryDiv.innerHTML = `
-                    <div class="col-md-3">
-                        <label class="form-label">Amount</label>
-                        <input type="number" class="form-control" name="${sectionKey}[${index}][amount]" 
-                               value="${entry.amount || ''}" step="any" onchange="calculateSectionTotal('${sectionKey}')" />
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Currency</label>
-                        <select class="form-control" name="${sectionKey}[${index}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
-                            <option value="lebanese" ${entry.currency === 'lebanese' ? 'selected' : ''}>Lebanese</option>
-                            <option value="dollar" ${entry.currency === 'dollar' ? 'selected' : ''}>Dollar</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Tag</label>
-                        <select class="form-control" name="${sectionKey}[${index}][tag]" onchange="calculateSectionTotal('${sectionKey}')">
-                            <option value="">Select Tag...</option>
-                            <option value="Cash purchase" ${entry.tag === 'Cash purchase' ? 'selected' : ''}>Cash purchase</option>
-                            <option value="Credit invoices" ${entry.tag === 'Credit invoices' ? 'selected' : ''}>Credit invoices</option>
-                            <option value="Employee OTH" ${entry.tag === 'Employee OTH' ? 'selected' : ''}>Employee OTH</option>
-                            <option value="Customer OTH" ${entry.tag === 'Customer OTH' ? 'selected' : ''}>Customer OTH</option>
-                            <option value="Bar OTH" ${entry.tag === 'Bar OTH' ? 'selected' : ''}>Bar OTH</option>
-                            <option value="Store" ${entry.tag === 'Store' ? 'selected' : ''}>Store</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control" name="${sectionKey}[${index}][name]" 
-                               value="${entry.name || ''}" />
-                    </div>
-                    <div class="col-md-1 d-flex align-items-end">
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-            } else {
-                entryDiv.innerHTML = `
-                    <div class="col-md-4">
-                        <label class="form-label">Amount</label>
-                        <input type="number" class="form-control" name="${sectionKey}[${index}][amount]" 
-                               value="${entry.amount || ''}" step="any" onchange="calculateSectionTotal('${sectionKey}')" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Currency</label>
-                        <select class="form-control" name="${sectionKey}[${index}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
-                            <option value="lebanese" ${entry.currency === 'lebanese' ? 'selected' : ''}>Lebanese</option>
-                            <option value="dollar" ${entry.currency === 'dollar' ? 'selected' : ''}>Dollar</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control" name="${sectionKey}[${index}][name]" 
-                               value="${entry.name || ''}" />
-                    </div>
-                    <div class="col-md-1 d-flex align-items-end">
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-            }
-            container.appendChild(entryDiv);
-        });
-        
-        calculateSectionTotal(sectionKey);
-    }
-
-    function addDynamicEntry(sectionKey) {
-        const container = document.getElementById(`dynamic-list-${sectionKey}`);
-        const currentEntries = Array.from(container.children).length;
-        
-        const entryDiv = document.createElement('div');
-        entryDiv.className = 'row mb-2 p-2 border rounded';
-        
-        if (sectionKey === 'coffee_machine') {
-            // Current Amount field
-            const currentAmountCol = document.createElement('div');
-            currentAmountCol.className = 'col-md-3';
-            
-            const currentAmountLabel = document.createElement('label');
-            currentAmountLabel.className = 'form-label';
-            currentAmountLabel.textContent = 'Current Amount';
-            
-            const currentAmountInput = document.createElement('input');
-            currentAmountInput.type = 'number';
-            currentAmountInput.className = 'form-control';
-            currentAmountInput.name = sectionKey + '[' + currentEntries + '][current_amount]';
-            currentAmountInput.step = 'any';
-            
-            currentAmountCol.appendChild(currentAmountLabel);
-            currentAmountCol.appendChild(currentAmountInput);
-            entryDiv.appendChild(currentAmountCol);
-            
-            // Daily Add field
-            const dailyAddCol = document.createElement('div');
-            dailyAddCol.className = 'col-md-3';
-            
-            const dailyAddLabel = document.createElement('label');
-            dailyAddLabel.className = 'form-label';
-            dailyAddLabel.textContent = 'Daily Add';
-            
-            const dailyAddInput = document.createElement('input');
-            dailyAddInput.type = 'number';
-            dailyAddInput.className = 'form-control';
-            dailyAddInput.name = sectionKey + '[' + currentEntries + '][daily_add]';
-            dailyAddInput.step = 'any';
-            
-            dailyAddCol.appendChild(dailyAddLabel);
-            dailyAddCol.appendChild(dailyAddInput);
-            entryDiv.appendChild(dailyAddCol);
-            
-            // Tag field
-            const tagCol = document.createElement('div');
-            tagCol.className = 'col-md-5';
-            
-            const tagLabel = document.createElement('label');
-            tagLabel.className = 'form-label';
-            tagLabel.textContent = 'Tag';
-            
-            const tagSelect = document.createElement('select');
-            tagSelect.className = 'form-control';
-            tagSelect.name = sectionKey + '[' + currentEntries + '][tag]';
-            
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select Tag...';
-            tagSelect.appendChild(defaultOption);
-            
-            // Add all tag options
-            const tagOptions = [
-                'Paper Cup Small', 'Paper Cup Big', 'Plastic Cup Small', 'Cover Cup Big',
-                'Cover Cup Small', 'Small Sticks', 'Big Sticks', 'Nescafe Shalimon',
-                'Coffee Kg.', 'Nescafe Kg.', 'Coffee Mate Kg.', 'Cadbury Pouder Kg.',
-                'Sugar kg.', 'Tea Bags.', 'Nestle kg.', 'Galon 10L.',
-                'Zanjabil w 3asal', 'Gaz 12.5 kg.', 'Gaz 10 kg.'
-            ];
-            
-            tagOptions.forEach(optionValue => {
-                const option = document.createElement('option');
-                option.value = optionValue;
-                option.textContent = optionValue;
-                tagSelect.appendChild(option);
-            });
-            
-            tagCol.appendChild(tagLabel);
-            tagCol.appendChild(tagSelect);
-            entryDiv.appendChild(tagCol);
-            
-            // Delete button
-            const deleteCol = document.createElement('div');
-            deleteCol.className = 'col-md-1 d-flex align-items-end';
-            
-            const deleteButton = document.createElement('button');
-            deleteButton.type = 'button';
-            deleteButton.className = 'btn btn-sm btn-danger';
-            deleteButton.onclick = function() { removeDynamicEntry(sectionKey, currentEntries); };
-            
-            const deleteIcon = document.createElement('i');
-            deleteIcon.className = 'fas fa-trash';
-            deleteButton.appendChild(deleteIcon);
-            
-            deleteCol.appendChild(deleteButton);
-            entryDiv.appendChild(deleteCol);
-        } else if (sectionKey === 'credit') {
-            entryDiv.innerHTML = `
-                <div class="col-md-3">
-                    <label class="form-label">Amount</label>
-                    <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][amount]" 
-                           step="any" onchange="calculateSectionTotal('${sectionKey}')" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Currency</label>
-                    <select class="form-control" name="${sectionKey}[${currentEntries}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
-                        <option value="lebanese">Lebanese</option>
-                        <option value="dollar">Dollar</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Tag</label>
-                    <select class="form-control" name="${sectionKey}[${currentEntries}][tag]" onchange="calculateSectionTotal('${sectionKey}')">
-                        <option value="">Select Tag...</option>
-                        <option value="Cash purchase">Cash purchase</option>
-                        <option value="Credit invoices">Credit invoices</option>
-                        <option value="Employee OTH">Employee OTH</option>
-                        <option value="Customer OTH">Customer OTH</option>
-                        <option value="Bar OTH">Bar OTH</option>
-                        <option value="Store">Store</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" name="${sectionKey}[${currentEntries}][name]" />
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${currentEntries})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-        } else {
-            entryDiv.innerHTML = `
-                <div class="col-md-4">
-                    <label class="form-label">Amount</label>
-                    <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][amount]" 
-                           step="any" onchange="calculateSectionTotal('${sectionKey}')" />
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Currency</label>
-                    <select class="form-control" name="${sectionKey}[${currentEntries}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
-                        <option value="lebanese">Lebanese</option>
-                        <option value="dollar">Dollar</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" name="${sectionKey}[${currentEntries}][name]" />
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${currentEntries})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-        }
-        container.appendChild(entryDiv);
-    }
-
-    function removeDynamicEntry(sectionKey, index) {
-        const container = document.getElementById(`dynamic-list-${sectionKey}`);
-        const entries = Array.from(container.children);
-        if (entries[index]) {
-            entries[index].remove();
-            // Re-index remaining entries
-            renderDynamicListEntries(sectionKey, getDynamicListData(sectionKey));
-        }
-    }
-
-    function getDynamicListData(sectionKey) {
-        const container = document.getElementById(`dynamic-list-${sectionKey}`);
-        if (!container) return [];
-        
-        const entries = [];
-        const rows = container.querySelectorAll('.row.mb-2');
-        
-        rows.forEach(row => {
-            // Handle Coffee Machine section (different field structure)
-            if (sectionKey === 'coffee_machine') {
-                const currentAmount = row.querySelector('input[name$="[current_amount]"]')?.value;
-                const dailyAdd = row.querySelector('input[name$="[daily_add]"]')?.value;
-                const tag = row.querySelector('select[name$="[tag]"]')?.value;
-                
-                if (currentAmount || dailyAdd || tag) {
-                    entries.push({
-                        current_amount: parseFloat(currentAmount) || 0,
-                        daily_add: parseFloat(dailyAdd) || 0,
-                        tag: tag || ''
-                    });
-                }
-            }
-            // Handle Credit section (has amount, currency, tag, name)
-            else if (sectionKey === 'credit') {
-                const amount = row.querySelector('input[name$="[amount]"]')?.value;
-                const currency = row.querySelector('select[name$="[currency]"]')?.value;
-                const tag = row.querySelector('select[name$="[tag]"]')?.value;
-                const name = row.querySelector('input[name$="[name]"]')?.value;
-                
-                if (amount || currency || name || tag) {
-                    entries.push({
-                        amount: parseFloat(amount) || 0,
-                        currency: currency || 'lebanese',
-                        tag: tag || '',
-                        name: name || ''
-                    });
-                }
-            }
-            // Handle other dynamic list sections (generic fallback)
-            else {
-                const amount = row.querySelector('input[name$="[amount]"]')?.value;
-                const currency = row.querySelector('select[name$="[currency]"]')?.value;
-                const name = row.querySelector('input[name$="[name]"]')?.value;
-                
-                if (amount || currency || name) {
-                    entries.push({
-                        amount: parseFloat(amount) || 0,
-                        currency: currency || 'lebanese',
-                        name: name || ''
-                    });
-                }
-            }
-        });
-        
-        return entries;
-    }
-
-    function calculateSectionTotal(sectionKey) {
-        if (sectionKey === 'credit') {
-            calculateCreditTotals();
-        } else {
-            const entries = getDynamicListData(sectionKey);
-            let total = 0;
-            
-            entries.forEach(entry => {
-                if (entry.currency === 'dollar') {
-                    // Convert dollar to LBP using dollar rate
-                    const dollarRate = parseFloat(document.querySelector('input[name="dollar_rate"]')?.value) || 1;
-                    total += (entry.amount || 0) * dollarRate;
-                } else {
-                    total += entry.amount || 0;
-                }
-            });
-            
-            const totalField = document.querySelector(`input[name="${sectionKey.replace('_', '_')}_total"]`);
-            if (totalField) {
-                totalField.value = total.toFixed(2);
-            }
-        }
-        
-        calculateAllTotals();
-    }
-
-    function calculateCreditTotals() {
-        const entries = getDynamicListData('credit');
-        const tagTotals = {
-            'Cash purchase': 0,
-            'Credit invoices': 0,
-            'Employee OTH': 0,
-            'Customer OTH': 0,
-            'Bar OTH': 0,
-            'Store': 0
-        };
-        
-        entries.forEach(entry => {
-            let amount = entry.amount || 0;
-            if (entry.currency === 'dollar') {
-                // Convert dollar to LBP using dollar rate
-                const dollarRate = parseFloat(document.querySelector('input[name="dollar_rate"]')?.value) || 1;
-                amount = amount * dollarRate;
-            }
-            
-            if (entry.tag && tagTotals.hasOwnProperty(entry.tag)) {
-                tagTotals[entry.tag] += amount;
-            }
-        });
-        
-        // Update individual tag totals
-        Object.keys(tagTotals).forEach(tag => {
-            // Map tag names to field names
-            const fieldNameMap = {
-                'Cash purchase': 'cash_purchase',
-                'Credit invoices': 'credit_invoices',
-                'Employee OTH': 'employee_oth',
-                'Customer OTH': 'customer_oth',
-                'Bar OTH': 'bar_oth',
-                'Store': 'store'
-            };
-            const fieldName = fieldNameMap[tag];
-            const totalField = document.querySelector(`input[name="${fieldName}_total"]`);
-            if (totalField) {
-                totalField.value = tagTotals[tag].toFixed(2);
-            }
-        });
-        
-        // Calculate grand total
-        const grandTotal = Object.values(tagTotals).reduce((sum, total) => sum + total, 0);
-        const grandTotalField = document.querySelector('input[name="credit_grand_total"]');
-        if (grandTotalField) {
-            grandTotalField.value = grandTotal.toFixed(2);
-        }
-    }
-
-    function calculateAllTotals() {
-        // Special Credit Total
-        const specialCreditTotal = 
-            (parseFloat(document.querySelector('input[name="rayan_invoices_credit"]')?.value) || 0) +
-            (parseFloat(document.querySelector('input[name="employee_invoice_credit"]')?.value) || 0) +
-            (parseFloat(document.querySelector('input[name="delivery_shabeb_co"]')?.value) || 0) +
-            (parseFloat(document.querySelector('input[name="delivery_employee"]')?.value) || 0) +
-            (parseFloat(document.querySelector('input[name="waste_goods"]')?.value) || 0);
-        
-        document.querySelector('input[name="special_credit_total"]').value = specialCreditTotal.toFixed(2);
-        
-        // Lebanese Cash Total
-        const lebaneseTotal = 
-            (parseFloat(document.querySelector('input[name="lebanese_5000_qty"]')?.value) || 0) * 5000 +
-            (parseFloat(document.querySelector('input[name="lebanese_10000_qty"]')?.value) || 0) * 10000 +
-            (parseFloat(document.querySelector('input[name="lebanese_20000_qty"]')?.value) || 0) * 20000 +
-            (parseFloat(document.querySelector('input[name="lebanese_50000_qty"]')?.value) || 0) * 50000 +
-            (parseFloat(document.querySelector('input[name="lebanese_100000_qty"]')?.value) || 0) * 100000;
-        
-        document.querySelector('input[name="lebanese_cash_total"]').value = lebaneseTotal.toFixed(2);
-        
-        // Dollar Cash Total
-        const dollarTotal = 
-            (parseFloat(document.querySelector('input[name="dollar_1_qty"]')?.value) || 0) * 1 +
-            (parseFloat(document.querySelector('input[name="dollar_5_qty"]')?.value) || 0) * 5 +
-            (parseFloat(document.querySelector('input[name="dollar_10_qty"]')?.value) || 0) * 10 +
-            (parseFloat(document.querySelector('input[name="dollar_20_qty"]')?.value) || 0) * 20 +
-            (parseFloat(document.querySelector('input[name="dollar_50_qty"]')?.value) || 0) * 50 +
-            (parseFloat(document.querySelector('input[name="dollar_100_qty"]')?.value) || 0) * 100;
-        
-        const dollarRate = parseFloat(document.querySelector('input[name="dollar_rate"]')?.value) || 1;
-        const dollarInLBP = dollarTotal * dollarRate;
-        
-        document.querySelector('input[name="dollar_cash_total_usd"]').value = dollarTotal.toFixed(2);
-        document.querySelector('input[name="dollar_cash_total_lbp"]').value = dollarInLBP.toFixed(2);
-        
-        // Calculate Credit section totals
-        calculateSectionTotal('credit');
-        
-        // Summary Results
-        const cashInHandDollar = dollarInLBP;
-        const cashInHandLebanese = lebaneseTotal;
-        const cashOutOfHand = specialCreditTotal + 
-            (parseFloat(document.querySelector('input[name="credit_grand_total"]')?.value) || 0);
-        const grandTotal = cashInHandDollar + cashInHandLebanese + cashOutOfHand;
-        
-        document.querySelector('input[name="cash_in_hand_dollar"]').value = cashInHandDollar.toFixed(2);
-        document.querySelector('input[name="cash_in_hand_lebanese"]').value = cashInHandLebanese.toFixed(2);
-        document.querySelector('input[name="cash_out_of_hand"]').value = cashOutOfHand.toFixed(2);
-        document.querySelector('input[name="grand_total"]').value = grandTotal.toFixed(2);
-    }
-
-    function buildForm() {
-        formSections.innerHTML = '';
-        
-        // Debug logging
-        console.log('Schema:', schema);
-        console.log('Values:', values);
-        console.log('Schema sections count:', schema.sections ? schema.sections.length : 'No sections');
-        if (schema.sections) {
-            schema.sections.forEach((section, index) => {
-                console.log(`Section ${index}: ${section.title} (type: ${section.type})`);
-                if (section.type === 'dynamic_list') {
-                    console.log(`  - Fields:`, section.fields);
-                    console.log(`  - Item schema:`, section.item_schema);
-                }
-            });
-        }
-        
-        // Check if schema has sections
-        if (schema && schema.sections && schema.sections.length > 0) {
-            schema.sections.forEach((section, index) => {
-                if (section.type === 'dynamic_list') {
-                    renderDynamicList(section, index);
-                } else {
-                    const sectionDiv = document.createElement('div');
-                    sectionDiv.className = 'accordion mb-3';
-                    sectionDiv.innerHTML = `
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="heading-${index}">
-                                <button class="accordion-button ${index === 0 ? '' : 'collapsed'}" type="button" 
-                                        data-bs-toggle="collapse" data-bs-target="#collapse-${index}" 
-                                        aria-expanded="${index === 0 ? 'true' : 'false'}" 
-                                        aria-controls="collapse-${index}">
-                                    <i class="fas fa-folder me-2"></i>${section.title}
-                                </button>
-                            </h2>
-                            <div id="collapse-${index}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" 
-                                 aria-labelledby="heading-${index}" data-bs-parent="#formSections">
-                                <div class="accordion-body">
-                                    <div class="row g-3" id="section-${section.title.replace(/\s+/g, '-').toLowerCase()}"></div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    formSections.appendChild(sectionDiv);
-                    
-                    const sectionFields = sectionDiv.querySelector(`#section-${section.title.replace(/\s+/g, '-').toLowerCase()}`);
-                    section.fields.forEach(f => sectionFields.appendChild(renderField(f, index)));
-                }
-            });
-        } else {
-            // Fallback to single section
-            const fields = schema.fields || [];
-            const fallbackDiv = document.createElement('div');
-            fallbackDiv.className = 'row g-3';
-            fields.forEach(f => fallbackDiv.appendChild(renderField(f, 0)));
-            formSections.appendChild(fallbackDiv);
-        }
-        
-        // Add event listeners for calculations
-        document.querySelectorAll('input[name*="qty"], input[name="dollar_rate"], input[name*="credit"], input[name*="special"], input[name*="lebanese"], input[name*="dollar"]').forEach(input => {
-            input.addEventListener('input', calculateAllTotals);
-        });
-        
-        // Add event listeners for Credit section dynamic entries
-        document.addEventListener('change', function(e) {
-            if (e.target.name && e.target.name.includes('credit[')) {
-                calculateAllTotals();
-            }
-        });
-        
-        // Initial calculation
-        calculateAllTotals();
-    }
-
-    function showStatus(kind, html) {
-        statusBox.className = `alert alert-${kind}`;
-        statusBox.innerHTML = html;
-        statusBox.style.display = 'block';
-        if (kind === 'success') {
-            setTimeout(() => { statusBox.style.display = 'none'; }, 3000);
-        }
-    }
-
-    submitBtn.addEventListener('click', function() {
+        const formData = new FormData(this);
         const data = {};
         
-        // Collect regular field data (exclude dynamic list fields)
-        const inputs = document.querySelectorAll('#dynamicForm input[name], #dynamicForm select[name]');
-        inputs.forEach(inp => {
-            if (inp.name && !inp.readOnly) {
-                // Skip dynamic list fields (they'll be handled separately)
-                if (inp.name.startsWith('credit[')) {
-                    return; // Skip credit section inputs
-                }
-                
-                data[inp.name] = inp.value;
+        // Collect all form data
+        for (let [key, value] of formData.entries()) {
+            if (key.startsWith('form-') && key.includes('-')) {
+                const [formType, fieldName] = key.split('-', 2);
+                if (!data[formType]) data[formType] = [];
+                const index = parseInt(formType.replace('form', ''));
+                if (!data[formType][index]) data[formType][index] = {};
+                data[formType][index][fieldName] = value;
+            } else {
+                data[key] = value;
             }
-        });
+        }
         
-        // Explicitly collect dynamic list data for Credit section
-        data['credit'] = getDynamicListData('credit');
-        
-        // Explicitly collect dynamic list data for Coffee Machine section
-        data['coffee_machine'] = getDynamicListData('coffee_machine');
-
-        const payload = {
-            data: data,
-            entry_date: entryDate.value || null,
-        };
-
-        submitBtn.disabled = true;
+        // Submit via AJAX
         fetch(window.location.pathname + 'submit/', {
             method: 'POST',
             headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
             },
-            body: JSON.stringify(payload)
-        }).then(r => r.json())
-        .then(res => {
-            if (res.success) {
-                showStatus('success', '<i class="fas fa-check me-2"></i>Saved successfully');
-                // If new submission, redirect to edit page with new sheet_name
-                if (res.redirect_url) {
+            body: JSON.stringify({
+                data: data,
+                entry_date: document.getElementById('entryDate').value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('statusBox').className = 'alert alert-success';
+                document.getElementById('statusBox').innerHTML = '<i class="fas fa-check me-2"></i>Saved successfully';
+                document.getElementById('statusBox').style.display = 'block';
+                
+                if (data.redirect_url) {
                     setTimeout(() => {
-                        window.location.href = res.redirect_url;
+                        window.location.href = data.redirect_url;
                     }, 1000);
                 }
-            } else if (res.warning) {
-                showStatus('warning', res.warning);
             } else {
-                showStatus('danger', res.error || 'Unknown error');
+                document.getElementById('statusBox').className = 'alert alert-danger';
+                document.getElementById('statusBox').innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>' + (data.error || 'Error saving');
+                document.getElementById('statusBox').style.display = 'block';
             }
-        }).catch(err => {
-            showStatus('danger', 'Error: ' + err);
-        }).finally(() => {
-            submitBtn.disabled = false;
+        })
+        .catch(error => {
+            document.getElementById('statusBox').className = 'alert alert-danger';
+            document.getElementById('statusBox').innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Error: ' + error;
+            document.getElementById('statusBox').style.display = 'block';
         });
     });
-
-    // Make functions global for onclick handlers
-    window.addDynamicEntry = addDynamicEntry;
-    window.removeDynamicEntry = removeDynamicEntry;
-    window.calculateSectionTotal = calculateSectionTotal;
-
-    buildForm();
 });
 </script>
-
-{% csrf_token %}
 {% endblock %}

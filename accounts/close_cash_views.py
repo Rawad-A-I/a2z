@@ -421,16 +421,17 @@ def employee_edit_close_cash_form(request, sheet_name):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
-    # Import hardcoded schema
-    from .rawad_form_schema import RAWAD_FORM_SCHEMA
+    from .close_cash_forms import (
+        GeneralSectionForm, LebaneseCashForm, DollarCashForm, 
+        SpecialCreditForm, CreditEntryFormSet, CoffeeMachineEntryFormSet
+    )
     
     # Handle "new" sheet name for creating new submissions
     if sheet_name == 'new':
         sheet_name = 'new_submission'
-        form_values = {}
+        form_data = {}
     else:
         # Load existing entry from DB for prefill (if exists)
-        # Remove user filter to allow admin to view employee submissions
         entry = CloseCashEntry.objects.filter(
             workbook__iexact='Employee_Close_Cash.xlsx',
             sheet_name=sheet_name,
@@ -438,12 +439,26 @@ def employee_edit_close_cash_form(request, sheet_name):
         ).order_by('-created_at').first()
         
         # Use DB values if available, otherwise empty
-        form_values = entry.data_json if entry else {}
+        form_data = entry.data_json if entry else {}
+    
+    # Initialize forms with data
+    general_form = GeneralSectionForm(initial=form_data.get('general', {}))
+    lebanese_cash_form = LebaneseCashForm(initial=form_data.get('lebanese_cash', {}))
+    dollar_cash_form = DollarCashForm(initial=form_data.get('dollar_cash', {}))
+    special_credit_form = SpecialCreditForm(initial=form_data.get('special_credit', {}))
+    
+    # Initialize formsets
+    credit_formset = CreditEntryFormSet(initial=form_data.get('credit', []))
+    coffee_machine_formset = CoffeeMachineEntryFormSet(initial=form_data.get('coffee_machine', []))
     
     context = {
         'sheet_name': sheet_name,
-        'schema': RAWAD_FORM_SCHEMA,
-        'values': form_values,
+        'general_form': general_form,
+        'lebanese_cash_form': lebanese_cash_form,
+        'dollar_cash_form': dollar_cash_form,
+        'special_credit_form': special_credit_form,
+        'credit_formset': credit_formset,
+        'coffee_machine_formset': coffee_machine_formset,
         'workbook_name': 'Employee_Close_Cash.xlsx',
     }
     return render(request, 'accounts/close_cash_employee_form.html', context)
