@@ -611,9 +611,19 @@ document.addEventListener('DOMContentLoaded', function() {
         data.grand_total = data.cash_in_hand_dollar + data.cash_in_hand_lebanese + data.cash_out_of_hand;
         
         // Log the data structure before sending
-        console.log('Submitting data:', JSON.stringify(data, null, 2));
+        console.log('=== FORM SUBMISSION DEBUG ===');
+        console.log('Form data entries collected:', formData.entries());
+        console.log('Organized data structure:');
+        console.log('  General:', data.general);
+        console.log('  Lebanese Cash:', data.lebanese_cash);
+        console.log('  Dollar Cash:', data.dollar_cash);
+        console.log('  Special Credit:', data.special_credit);
+        console.log('  Credit entries:', data.credit);
+        console.log('  Coffee Machine entries:', data.coffee_machine);
+        console.log('Full data:', JSON.stringify(data, null, 2));
         console.log('Entry date:', document.getElementById('entryDate').value);
         console.log('Sheet name from URL:', window.location.pathname);
+        console.log('=== END DEBUG ===');
         
         // Submit via AJAX
         fetch(window.location.pathname + 'submit/', {
