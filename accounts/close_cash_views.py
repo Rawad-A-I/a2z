@@ -430,8 +430,8 @@ def employee_edit_close_cash_form(request, sheet_name):
         form_values = {}
     else:
         # Load existing entry from DB for prefill (if exists)
+        # Remove user filter to allow admin to view employee submissions
         entry = CloseCashEntry.objects.filter(
-            user=request.user,
             workbook__iexact='Employee_Close_Cash.xlsx',
             sheet_name=sheet_name,
             source_version='v1'
@@ -515,9 +515,8 @@ def employee_submit_close_cash_form(request, sheet_name):
             )
             created = True
         else:
-            # Edit existing - find by sheet_name
+            # Edit existing - find by sheet_name (allows admin to edit any submission)
             entry = CloseCashEntry.objects.get(
-                user=request.user,
                 workbook='Employee_Close_Cash.xlsx',
                 sheet_name=sheet_name
             )
