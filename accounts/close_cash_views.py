@@ -748,6 +748,25 @@ def employee_export_excel(request):
             ws.cell(row, 2, data.get('credit_grand_total', ''))
             row += 2
             
+            # Coffee Machine Section
+            ws.cell(row, 1, "Coffee Machine").font = section_font
+            row += 1
+            
+            ws.cell(row, 1, "Tag")
+            ws.cell(row, 2, "Current Amount")
+            ws.cell(row, 3, "Daily Add")
+            row += 1
+            
+            coffee_items = data.get('coffee_machine', [])
+            if coffee_items:
+                for item in coffee_items:
+                    if item.get('tag'):  # Only show non-empty entries
+                        ws.cell(row, 1, item.get('tag', ''))
+                        ws.cell(row, 2, item.get('current_amount', ''))
+                        ws.cell(row, 3, item.get('daily_add', ''))
+                        row += 1
+            row += 1
+            
             # Summary Results
             ws.cell(row, 1, "Summary Results").font = section_font
             row += 1
