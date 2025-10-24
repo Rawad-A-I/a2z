@@ -377,6 +377,8 @@ def rawad_forms_dashboard(request):
     for entry in entries:
         date_key = entry.entry_date.strftime('%Y-%m-%d')
         if date_key not in submissions_by_date:
+            # Ensure sheet_name matches the date format for display
+            entry.sheet_name = date_key
             submissions_by_date[date_key] = entry
     
     context = {
@@ -475,14 +477,14 @@ def rawad_submit_close_cash_form(request, sheet_name):
         if field not in data:
             data[field] = 0
     
-    # Persist DB entry - Update if exists, create if new
+    # Persist DB entry - Update if exists (match on entry_date), create if new
     try:
         entry, created = CloseCashEntry.objects.update_or_create(
             user=request.user,
             workbook='Rawad.xlsx',
-            sheet_name=sheet_name,
+            entry_date=entry_date_obj,  # Match on entry_date instead of sheet_name
             defaults={
-                'entry_date': entry_date_obj,
+                'sheet_name': sheet_name,  # Update sheet_name to new format
                 'data_json': data,
                 'source_version': 'v1',
             }
