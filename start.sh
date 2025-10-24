@@ -9,13 +9,13 @@ chmod +x deploy_fix.sh
 echo "Creating superuser..."
 python manage.py create_superuser
 
-# Run migrations automatically
+# Fake the 0033 migration FIRST (before general migrations)
+echo "Faking Close Cash migration if tables exist..."
+python manage.py migrate accounts 0033_close_cash_models --fake 2>/dev/null || echo "Migration 0033 not found or already applied"
+
+# THEN run general migrations
 echo "Running database migrations..."
 python manage.py migrate --noinput || true
-
-# Fake the 0033 migration if tables already exist
-echo "Checking for existing Close Cash tables..."
-python manage.py migrate accounts 0033_close_cash_models --fake || echo "Migration 0033 already applied or not needed"
 
 # Import Close Cash schemas if Close Cash folder exists (DISABLED - using new employee forms system)
 # echo "Importing Close Cash schemas..."
