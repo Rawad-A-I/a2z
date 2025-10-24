@@ -584,24 +584,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     submitBtn.addEventListener('click', function() {
         const data = {};
+        
+        // Collect regular field data (exclude dynamic list fields)
         const inputs = document.querySelectorAll('#dynamicForm input[name], #dynamicForm select[name]');
         inputs.forEach(inp => {
             if (inp.name && !inp.readOnly) {
-                if (inp.name.includes('[') && inp.name.includes(']')) {
-                    // Handle dynamic list data
-                    const baseName = inp.name.split('[')[0];
-                    if (!data[baseName]) data[baseName] = [];
-                    
-                    const index = parseInt(inp.name.match(/\[(\d+)\]/)[1]);
-                    const field = inp.name.split('[')[1].split(']')[0];
-                    
-                    if (!data[baseName][index]) data[baseName][index] = {};
-                    data[baseName][index][field] = inp.value;
-                } else {
-                    data[inp.name] = inp.value;
+                // Skip dynamic list fields (they'll be handled separately)
+                if (inp.name.startsWith('credit[')) {
+                    return; // Skip credit section inputs
                 }
+                
+                data[inp.name] = inp.value;
             }
         });
+        
+        // Explicitly collect dynamic list data for Credit section
+        data['credit'] = getDynamicListData('credit');
 
         const payload = {
             data: data,
