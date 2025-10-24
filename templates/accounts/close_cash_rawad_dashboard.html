@@ -37,9 +37,20 @@
             </div>
             {% endif %}
 
-            {% if sheet_names %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>Your Submissions</h4>
+                        <a href="{% url 'rawad_edit_close_cash_form' 'new' %}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>New Submission
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if submissions %}
             <div class="row">
-                {% for sheet_name in sheet_names %}
+                {% for submission in submissions %}
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
@@ -48,19 +59,15 @@
                                     <i class="fas fa-calendar-day fa-2x text-warning"></i>
                                 </div>
                                 <div>
-                                    <h5 class="card-title mb-1">{{ sheet_name }}</h5>
+                                    <h5 class="card-title mb-1">{{ submission.entry_date|date:"M d, Y" }}</h5>
                                     <p class="text-muted mb-0 small">
-                                        {% if latest_by_sheet.get:sheet_name %}
-                                            Last submitted: {{ latest_by_sheet.get:sheet_name.updated_at|date:"M d, Y H:i" }}
-                                        {% else %}
-                                            No submission yet
-                                        {% endif %}
+                                        Last updated: {{ submission.updated_at|date:"M d, Y H:i" }}
                                     </p>
                                 </div>
                             </div>
                             <div class="d-grid gap-2">
-                                <a href="{% url 'rawad_edit_close_cash_form' sheet_name %}" class="btn btn-primary">
-                                    <i class="fas fa-edit me-2"></i>Open Form
+                                <a href="{% url 'rawad_edit_close_cash_form' submission.sheet_name %}" class="btn btn-primary">
+                                    <i class="fas fa-edit me-2"></i>Edit Submission
                                 </a>
                             </div>
                         </div>
@@ -71,8 +78,11 @@
             {% else %}
             <div class="text-center py-5">
                 <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
-                <h4 class="text-muted">No date sheets found</h4>
-                <p class="text-muted">The Rawad.xlsx file may not exist or be accessible.</p>
+                <h4 class="text-muted">No submissions yet</h4>
+                <p class="text-muted">Create your first close cash submission to get started.</p>
+                <a href="{% url 'rawad_edit_close_cash_form' 'new' %}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Create First Submission
+                </a>
             </div>
             {% endif %}
         </div>

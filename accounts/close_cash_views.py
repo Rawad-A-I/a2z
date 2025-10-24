@@ -82,22 +82,7 @@ def close_cash_dashboard(request):
     # Show Rawad entrypoint for Rawad/admin, blank for others
     context = {}
     if is_rawad_or_admin(request.user):
-        # Check if Rawad.xlsx exists
-        rawad_path = os.path.join(get_close_cash_directory(), 'Rawad.xlsx')
-        if os.path.exists(rawad_path):
-            try:
-                # Get sheet names directly from Excel
-                from openpyxl import load_workbook
-                wb = load_workbook(rawad_path, data_only=True)
-                sheet_names = wb.sheetnames
-                context['rawad_schemas'] = sheet_names
-                context['show_rawad_entry'] = True
-            except Exception as e:
-                context['rawad_error'] = f'Error reading Rawad.xlsx: {str(e)}'
-                context['show_rawad_entry'] = True
-        else:
-            context['rawad_error'] = 'Rawad.xlsx file not found'
-            context['show_rawad_entry'] = True
+        context['show_rawad_entry'] = True
     
     return render(request, 'accounts/close_cash_dashboard.html', context)
 
@@ -376,38 +361,30 @@ def is_rawad_or_admin(user):
 
 @login_required
 def rawad_forms_dashboard(request):
-    """Rawad-only forms dashboard showing available date sheets."""
+    """Rawad-only forms dashboard showing available submissions."""
     if not is_rawad_or_admin(request.user):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
-    # Read Excel directly to get sheet names
-    rawad_path = os.path.join(get_close_cash_directory(), 'Rawad.xlsx')
-    if not os.path.exists(rawad_path):
-        messages.error(request, 'Rawad.xlsx file not found.')
-        return redirect('close_cash_dashboard')
+    # Get existing entries from DB
+    entries = CloseCashEntry.objects.filter(
+        user=request.user, 
+        workbook__iexact='Rawad.xlsx'
+    ).order_by('-entry_date')
     
-    try:
-        # Get sheet names directly from Excel
-        from openpyxl import load_workbook
-        wb = load_workbook(rawad_path, data_only=True)
-        sheet_names = wb.sheetnames
-        
-        # Get existing entries from DB
-        entries = CloseCashEntry.objects.filter(user=request.user, workbook__iexact='Rawad.xlsx')
-        latest_by_sheet = {e.sheet_name: e for e in entries}
-        
-        context = {
-            'sheet_names': sheet_names,
-            'latest_by_sheet': latest_by_sheet,
-            'workbook_name': 'Rawad.xlsx',
-            'is_admin': request.user.is_superuser,
-        }
-        return render(request, 'accounts/close_cash_rawad_dashboard.html', context)
-        
-    except Exception as e:
-        messages.error(request, f'Error reading Rawad.xlsx: {str(e)}')
-        return redirect('close_cash_dashboard')
+    # Group by entry date for display
+    submissions_by_date = {}
+    for entry in entries:
+        date_key = entry.entry_date.strftime('%Y-%m-%d')
+        if date_key not in submissions_by_date:
+            submissions_by_date[date_key] = entry
+    
+    context = {
+        'submissions': list(submissions_by_date.values()),
+        'workbook_name': 'Rawad.xlsx',
+        'is_admin': request.user.is_superuser,
+    }
+    return render(request, 'accounts/close_cash_rawad_dashboard.html', context)
 
 
 @login_required
@@ -417,24 +394,15 @@ def rawad_edit_close_cash_form(request, sheet_name):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
-    # Read Excel directly to get schema and values
-    rawad_path = os.path.join(get_close_cash_directory(), 'Rawad.xlsx')
-    if not os.path.exists(rawad_path):
-        messages.error(request, 'Rawad.xlsx file not found.')
-        return redirect('rawad_forms_dashboard')
+    # Import hardcoded schema
+    from .rawad_form_schema import RAWAD_FORM_SCHEMA
     
-    try:
-        # Get schema and values directly from Excel
-        mapping = build_workbook_schema_and_data(rawad_path)
-        if sheet_name not in mapping:
-            messages.error(request, f'Sheet "{sheet_name}" not found in Rawad.xlsx')
-            return redirect('rawad_forms_dashboard')
-        
-        sheet_data = mapping[sheet_name]
-        schema = sheet_data.get('schema', {})
-        values = sheet_data.get('values', {})
-        
-        # Load latest entry from DB for prefill (if exists)
+    # Handle "new" sheet name for creating new submissions
+    if sheet_name == 'new':
+        sheet_name = 'new_submission'
+        form_values = {}
+    else:
+        # Load existing entry from DB for prefill (if exists)
         entry = CloseCashEntry.objects.filter(
             user=request.user,
             workbook__iexact='Rawad.xlsx',
@@ -442,20 +410,16 @@ def rawad_edit_close_cash_form(request, sheet_name):
             source_version='v1'
         ).order_by('-created_at').first()
         
-        # Use DB values if available, otherwise use Excel values
-        form_values = entry.data_json if entry else values
-        
-        context = {
-            'sheet_name': sheet_name,
-            'schema': schema,
-            'values': form_values,
-            'workbook_name': 'Rawad.xlsx',
-        }
-        return render(request, 'accounts/close_cash_rawad_form.html', context)
-        
-    except Exception as e:
-        messages.error(request, f'Error reading sheet "{sheet_name}": {str(e)}')
-        return redirect('rawad_forms_dashboard')
+        # Use DB values if available, otherwise empty
+        form_values = entry.data_json if entry else {}
+    
+    context = {
+        'sheet_name': sheet_name,
+        'schema': RAWAD_FORM_SCHEMA,
+        'values': form_values,
+        'workbook_name': 'Rawad.xlsx',
+    }
+    return render(request, 'accounts/close_cash_rawad_form.html', context)
 
 
 @login_required
@@ -473,20 +437,6 @@ def rawad_submit_close_cash_form(request, sheet_name):
     
     data = payload.get('data', {})
     entry_date = payload.get('entry_date')
-    
-    # Get schema directly from Excel
-    rawad_path = os.path.join(get_close_cash_directory(), 'Rawad.xlsx')
-    if not os.path.exists(rawad_path):
-        return JsonResponse({'error': 'Rawad.xlsx file not found'}, status=404)
-    
-    try:
-        mapping = build_workbook_schema_and_data(rawad_path)
-        if sheet_name not in mapping:
-            return JsonResponse({'error': f'Sheet "{sheet_name}" not found'}, status=404)
-        
-        schema = mapping[sheet_name].get('schema', {})
-    except Exception as e:
-        return JsonResponse({'error': f'Error reading Excel: {str(e)}'}, status=500)
     
     # Convert entry_date
     from django.utils import timezone
@@ -509,35 +459,72 @@ def rawad_submit_close_cash_form(request, sheet_name):
         source_version='v1',
     )
     
-    # Sync back to Rawad workbook
-    try:
-        rawad_workbook_path = os.path.join(get_close_cash_directory(), 'Rawad.xlsx')
-        write_values_to_workbook(rawad_workbook_path, sheet_name, schema, data)
-    except Exception as e:
-        return JsonResponse({'success': True, 'warning': f'Data saved but Excel sync failed: {str(e)}'})
-    
     return JsonResponse({'success': True, 'message': 'Form saved successfully'})
 
 
 @login_required
 def rawad_export_excel(request):
-    """Admin-only export of Rawad.xlsx with all submissions."""
+    """Admin-only export of Rawad submissions as Excel file."""
     if not request.user.is_superuser:
         messages.error(request, 'Only administrators can export Excel files.')
         return redirect('index')
     
-    rawad_path = os.path.join(get_close_cash_directory(), 'Rawad.xlsx')
-    if not os.path.exists(rawad_path):
-        messages.error(request, 'Rawad.xlsx file not found.')
-        return redirect('rawad_forms_dashboard')
-    
     try:
-        with open(rawad_path, 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = f'attachment; filename="Rawad_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
-            return response
+        from openpyxl import Workbook
+        from .rawad_form_schema import RAWAD_FORM_SCHEMA
+        
+        # Get all Rawad submissions from DB
+        entries = CloseCashEntry.objects.filter(
+            workbook__iexact='Rawad.xlsx'
+        ).order_by('entry_date')
+        
+        if not entries.exists():
+            messages.error(request, 'No submissions found to export.')
+            return redirect('rawad_forms_dashboard')
+        
+        # Create new workbook
+        wb = Workbook()
+        wb.remove(wb.active)  # Remove default sheet
+        
+        # For each submission, create a sheet
+        for entry in entries:
+            # Create sheet with date as name
+            sheet_name = entry.entry_date.strftime('%d-%m-%Y')
+            ws = wb.create_sheet(title=sheet_name)
+            
+            # Write section headers and field values in A/B columns
+            row = 1
+            for section in RAWAD_FORM_SCHEMA['sections']:
+                # Section header
+                ws.cell(row, 1, section['title'])
+                row += 1
+                
+                # Section fields
+                for field in section['fields']:
+                    ws.cell(row, 1, field['label'])
+                    value = entry.data_json.get(field['key'], '')
+                    ws.cell(row, 2, value)
+                    row += 1
+                
+                # Blank row between sections
+                row += 1
+        
+        # Convert to bytes
+        from io import BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Return as download
+        response = HttpResponse(
+            output.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="Rawad_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        return response
+        
     except Exception as e:
-        messages.error(request, f'Error exporting file: {str(e)}')
+        messages.error(request, f'Error generating Excel: {str(e)}')
         return redirect('rawad_forms_dashboard')
 
 
