@@ -27,7 +27,7 @@
                     <div>
                         <input type="date" id="entryDate" class="form-control" style="display:inline-block; width:auto;" />
                         <button id="submitBtn" class="btn btn-success ms-2">
-                            <i class="fas fa-save me-2"></i>Submit
+                            <i class="fas fa-save me-2"></i>{% if sheet_name == 'new' or sheet_name == 'new_submission' %}Submit{% else %}Save Changes{% endif %}
                         </button>
                     </div>
                 </div>

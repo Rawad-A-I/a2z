@@ -366,24 +366,45 @@ def employee_forms_dashboard(request):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
-    # Get existing entries from DB for this user
-    entries = CloseCashEntry.objects.filter(
-        user=request.user, 
-        workbook__iexact='Employee_Close_Cash.xlsx'
-    ).order_by('-entry_date', '-created_at')
-    
-    # Group by entry date for display, but keep all submissions per date
-    from collections import defaultdict
-    submissions_by_date = defaultdict(list)
-    for entry in entries:
-        date_key = entry.entry_date.strftime('%Y-%m-%d')
-        submissions_by_date[date_key].append(entry)
-    
-    context = {
-        'submissions_by_date': dict(submissions_by_date),
-        'workbook_name': 'Employee_Close_Cash.xlsx',
-        'is_admin': request.user.is_superuser,
-    }
+    # Get existing entries from DB - admin sees all, employee sees only their own
+    if request.user.is_superuser:
+        # Admin can see all submissions grouped by username
+        entries = CloseCashEntry.objects.filter(
+            workbook__iexact='Employee_Close_Cash.xlsx'
+        ).order_by('user__username', '-entry_date', '-created_at')
+        
+        # Admin view: group by username, then by date
+        from collections import defaultdict
+        submissions_by_user = defaultdict(lambda: defaultdict(list))
+        for entry in entries:
+            username = entry.user.username
+            date_key = entry.entry_date.strftime('%Y-%m-%d')
+            submissions_by_user[username][date_key].append(entry)
+        
+        context = {
+            'submissions_by_user': dict(submissions_by_user),
+            'is_admin': True,
+            'workbook_name': 'Employee_Close_Cash.xlsx',
+        }
+    else:
+        # Employee sees only their own submissions
+        entries = CloseCashEntry.objects.filter(
+            user=request.user, 
+            workbook__iexact='Employee_Close_Cash.xlsx'
+        ).order_by('-entry_date', '-created_at')
+        
+        # Employee view: group by date only
+        from collections import defaultdict
+        submissions_by_date = defaultdict(list)
+        for entry in entries:
+            date_key = entry.entry_date.strftime('%Y-%m-%d')
+            submissions_by_date[date_key].append(entry)
+        
+        context = {
+            'submissions_by_date': dict(submissions_by_date),
+            'is_admin': False,
+            'workbook_name': 'Employee_Close_Cash.xlsx',
+        }
     return render(request, 'accounts/close_cash_employee_dashboard.html', context)
 
 
