@@ -141,17 +141,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderDynamicList(section, sectionIndex) {
+        console.log(`Rendering dynamic list: ${section.title}`, section);
         const sectionDiv = document.createElement('div');
         sectionDiv.className = 'accordion mb-3';
         
         // Handle both 'fields' and 'item_schema' structures
         const fields = section.fields || section.item_schema || [];
-        const sectionKey = fields[0]?.key || 'unknown';
-        const totalKey = fields[1]?.key;
-        const listData = values[sectionKey] || [];
+        let sectionKey, totalKey, listData, hasTotalField;
         
-        // Check if we have a total field to render
-        const hasTotalField = fields[1] && fields[1].label;
+        // Check if this is a nested structure (like Coffee Machine)
+        if (fields[0] && fields[0].type === 'dynamic_list' && fields[0].list_fields) {
+            // Nested structure: fields[0] contains the list definition
+            sectionKey = fields[0].key;
+            totalKey = fields[1]?.key;
+            listData = values[sectionKey] || [];
+            hasTotalField = fields[1] && fields[1].label;
+        } else {
+            // Simple structure: fields[0] is the list key
+            sectionKey = fields[0]?.key || 'unknown';
+            totalKey = fields[1]?.key;
+            listData = values[sectionKey] || [];
+            hasTotalField = fields[1] && fields[1].label;
+        }
+        
+        console.log(`Section key: ${sectionKey}, Total key: ${totalKey}, Fields:`, fields);
+        console.log(`Has total field: ${hasTotalField}`);
         
         sectionDiv.innerHTML = `
             <div class="accordion-item">
@@ -629,6 +643,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Debug logging
         console.log('Schema:', schema);
         console.log('Values:', values);
+        console.log('Schema sections count:', schema.sections ? schema.sections.length : 'No sections');
+        if (schema.sections) {
+            schema.sections.forEach((section, index) => {
+                console.log(`Section ${index}: ${section.title} (type: ${section.type})`);
+                if (section.type === 'dynamic_list') {
+                    console.log(`  - Fields:`, section.fields);
+                    console.log(`  - Item schema:`, section.item_schema);
+                }
+            });
+        }
         
         // Check if schema has sections
         if (schema && schema.sections && schema.sections.length > 0) {
