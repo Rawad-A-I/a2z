@@ -449,6 +449,10 @@ def rawad_submit_close_cash_form(request, sheet_name):
     else:
         entry_date_obj = timezone.now().date()
     
+    # If this is a new submission (sheet_name == 'new_submission'), use the entry_date as sheet_name
+    if sheet_name == 'new_submission':
+        sheet_name = entry_date_obj.strftime('%Y-%m-%d')
+    
         # Clean up dynamic list data - remove empty entries
         dynamic_list_keys = ['credit']
 
