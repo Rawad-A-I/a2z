@@ -62,7 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn');
     const entryDate = document.getElementById('entryDate');
 
-    function renderField(field) {
+    // Set today's date as default
+    entryDate.value = new Date().toISOString().split('T')[0];
+
+    function renderField(field, sectionIndex) {
         const colDiv = document.createElement('div');
         colDiv.className = 'col-md-6';
 
@@ -73,36 +76,295 @@ document.addEventListener('DOMContentLoaded', function() {
         label.className = 'form-label fw-bold';
         label.textContent = field.label || field.key;
 
-        let input = document.createElement('input');
-        input.className = 'form-control';
-        input.name = field.key;
-        input.required = !!field.required;
+        let input;
         const v = values[field.key];
 
-        switch ((field.type || 'text').toLowerCase()) {
-            case 'number':
-                input.type = 'number';
-                input.step = 'any';
-                if (v !== undefined && v !== null) input.value = v;
-                break;
-            case 'date':
-                input.type = 'date';
-                try {
-                    if (v) {
-                        const d = new Date(v);
-                        if (!isNaN(d)) input.valueAsDate = d;
-                    }
-                } catch (e) {}
-                break;
-            default:
-                input.type = 'text';
-                if (v !== undefined && v !== null) input.value = v;
+        if (field.type === 'select') {
+            input = document.createElement('select');
+            input.className = 'form-control';
+            input.name = field.key;
+            input.required = !!field.required;
+            
+            // Add default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select...';
+            input.appendChild(defaultOption);
+            
+            // Add options
+            if (field.options) {
+                field.options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    if (v === option) optionElement.selected = true;
+                    input.appendChild(optionElement);
+                });
+            }
+        } else {
+            input = document.createElement('input');
+            input.className = 'form-control';
+            input.name = field.key;
+            input.required = !!field.required;
+            
+            if (field.readonly) {
+                input.readOnly = true;
+                input.style.backgroundColor = '#f8f9fa';
+                input.style.borderColor = '#dee2e6';
+            }
+
+            switch ((field.type || 'text').toLowerCase()) {
+                case 'number':
+                    input.type = 'number';
+                    input.step = 'any';
+                    if (v !== undefined && v !== null) input.value = v;
+                    break;
+                case 'date':
+                    input.type = 'date';
+                    try {
+                        if (v) {
+                            const d = new Date(v);
+                            if (!isNaN(d)) input.valueAsDate = d;
+                        }
+                    } catch (e) {}
+                    break;
+                default:
+                    input.type = 'text';
+                    if (v !== undefined && v !== null) input.value = v;
+            }
         }
 
         formGroup.appendChild(label);
         formGroup.appendChild(input);
         colDiv.appendChild(formGroup);
         return colDiv;
+    }
+
+    function renderDynamicList(section, sectionIndex) {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'accordion mb-3';
+        
+        const sectionKey = section.fields[0].key;
+        const totalKey = section.fields[1].key;
+        const listData = values[sectionKey] || [];
+        
+        sectionDiv.innerHTML = `
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-${sectionIndex}">
+                    <button class="accordion-button ${sectionIndex === 0 ? '' : 'collapsed'}" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#collapse-${sectionIndex}" 
+                            aria-expanded="${sectionIndex === 0 ? 'true' : 'false'}" 
+                            aria-controls="collapse-${sectionIndex}">
+                        <i class="fas fa-folder me-2"></i>${section.title}
+                    </button>
+                </h2>
+                <div id="collapse-${sectionIndex}" class="accordion-collapse collapse ${sectionIndex === 0 ? 'show' : ''}" 
+                     aria-labelledby="heading-${sectionIndex}" data-bs-parent="#formSections">
+                    <div class="accordion-body">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="addDynamicEntry('${sectionKey}')">
+                                <i class="fas fa-plus me-1"></i>Add Entry
+                            </button>
+                        </div>
+                        <div id="dynamic-list-${sectionKey}" class="mb-3"></div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">${section.fields[1].label}</label>
+                                <input type="number" class="form-control" name="${totalKey}" readonly 
+                                       style="background-color: #f8f9fa; border-color: #dee2e6;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        formSections.appendChild(sectionDiv);
+        
+        // Render existing entries
+        renderDynamicListEntries(sectionKey, listData);
+        
+        return sectionDiv;
+    }
+
+    function renderDynamicListEntries(sectionKey, entries) {
+        const container = document.getElementById(`dynamic-list-${sectionKey}`);
+        container.innerHTML = '';
+        
+        entries.forEach((entry, index) => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'row mb-2 p-2 border rounded';
+            entryDiv.innerHTML = `
+                <div class="col-md-4">
+                    <label class="form-label">Amount</label>
+                    <input type="number" class="form-control" name="${sectionKey}[${index}][amount]" 
+                           value="${entry.amount || ''}" step="any" onchange="calculateSectionTotal('${sectionKey}')" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Currency</label>
+                    <select class="form-control" name="${sectionKey}[${index}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
+                        <option value="lebanese" ${entry.currency === 'lebanese' ? 'selected' : ''}>Lebanese</option>
+                        <option value="dollar" ${entry.currency === 'dollar' ? 'selected' : ''}>Dollar</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" name="${sectionKey}[${index}][name]" 
+                           value="${entry.name || ''}" />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(entryDiv);
+        });
+        
+        calculateSectionTotal(sectionKey);
+    }
+
+    function addDynamicEntry(sectionKey) {
+        const container = document.getElementById(`dynamic-list-${sectionKey}`);
+        const currentEntries = Array.from(container.children).length;
+        
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'row mb-2 p-2 border rounded';
+        entryDiv.innerHTML = `
+            <div class="col-md-4">
+                <label class="form-label">Amount</label>
+                <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][amount]" 
+                       step="any" onchange="calculateSectionTotal('${sectionKey}')" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Currency</label>
+                <select class="form-control" name="${sectionKey}[${currentEntries}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
+                    <option value="lebanese">Lebanese</option>
+                    <option value="dollar">Dollar</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" name="${sectionKey}[${currentEntries}][name]" />
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${currentEntries})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(entryDiv);
+    }
+
+    function removeDynamicEntry(sectionKey, index) {
+        const container = document.getElementById(`dynamic-list-${sectionKey}`);
+        const entries = Array.from(container.children);
+        if (entries[index]) {
+            entries[index].remove();
+            // Re-index remaining entries
+            renderDynamicListEntries(sectionKey, getDynamicListData(sectionKey));
+        }
+    }
+
+    function getDynamicListData(sectionKey) {
+        const container = document.getElementById(`dynamic-list-${sectionKey}`);
+        const entries = [];
+        const rows = container.querySelectorAll('.row.mb-2');
+        
+        rows.forEach(row => {
+            const amount = row.querySelector('input[name$="[amount]"]')?.value;
+            const currency = row.querySelector('select[name$="[currency]"]')?.value;
+            const name = row.querySelector('input[name$="[name]"]')?.value;
+            
+            if (amount || currency || name) {
+                entries.push({
+                    amount: parseFloat(amount) || 0,
+                    currency: currency || 'lebanese',
+                    name: name || ''
+                });
+            }
+        });
+        
+        return entries;
+    }
+
+    function calculateSectionTotal(sectionKey) {
+        const entries = getDynamicListData(sectionKey);
+        let total = 0;
+        
+        entries.forEach(entry => {
+            if (entry.currency === 'dollar') {
+                // Convert dollar to LBP using dollar rate
+                const dollarRate = parseFloat(document.querySelector('input[name="dollar_rate"]')?.value) || 1;
+                total += (entry.amount || 0) * dollarRate;
+            } else {
+                total += entry.amount || 0;
+            }
+        });
+        
+        const totalField = document.querySelector(`input[name="${sectionKey.replace('_', '_')}_total"]`);
+        if (totalField) {
+            totalField.value = total.toFixed(2);
+        }
+        
+        calculateAllTotals();
+    }
+
+    function calculateAllTotals() {
+        // Special Credit Total
+        const specialCreditTotal = 
+            (parseFloat(document.querySelector('input[name="rayan_invoices_credit"]')?.value) || 0) +
+            (parseFloat(document.querySelector('input[name="employee_invoice_credit"]')?.value) || 0) +
+            (parseFloat(document.querySelector('input[name="delivery_shabeb_co"]')?.value) || 0) +
+            (parseFloat(document.querySelector('input[name="delivery_employee"]')?.value) || 0) +
+            (parseFloat(document.querySelector('input[name="waste_goods"]')?.value) || 0);
+        
+        document.querySelector('input[name="special_credit_total"]').value = specialCreditTotal.toFixed(2);
+        
+        // Lebanese Cash Total
+        const lebaneseTotal = 
+            (parseFloat(document.querySelector('input[name="lebanese_5000_qty"]')?.value) || 0) * 5000 +
+            (parseFloat(document.querySelector('input[name="lebanese_10000_qty"]')?.value) || 0) * 10000 +
+            (parseFloat(document.querySelector('input[name="lebanese_20000_qty"]')?.value) || 0) * 20000 +
+            (parseFloat(document.querySelector('input[name="lebanese_50000_qty"]')?.value) || 0) * 50000 +
+            (parseFloat(document.querySelector('input[name="lebanese_100000_qty"]')?.value) || 0) * 100000;
+        
+        document.querySelector('input[name="lebanese_cash_total"]').value = lebaneseTotal.toFixed(2);
+        
+        // Dollar Cash Total
+        const dollarTotal = 
+            (parseFloat(document.querySelector('input[name="dollar_1_qty"]')?.value) || 0) * 1 +
+            (parseFloat(document.querySelector('input[name="dollar_5_qty"]')?.value) || 0) * 5 +
+            (parseFloat(document.querySelector('input[name="dollar_10_qty"]')?.value) || 0) * 10 +
+            (parseFloat(document.querySelector('input[name="dollar_20_qty"]')?.value) || 0) * 20 +
+            (parseFloat(document.querySelector('input[name="dollar_50_qty"]')?.value) || 0) * 50 +
+            (parseFloat(document.querySelector('input[name="dollar_100_qty"]')?.value) || 0) * 100;
+        
+        const dollarRate = parseFloat(document.querySelector('input[name="dollar_rate"]')?.value) || 1;
+        const dollarInLBP = dollarTotal * dollarRate;
+        
+        document.querySelector('input[name="dollar_cash_total_usd"]').value = dollarTotal.toFixed(2);
+        document.querySelector('input[name="dollar_cash_total_lbp"]').value = dollarInLBP.toFixed(2);
+        
+        // Calculate all dynamic section totals
+        calculateSectionTotal('cash_purchase');
+        calculateSectionTotal('credit_invoices');
+        calculateSectionTotal('employee_on_house');
+        calculateSectionTotal('customer_on_house');
+        calculateSectionTotal('bar_on_house');
+        calculateSectionTotal('store');
+        
+        // Summary Results
+        const cashInHandDollar = dollarInLBP;
+        const cashInHandLebanese = lebaneseTotal;
+        const cashOutOfHand = specialCreditTotal + 
+            (parseFloat(document.querySelector('input[name="credit_invoices_total"]')?.value) || 0);
+        const grandTotal = cashInHandDollar + cashInHandLebanese + cashOutOfHand;
+        
+        document.querySelector('input[name="cash_in_hand_dollar"]').value = cashInHandDollar.toFixed(2);
+        document.querySelector('input[name="cash_in_hand_lebanese"]').value = cashInHandLebanese.toFixed(2);
+        document.querySelector('input[name="cash_out_of_hand"]').value = cashOutOfHand.toFixed(2);
+        document.querySelector('input[name="grand_total"]').value = grandTotal.toFixed(2);
     }
 
     function buildForm() {
@@ -115,39 +377,51 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if schema has sections
         if (schema && schema.sections && schema.sections.length > 0) {
             schema.sections.forEach((section, index) => {
-                const sectionDiv = document.createElement('div');
-                sectionDiv.className = 'accordion mb-3';
-                sectionDiv.innerHTML = `
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="heading-${index}">
-                            <button class="accordion-button ${index === 0 ? '' : 'collapsed'}" type="button" 
-                                    data-bs-toggle="collapse" data-bs-target="#collapse-${index}" 
-                                    aria-expanded="${index === 0 ? 'true' : 'false'}" 
-                                    aria-controls="collapse-${index}">
-                                <i class="fas fa-folder me-2"></i>${section.title}
-                            </button>
-                        </h2>
-                        <div id="collapse-${index}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" 
-                             aria-labelledby="heading-${index}" data-bs-parent="#formSections">
-                            <div class="accordion-body">
-                                <div class="row g-3" id="section-${section.title.replace(/\s+/g, '-').toLowerCase()}"></div>
+                if (section.type === 'dynamic_list') {
+                    renderDynamicList(section, index);
+                } else {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.className = 'accordion mb-3';
+                    sectionDiv.innerHTML = `
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading-${index}">
+                                <button class="accordion-button ${index === 0 ? '' : 'collapsed'}" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#collapse-${index}" 
+                                        aria-expanded="${index === 0 ? 'true' : 'false'}" 
+                                        aria-controls="collapse-${index}">
+                                    <i class="fas fa-folder me-2"></i>${section.title}
+                                </button>
+                            </h2>
+                            <div id="collapse-${index}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" 
+                                 aria-labelledby="heading-${index}" data-bs-parent="#formSections">
+                                <div class="accordion-body">
+                                    <div class="row g-3" id="section-${section.title.replace(/\s+/g, '-').toLowerCase()}"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                formSections.appendChild(sectionDiv);
-                
-                const sectionFields = sectionDiv.querySelector(`#section-${section.title.replace(/\s+/g, '-').toLowerCase()}`);
-                section.fields.forEach(f => sectionFields.appendChild(renderField(f)));
+                    `;
+                    formSections.appendChild(sectionDiv);
+                    
+                    const sectionFields = sectionDiv.querySelector(`#section-${section.title.replace(/\s+/g, '-').toLowerCase()}`);
+                    section.fields.forEach(f => sectionFields.appendChild(renderField(f, index)));
+                }
             });
         } else {
             // Fallback to single section
             const fields = schema.fields || [];
             const fallbackDiv = document.createElement('div');
             fallbackDiv.className = 'row g-3';
-            fields.forEach(f => fallbackDiv.appendChild(renderField(f)));
+            fields.forEach(f => fallbackDiv.appendChild(renderField(f, 0)));
             formSections.appendChild(fallbackDiv);
         }
+        
+        // Add event listeners for calculations
+        document.querySelectorAll('input[name*="qty"], input[name="dollar_rate"], input[name*="credit"]').forEach(input => {
+            input.addEventListener('input', calculateAllTotals);
+        });
+        
+        // Initial calculation
+        calculateAllTotals();
     }
 
     function showStatus(kind, html) {
@@ -161,9 +435,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     submitBtn.addEventListener('click', function() {
         const data = {};
-        const inputs = document.querySelectorAll('#dynamicForm input[name]');
+        const inputs = document.querySelectorAll('#dynamicForm input[name], #dynamicForm select[name]');
         inputs.forEach(inp => {
-            data[inp.name] = inp.value;
+            if (inp.name && !inp.readOnly) {
+                if (inp.name.includes('[') && inp.name.includes(']')) {
+                    // Handle dynamic list data
+                    const baseName = inp.name.split('[')[0];
+                    if (!data[baseName]) data[baseName] = [];
+                    
+                    const index = parseInt(inp.name.match(/\[(\d+)\]/)[1]);
+                    const field = inp.name.split('[')[1].split(']')[0];
+                    
+                    if (!data[baseName][index]) data[baseName][index] = {};
+                    data[baseName][index][field] = inp.value;
+                } else {
+                    data[inp.name] = inp.value;
+                }
+            }
         });
 
         const payload = {
@@ -194,6 +482,11 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = false;
         });
     });
+
+    // Make functions global for onclick handlers
+    window.addDynamicEntry = addDynamicEntry;
+    window.removeDynamicEntry = removeDynamicEntry;
+    window.calculateSectionTotal = calculateSectionTotal;
 
     buildForm();
 });

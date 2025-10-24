@@ -1,6 +1,6 @@
 """
 Hardcoded form schema for Rawad close cash submissions.
-Based on the structure extracted from Rawad.xlsx.
+New 12-section structure with dynamic lists and auto-calculations.
 """
 
 RAWAD_FORM_SCHEMA = {
@@ -16,7 +16,7 @@ RAWAD_FORM_SCHEMA = {
                 },
                 {
                     "key": "cashier_name",
-                    "label": "Cashier name",
+                    "label": "Cashier Name",
                     "type": "text",
                     "required": False
                 },
@@ -25,64 +25,30 @@ RAWAD_FORM_SCHEMA = {
                     "label": "Date",
                     "type": "date",
                     "required": False
+                },
+                {
+                    "key": "shift_time",
+                    "label": "Shift Time",
+                    "type": "select",
+                    "options": ["Morning", "Day", "Evening", "Night"],
+                    "required": False
                 }
             ]
         },
         {
-            "title": "Shift Time",
+            "title": "Recharge Cards",
             "fields": [
                 {
-                    "key": "mtc_3_79",
-                    "label": "MTC 3.79$",
+                    "key": "recharge_placeholder",
+                    "label": "This section is reserved for future use",
                     "type": "text",
-                    "required": False
-                },
-                {
-                    "key": "mtc_4_5",
-                    "label": "MTC 4.5$",
-                    "type": "text",
-                    "required": False
-                },
-                {
-                    "key": "mtc_7_58",
-                    "label": "MTC 7.58$",
-                    "type": "text",
-                    "required": False
-                },
-                {
-                    "key": "mtc_15_15",
-                    "label": "MTC 15.15$",
-                    "type": "text",
-                    "required": False
-                },
-                {
-                    "key": "alfa_3_03",
-                    "label": "Alfa 3.03$",
-                    "type": "text",
-                    "required": False
-                },
-                {
-                    "key": "alfa_4_5",
-                    "label": "Alfa 4.5$",
-                    "type": "text",
-                    "required": False
-                },
-                {
-                    "key": "alfa_7_58",
-                    "label": "Alfa 7.58$",
-                    "type": "text",
-                    "required": False
-                },
-                {
-                    "key": "alfa_15_15",
-                    "label": "Alfa 15.15$",
-                    "type": "text",
-                    "required": False
+                    "required": False,
+                    "readonly": True
                 }
             ]
         },
         {
-            "title": "Total in Account $",
+            "title": "Special Credit",
             "fields": [
                 {
                     "key": "rayan_invoices_credit",
@@ -97,14 +63,14 @@ RAWAD_FORM_SCHEMA = {
                     "required": False
                 },
                 {
-                    "key": "delivery_chabeb_co",
-                    "label": "Delivery Chabeb co.",
+                    "key": "delivery_shabeb_co",
+                    "label": "Delivery Shabeb co.",
                     "type": "number",
                     "required": False
                 },
                 {
                     "key": "delivery_employee",
-                    "label": "Delivery Employee.",
+                    "label": "Delivery Employee",
                     "type": "number",
                     "required": False
                 },
@@ -115,45 +81,299 @@ RAWAD_FORM_SCHEMA = {
                     "required": False
                 },
                 {
-                    "key": "total_l_l",
-                    "label": "Total L.L.",
+                    "key": "special_credit_total",
+                    "label": "Special Credit Total",
                     "type": "number",
-                    "required": False
-                },
-                {
-                    "key": "cash_in_hand_l_l",
-                    "label": "Cash in Hand $/L.L.",
-                    "type": "number",
-                    "required": False
-                },
-                {
-                    "key": "cash_in_hand_lbp",
-                    "label": "Cash in Hand LBP",
-                    "type": "number",
-                    "required": False
-                },
-                {
-                    "key": "cash_out_from_draw",
-                    "label": "Cash out from draw",
-                    "type": "number",
-                    "required": False
-                },
-                {
-                    "key": "total_shift_sales",
-                    "label": "Total shift sales",
-                    "type": "number",
-                    "required": False
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
                 }
             ]
         },
         {
-            "title": "Coffee Machine",
+            "title": "Lebanese Cash Bills",
             "fields": [
                 {
-                    "key": "item",
-                    "label": "ITEM",
-                    "type": "text",
+                    "key": "lebanese_5000_qty",
+                    "label": "5,000 LBP (Quantity)",
+                    "type": "number",
                     "required": False
+                },
+                {
+                    "key": "lebanese_10000_qty",
+                    "label": "10,000 LBP (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "lebanese_20000_qty",
+                    "label": "20,000 LBP (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "lebanese_50000_qty",
+                    "label": "50,000 LBP (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "lebanese_100000_qty",
+                    "label": "100,000 LBP (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "lebanese_cash_total",
+                    "label": "Lebanese Cash Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
+            "title": "Dollar Cash Bills",
+            "fields": [
+                {
+                    "key": "dollar_1_qty",
+                    "label": "$1 (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "dollar_5_qty",
+                    "label": "$5 (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "dollar_10_qty",
+                    "label": "$10 (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "dollar_20_qty",
+                    "label": "$20 (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "dollar_50_qty",
+                    "label": "$50 (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "dollar_100_qty",
+                    "label": "$100 (Quantity)",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "dollar_rate",
+                    "label": "Dollar Rate",
+                    "type": "number",
+                    "required": False
+                },
+                {
+                    "key": "dollar_cash_total_usd",
+                    "label": "Dollar Cash Total (USD)",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                },
+                {
+                    "key": "dollar_cash_total_lbp",
+                    "label": "Dollar Cash Total (LBP)",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
+            "title": "Cash Purchase",
+            "type": "dynamic_list",
+            "fields": [
+                {
+                    "key": "cash_purchase",
+                    "label": "Cash Purchase Entries",
+                    "type": "dynamic_list",
+                    "list_fields": [
+                        {"key": "amount", "label": "Amount", "type": "number"},
+                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
+                        {"key": "name", "label": "Name", "type": "text"}
+                    ]
+                },
+                {
+                    "key": "cash_purchase_total",
+                    "label": "Cash Purchase Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
+            "title": "Credit Invoices",
+            "type": "dynamic_list",
+            "fields": [
+                {
+                    "key": "credit_invoices",
+                    "label": "Credit Invoice Entries",
+                    "type": "dynamic_list",
+                    "list_fields": [
+                        {"key": "amount", "label": "Amount", "type": "number"},
+                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
+                        {"key": "name", "label": "Name", "type": "text"}
+                    ]
+                },
+                {
+                    "key": "credit_invoices_total",
+                    "label": "Credit Invoices Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
+            "title": "Employee On the House",
+            "type": "dynamic_list",
+            "fields": [
+                {
+                    "key": "employee_on_house",
+                    "label": "Employee On the House Entries",
+                    "type": "dynamic_list",
+                    "list_fields": [
+                        {"key": "amount", "label": "Amount", "type": "number"},
+                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
+                        {"key": "name", "label": "Name", "type": "text"}
+                    ]
+                },
+                {
+                    "key": "employee_on_house_total",
+                    "label": "Employee On the House Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
+            "title": "Customer On the House",
+            "type": "dynamic_list",
+            "fields": [
+                {
+                    "key": "customer_on_house",
+                    "label": "Customer On the House Entries",
+                    "type": "dynamic_list",
+                    "list_fields": [
+                        {"key": "amount", "label": "Amount", "type": "number"},
+                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
+                        {"key": "name", "label": "Name", "type": "text"}
+                    ]
+                },
+                {
+                    "key": "customer_on_house_total",
+                    "label": "Customer On the House Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
+            "title": "Bar On the House",
+            "type": "dynamic_list",
+            "fields": [
+                {
+                    "key": "bar_on_house",
+                    "label": "Bar On the House Entries",
+                    "type": "dynamic_list",
+                    "list_fields": [
+                        {"key": "amount", "label": "Amount", "type": "number"},
+                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
+                        {"key": "name", "label": "Name", "type": "text"}
+                    ]
+                },
+                {
+                    "key": "bar_on_house_total",
+                    "label": "Bar On the House Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
+            "title": "Store",
+            "type": "dynamic_list",
+            "fields": [
+                {
+                    "key": "store",
+                    "label": "Store Entries",
+                    "type": "dynamic_list",
+                    "list_fields": [
+                        {"key": "amount", "label": "Amount", "type": "number"},
+                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
+                        {"key": "name", "label": "Name", "type": "text"}
+                    ]
+                },
+                {
+                    "key": "store_total",
+                    "label": "Store Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                }
+            ]
+        },
+        {
+            "title": "Summary Results",
+            "fields": [
+                {
+                    "key": "cash_in_hand_dollar",
+                    "label": "Cash in Hand (Dollar)",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                },
+                {
+                    "key": "cash_in_hand_lebanese",
+                    "label": "Cash in Hand (Lebanese)",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                },
+                {
+                    "key": "cash_out_of_hand",
+                    "label": "Cash Out of Hand",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                },
+                {
+                    "key": "grand_total",
+                    "label": "Grand Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
                 }
             ]
         }

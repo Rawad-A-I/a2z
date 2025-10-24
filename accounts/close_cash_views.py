@@ -449,6 +449,29 @@ def rawad_submit_close_cash_form(request, sheet_name):
     else:
         entry_date_obj = timezone.now().date()
     
+    # Clean up dynamic list data - remove empty entries
+    dynamic_list_keys = ['cash_purchase', 'credit_invoices', 'employee_on_house', 
+                        'customer_on_house', 'bar_on_house', 'store']
+    
+    for key in dynamic_list_keys:
+        if key in data and isinstance(data[key], list):
+            # Filter out empty entries
+            data[key] = [entry for entry in data[key] if entry and 
+                        (entry.get('amount') or entry.get('name'))]
+    
+    # Validate required calculations are present
+    calculated_fields = [
+        'special_credit_total', 'lebanese_cash_total', 'dollar_cash_total_usd', 
+        'dollar_cash_total_lbp', 'cash_purchase_total', 'credit_invoices_total',
+        'employee_on_house_total', 'customer_on_house_total', 'bar_on_house_total',
+        'store_total', 'cash_in_hand_dollar', 'cash_in_hand_lebanese', 
+        'cash_out_of_hand', 'grand_total'
+    ]
+    
+    for field in calculated_fields:
+        if field not in data:
+            data[field] = 0
+    
     # Persist DB entry
     try:
         entry = CloseCashEntry.objects.create(
@@ -473,6 +496,7 @@ def rawad_export_excel(request):
     
     try:
         from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment
         from .rawad_form_schema import RAWAD_FORM_SCHEMA
         
         # Get all Rawad submissions from DB
@@ -488,27 +512,160 @@ def rawad_export_excel(request):
         wb = Workbook()
         wb.remove(wb.active)  # Remove default sheet
         
+        # Style definitions
+        header_font = Font(bold=True, size=12)
+        section_font = Font(bold=True, size=11)
+        total_font = Font(bold=True, color="FFFFFF")
+        total_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+        
         # For each submission, create a sheet
         for entry in entries:
             # Create sheet with date as name
             sheet_name = entry.entry_date.strftime('%d-%m-%Y')
             ws = wb.create_sheet(title=sheet_name)
             
-            # Write section headers and field values in A/B columns
             row = 1
-            for section in RAWAD_FORM_SCHEMA['sections']:
-                # Section header
-                ws.cell(row, 1, section['title'])
+            data = entry.data_json
+            
+            # General Section
+            ws.cell(row, 1, "General").font = section_font
+            row += 1
+            ws.cell(row, 1, "Black Market Daily Rate")
+            ws.cell(row, 2, data.get('black_market_daily_rate', ''))
+            row += 1
+            ws.cell(row, 1, "Cashier Name")
+            ws.cell(row, 2, data.get('cashier_name', ''))
+            row += 1
+            ws.cell(row, 1, "Date")
+            ws.cell(row, 2, data.get('date', ''))
+            row += 1
+            ws.cell(row, 1, "Shift Time")
+            ws.cell(row, 2, data.get('shift_time', ''))
+            row += 2
+            
+            # Special Credit Section
+            ws.cell(row, 1, "Special Credit").font = section_font
+            row += 1
+            ws.cell(row, 1, "Rayan Invoices Credit")
+            ws.cell(row, 2, data.get('rayan_invoices_credit', ''))
+            row += 1
+            ws.cell(row, 1, "Employee Invoice Credit")
+            ws.cell(row, 2, data.get('employee_invoice_credit', ''))
+            row += 1
+            ws.cell(row, 1, "Delivery Shabeb co.")
+            ws.cell(row, 2, data.get('delivery_shabeb_co', ''))
+            row += 1
+            ws.cell(row, 1, "Delivery Employee")
+            ws.cell(row, 2, data.get('delivery_employee', ''))
+            row += 1
+            ws.cell(row, 1, "Waste Goods")
+            ws.cell(row, 2, data.get('waste_goods', ''))
+            row += 1
+            ws.cell(row, 1, "Special Credit Total")
+            ws.cell(row, 2, data.get('special_credit_total', ''))
+            row += 2
+            
+            # Lebanese Cash Bills
+            ws.cell(row, 1, "Lebanese Cash Bills").font = section_font
+            row += 1
+            lebanese_bills = [
+                ('lebanese_5000_qty', '5,000 LBP'),
+                ('lebanese_10000_qty', '10,000 LBP'),
+                ('lebanese_20000_qty', '20,000 LBP'),
+                ('lebanese_50000_qty', '50,000 LBP'),
+                ('lebanese_100000_qty', '100,000 LBP')
+            ]
+            for key, label in lebanese_bills:
+                qty = data.get(key, 0) or 0
+                value = qty * int(label.split(',')[0].replace(' ', ''))
+                ws.cell(row, 1, f"{label} × {qty} qty = {value:,} LBP")
+                row += 1
+            ws.cell(row, 1, "Lebanese Cash Total")
+            ws.cell(row, 2, data.get('lebanese_cash_total', ''))
+            row += 2
+            
+            # Dollar Cash Bills
+            ws.cell(row, 1, "Dollar Cash Bills").font = section_font
+            row += 1
+            dollar_bills = [
+                ('dollar_1_qty', 1),
+                ('dollar_5_qty', 5),
+                ('dollar_10_qty', 10),
+                ('dollar_20_qty', 20),
+                ('dollar_50_qty', 50),
+                ('dollar_100_qty', 100)
+            ]
+            for key, denomination in dollar_bills:
+                qty = data.get(key, 0) or 0
+                value = qty * denomination
+                ws.cell(row, 1, f"${denomination} × {qty} qty = ${value}")
+                row += 1
+            ws.cell(row, 1, "Dollar Rate")
+            ws.cell(row, 2, data.get('dollar_rate', ''))
+            row += 1
+            ws.cell(row, 1, "Dollar Cash Total (USD)")
+            ws.cell(row, 2, data.get('dollar_cash_total_usd', ''))
+            row += 1
+            ws.cell(row, 1, "Dollar Cash Total (LBP)")
+            ws.cell(row, 2, data.get('dollar_cash_total_lbp', ''))
+            row += 2
+            
+            # Dynamic Lists
+            dynamic_sections = [
+                ('cash_purchase', 'Cash Purchase'),
+                ('credit_invoices', 'Credit Invoices'),
+                ('employee_on_house', 'Employee On the House'),
+                ('customer_on_house', 'Customer On the House'),
+                ('bar_on_house', 'Bar On the House'),
+                ('store', 'Store')
+            ]
+            
+            for section_key, section_title in dynamic_sections:
+                ws.cell(row, 1, section_title).font = section_font
                 row += 1
                 
-                # Section fields
-                for field in section['fields']:
-                    ws.cell(row, 1, field['label'])
-                    value = entry.data_json.get(field['key'], '')
-                    ws.cell(row, 2, value)
+                entries_list = data.get(section_key, [])
+                if entries_list:
+                    # Headers
+                    ws.cell(row, 1, "Amount")
+                    ws.cell(row, 2, "Currency")
+                    ws.cell(row, 3, "Name")
+                    row += 1
+                    
+                    # Entries
+                    for entry_item in entries_list:
+                        ws.cell(row, 1, entry_item.get('amount', ''))
+                        ws.cell(row, 2, entry_item.get('currency', ''))
+                        ws.cell(row, 3, entry_item.get('name', ''))
+                        row += 1
+                else:
+                    ws.cell(row, 1, "No entries")
                     row += 1
                 
-                # Blank row between sections
+                # Total
+                total_key = f"{section_key}_total"
+                ws.cell(row, 1, f"{section_title} Total")
+                ws.cell(row, 2, data.get(total_key, ''))
+                row += 2
+            
+            # Summary Results
+            ws.cell(row, 1, "Summary Results").font = section_font
+            row += 1
+            summary_fields = [
+                ('cash_in_hand_dollar', 'Cash in Hand (Dollar)'),
+                ('cash_in_hand_lebanese', 'Cash in Hand (Lebanese)'),
+                ('cash_out_of_hand', 'Cash Out of Hand'),
+                ('grand_total', 'Grand Total')
+            ]
+            
+            for key, label in summary_fields:
+                ws.cell(row, 1, label)
+                ws.cell(row, 2, data.get(key, ''))
+                if key == 'grand_total':
+                    ws.cell(row, 1).font = total_font
+                    ws.cell(row, 1).fill = total_fill
+                    ws.cell(row, 2).font = total_font
+                    ws.cell(row, 2).fill = total_fill
                 row += 1
         
         # Convert to bytes
