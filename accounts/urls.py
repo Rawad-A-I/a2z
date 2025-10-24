@@ -96,6 +96,7 @@ urlpatterns = [
     path('employee/close-cash/rawad/', rawad_forms_dashboard, name='rawad_forms_dashboard'),
     path('employee/close-cash/rawad/<str:sheet_name>/', rawad_edit_close_cash_form, name='rawad_edit_close_cash_form'),
     path('employee/close-cash/rawad/<str:sheet_name>/submit/', rawad_submit_close_cash_form, name='rawad_submit_close_cash_form'),
+    path('employee/close-cash/rawad/export/', rawad_export_excel, name='rawad_export_excel'),
     
     # Inventory Management URLs
     path('inventory/dashboard/', inventory_dashboard, name='inventory_dashboard'),
