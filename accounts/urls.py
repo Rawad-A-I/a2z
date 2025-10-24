@@ -91,6 +91,11 @@ urlpatterns = [
 
     # New: A to Z master editor (editable mirror)
     path('employee/close-cash/a2z/', a2z_master_editor, name='a2z_master_editor'),
+
+    # Rawad-only Close Cash Forms
+    path('employee/close-cash/rawad/', rawad_forms_dashboard, name='rawad_forms_dashboard'),
+    path('employee/close-cash/rawad/<str:sheet_name>/', rawad_edit_close_cash_form, name='rawad_edit_close_cash_form'),
+    path('employee/close-cash/rawad/<str:sheet_name>/submit/', rawad_submit_close_cash_form, name='rawad_submit_close_cash_form'),
     
     # Inventory Management URLs
     path('inventory/dashboard/', inventory_dashboard, name='inventory_dashboard'),

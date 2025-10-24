@@ -79,16 +79,13 @@ def close_cash_dashboard(request):
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
 
-    # Show blank page for all per new requirement
-    return render(request, 'accounts/close_cash_dashboard.html', {})
-    
-    files = get_user_excel_files(request.user)
-    
-    context = {
-        'files': files,
-        'is_admin': request.user.is_superuser,
-        'user': request.user,
-    }
+    # Show Rawad entrypoint for Rawad/admin, blank for others
+    context = {}
+    if is_rawad_or_admin(request.user):
+        # Get available date sheets for Rawad
+        schemas = CloseCashSchema.objects.filter(workbook__iexact='Rawad.xlsx').order_by('sheet_name')
+        context['rawad_schemas'] = schemas
+        context['show_rawad_entry'] = True
     
     return render(request, 'accounts/close_cash_dashboard.html', context)
 
@@ -354,6 +351,117 @@ def a2z_master_editor(request):
     except Exception as e:
         messages.error(request, f'Error reading A to Z workbook: {str(e)}')
         return redirect('close_cash_dashboard')
+
+
+# =====================
+# Rawad-only Forms
+# =====================
+
+def is_rawad_or_admin(user):
+    """Check if user is Rawad (case-insensitive) or admin."""
+    return user.is_superuser or user.username.lower() == 'rawad'
+
+
+@login_required
+def rawad_forms_dashboard(request):
+    """Rawad-only forms dashboard showing available date sheets."""
+    if not is_rawad_or_admin(request.user):
+        messages.error(request, 'You do not have access to this page.')
+        return redirect('index')
+    
+    # Get schemas for Rawad.xlsx
+    schemas = CloseCashSchema.objects.filter(workbook__iexact='Rawad.xlsx').order_by('sheet_name')
+    entries = CloseCashEntry.objects.filter(user=request.user, workbook__iexact='Rawad.xlsx')
+    latest_by_sheet = {e.sheet_name: e for e in entries}
+    
+    context = {
+        'schemas': schemas,
+        'latest_by_sheet': latest_by_sheet,
+        'workbook_name': 'Rawad.xlsx',
+    }
+    return render(request, 'accounts/close_cash_rawad_dashboard.html', context)
+
+
+@login_required
+def rawad_edit_close_cash_form(request, sheet_name):
+    """Edit Rawad form for specific date sheet."""
+    if not is_rawad_or_admin(request.user):
+        messages.error(request, 'You do not have access to this page.')
+        return redirect('index')
+    
+    try:
+        schema_obj = CloseCashSchema.objects.get(workbook__iexact='Rawad.xlsx', sheet_name=sheet_name, version='v1')
+    except CloseCashSchema.DoesNotExist:
+        messages.error(request, 'Form schema not found for this sheet.')
+        return redirect('rawad_forms_dashboard')
+    
+    # Load latest entry for prefill
+    entry = CloseCashEntry.objects.filter(
+        user=request.user,
+        workbook__iexact='Rawad.xlsx',
+        sheet_name=sheet_name,
+        source_version='v1'
+    ).order_by('-created_at').first()
+    
+    context = {
+        'sheet_name': sheet_name,
+        'schema': schema_obj.schema_json,
+        'values': entry.data_json if entry else {},
+        'workbook_name': 'Rawad.xlsx',
+    }
+    return render(request, 'accounts/close_cash_form_edit.html', context)
+
+
+@login_required
+@require_POST
+@transaction.atomic
+def rawad_submit_close_cash_form(request, sheet_name):
+    """Submit Rawad form data."""
+    if not is_rawad_or_admin(request.user):
+        return JsonResponse({'error': 'Access denied'}, status=403)
+    
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON payload'}, status=400)
+    
+    data = payload.get('data', {})
+    entry_date = payload.get('entry_date')
+    
+    try:
+        schema_obj = CloseCashSchema.objects.get(workbook__iexact='Rawad.xlsx', sheet_name=sheet_name, version='v1')
+    except CloseCashSchema.DoesNotExist:
+        return JsonResponse({'error': 'Form schema not found'}, status=404)
+    
+    # Convert entry_date
+    from django.utils import timezone
+    if entry_date:
+        try:
+            from datetime import date
+            entry_date_obj = timezone.datetime.fromisoformat(entry_date).date()
+        except Exception:
+            return JsonResponse({'error': 'Invalid entry_date'}, status=400)
+    else:
+        entry_date_obj = timezone.now().date()
+    
+    # Persist DB entry
+    entry = CloseCashEntry.objects.create(
+        user=request.user,
+        workbook='Rawad.xlsx',
+        sheet_name=sheet_name,
+        entry_date=entry_date_obj,
+        data_json=data,
+        source_version='v1',
+    )
+    
+    # Sync back to Rawad workbook
+    try:
+        rawad_workbook_path = os.path.join(get_close_cash_directory(), 'Rawad.xlsx')
+        write_values_to_workbook(rawad_workbook_path, sheet_name, schema_obj.schema_json, data)
+    except Exception as e:
+        return JsonResponse({'success': True, 'warning': f'Data saved but Excel sync failed: {str(e)}'})
+    
+    return JsonResponse({'success': True, 'message': 'Form saved successfully'})
 
 
 @login_required

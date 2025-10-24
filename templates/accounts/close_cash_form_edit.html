@@ -33,7 +33,7 @@
                 </div>
                 <div class="card-body">
                     <form id="dynamicForm">
-                        <div id="formFields" class="row g-3"></div>
+                        <div id="formSections"></div>
                     </form>
                 </div>
             </div>
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const values = {{ values|safe }};
     const sheetName = {{ sheet_name|json_script:"sheetName" }};
 
-    const formFields = document.getElementById('formFields');
+    const formSections = document.getElementById('formSections');
     const statusBox = document.getElementById('statusBox');
     const submitBtn = document.getElementById('submitBtn');
     const entryDate = document.getElementById('entryDate');
@@ -96,9 +96,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function buildForm() {
-        formFields.innerHTML = '';
-        const fields = schema.fields || [];
-        fields.forEach(f => formFields.appendChild(renderField(f)));
+        formSections.innerHTML = '';
+        
+        // Check if schema has sections
+        if (schema.sections && schema.sections.length > 0) {
+            schema.sections.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'card mb-4';
+                sectionDiv.innerHTML = `
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-folder me-2"></i>${section.title}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3" id="section-${section.title.replace(/\s+/g, '-').toLowerCase()}"></div>
+                    </div>
+                `;
+                formSections.appendChild(sectionDiv);
+                
+                const sectionFields = sectionDiv.querySelector(`#section-${section.title.replace(/\s+/g, '-').toLowerCase()}`);
+                section.fields.forEach(f => sectionFields.appendChild(renderField(f)));
+            });
+        } else {
+            // Fallback to single section
+            const fields = schema.fields || [];
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.className = 'row g-3';
+            fields.forEach(f => fallbackDiv.appendChild(renderField(f)));
+            formSections.appendChild(fallbackDiv);
+        }
     }
 
     function showStatus(kind, html) {

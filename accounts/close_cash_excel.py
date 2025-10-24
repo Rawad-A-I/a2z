@@ -68,7 +68,7 @@ def detect_schema_for_sheet(ws) -> Dict[str, Any]:
     Heuristic detection:
     - If many label/value pairs in columns A/B → kv mode (single-record form)
     - Else if first non-empty row seems headers → table mode (use first data row)
-    Returns schema dict with mode, fields, and positional hints.
+    Returns schema dict with mode, fields, sections, and positional hints.
     """
     max_row = ws.max_row or 1
     max_col = ws.max_column or 1
@@ -76,23 +76,48 @@ def detect_schema_for_sheet(ws) -> Dict[str, Any]:
     # Attempt KV mode by scanning first 50 rows, first 4 columns for pairs
     kv_fields = []
     kv_hits = 0
+    sections = []
+    current_section = {"title": "General", "fields": []}
+    
     for r in range(1, min(max_row, 50) + 1):
         label_cell = ws.cell(row=r, column=1)
         value_cell = ws.cell(row=r, column=2)
         label = label_cell.value if label_cell.value is not None else ""
+        value = value_cell.value if value_cell.value is not None else ""
+        
         if isinstance(label, str) and label.strip():
-            kv_hits += 1
-            kv_fields.append({
-                "key": re.sub(r"[^a-zA-Z0-9_]+", "_", label.strip()).strip("_").lower()[:50] or f"field_{r}",
-                "label": label.strip(),
-                "type": infer_type(value_cell.value),
-                "cell": {"row": r, "col": 2},
-                "required": False,
-            })
+            # Check if this is a section header (label exists, value is empty)
+            if isinstance(value, str) and not value.strip():
+                # This might be a section header
+                if current_section["fields"]:  # Save previous section if it has fields
+                    sections.append(current_section.copy())
+                current_section = {"title": label.strip(), "fields": []}
+            else:
+                # Regular field
+                field = {
+                    "key": re.sub(r"[^a-zA-Z0-9_]+", "_", label.strip()).strip("_").lower()[:50] or f"field_{r}",
+                    "label": label.strip(),
+                    "type": infer_type(value),
+                    "cell": {"row": r, "col": 2},
+                    "required": False,
+                }
+                current_section["fields"].append(field)
+                kv_fields.append(field)
+                kv_hits += 1
+    
+    # Add the last section
+    if current_section["fields"]:
+        sections.append(current_section)
+    
+    # If no sections detected, create a single "General" section
+    if not sections and kv_fields:
+        sections = [{"title": "General", "fields": kv_fields}]
+    
     if kv_hits >= 5:
         return {
             "mode": "kv",
             "fields": kv_fields,
+            "sections": sections,
         }
 
     # Header/table mode: find first non-empty row as headers

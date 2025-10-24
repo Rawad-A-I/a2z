@@ -1,0 +1,63 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Rawad Close Cash Forms{% endblock %}
+
+{% block start %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-file-alt text-warning me-2"></i>Rawad Close Cash Forms</h2>
+                    <p class="text-muted mb-0">Select a date to fill or review your submission</p>
+                </div>
+                <div>
+                    <a href="{% url 'close_cash_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Close Cash
+                    </a>
+                </div>
+            </div>
+
+            {% if schemas %}
+            <div class="row">
+                {% for schema in schemas %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-calendar-day fa-2x text-warning"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1">{{ schema.sheet_name }}</h5>
+                                    <p class="text-muted mb-0 small">
+                                        {% if latest_by_sheet.get(schema.sheet_name) %}
+                                            Last submitted: {{ latest_by_sheet.get(schema.sheet_name).updated_at|date:"M d, Y H:i" }}
+                                        {% else %}
+                                            No submission yet
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'rawad_edit_close_cash_form' schema.sheet_name %}" class="btn btn-primary">
+                                    <i class="fas fa-edit me-2"></i>Open Form
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No form schemas found</h4>
+                <p class="text-muted">Ask an administrator to import the Rawad.xlsx workbook.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
