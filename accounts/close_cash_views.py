@@ -355,9 +355,8 @@ def a2z_master_editor(request):
 # =====================
 
 def is_employee_or_admin(user):
-    """Check if user is one of the 4 employees or admin."""
-    allowed_employees = ['rawad', 'hani', 'rayan', 'ahmad']
-    return user.is_superuser or user.username.lower() in allowed_employees
+    """Check if user is a staff member or admin."""
+    return user.is_staff or user.is_superuser
 
 
 @login_required
