@@ -471,17 +471,21 @@ def rawad_submit_close_cash_form(request, sheet_name):
         if field not in data:
             data[field] = 0
     
-    # Persist DB entry
+    # Persist DB entry - Update if exists, create if new
     try:
-        entry = CloseCashEntry.objects.create(
+        entry, created = CloseCashEntry.objects.update_or_create(
             user=request.user,
             workbook='Rawad.xlsx',
             sheet_name=sheet_name,
-            entry_date=entry_date_obj,
-            data_json=data,
-            source_version='v1',
+            defaults={
+                'entry_date': entry_date_obj,
+                'data_json': data,
+                'source_version': 'v1',
+            }
         )
-        return JsonResponse({'success': True, 'message': 'Form saved successfully'})
+        
+        action = 'created' if created else 'updated'
+        return JsonResponse({'success': True, 'message': f'Form {action} successfully'})
     except Exception as e:
         return JsonResponse({'error': f'Database error: {str(e)}'}, status=500)
 
