@@ -449,22 +449,21 @@ def rawad_submit_close_cash_form(request, sheet_name):
     else:
         entry_date_obj = timezone.now().date()
     
-    # Clean up dynamic list data - remove empty entries
-    dynamic_list_keys = ['cash_purchase', 'credit_invoices', 'employee_on_house', 
-                        'customer_on_house', 'bar_on_house', 'store']
-    
-    for key in dynamic_list_keys:
-        if key in data and isinstance(data[key], list):
-            # Filter out empty entries
-            data[key] = [entry for entry in data[key] if entry and 
-                        (entry.get('amount') or entry.get('name'))]
+        # Clean up dynamic list data - remove empty entries
+        dynamic_list_keys = ['credit']
+
+        for key in dynamic_list_keys:
+            if key in data and isinstance(data[key], list):
+                # Filter out empty entries
+                data[key] = [entry for entry in data[key] if entry and
+                            (entry.get('amount') or entry.get('name'))]
     
     # Validate required calculations are present
     calculated_fields = [
         'special_credit_total', 'lebanese_cash_total', 'dollar_cash_total_usd', 
         'dollar_cash_total_lbp', 'cash_purchase_total', 'credit_invoices_total',
-        'employee_on_house_total', 'customer_on_house_total', 'bar_on_house_total',
-        'store_total', 'cash_in_hand_dollar', 'cash_in_hand_lebanese', 
+        'employee_oth_total', 'customer_oth_total', 'bar_oth_total',
+        'store_total', 'credit_grand_total', 'cash_in_hand_dollar', 'cash_in_hand_lebanese',
         'cash_out_of_hand', 'grand_total'
     ]
     
@@ -610,42 +609,48 @@ def rawad_export_excel(request):
             ws.cell(row, 2, data.get('dollar_cash_total_lbp', ''))
             row += 2
             
-            # Dynamic Lists
-            dynamic_sections = [
-                ('cash_purchase', 'Cash Purchase'),
-                ('credit_invoices', 'Credit Invoices'),
-                ('employee_on_house', 'Employee On the House'),
-                ('customer_on_house', 'Customer On the House'),
-                ('bar_on_house', 'Bar On the House'),
-                ('store', 'Store')
-            ]
-            
-            for section_key, section_title in dynamic_sections:
-                ws.cell(row, 1, section_title).font = section_font
+                # Credit Section with Tags
+                ws.cell(row, 1, "Credit").font = section_font
                 row += 1
-                
-                entries_list = data.get(section_key, [])
-                if entries_list:
+
+                credit_entries = data.get('credit', [])
+                if credit_entries:
                     # Headers
                     ws.cell(row, 1, "Amount")
                     ws.cell(row, 2, "Currency")
-                    ws.cell(row, 3, "Name")
+                    ws.cell(row, 3, "Tag")
+                    ws.cell(row, 4, "Name")
                     row += 1
-                    
+
                     # Entries
-                    for entry_item in entries_list:
+                    for entry_item in credit_entries:
                         ws.cell(row, 1, entry_item.get('amount', ''))
                         ws.cell(row, 2, entry_item.get('currency', ''))
-                        ws.cell(row, 3, entry_item.get('name', ''))
+                        ws.cell(row, 3, entry_item.get('tag', ''))
+                        ws.cell(row, 4, entry_item.get('name', ''))
                         row += 1
                 else:
                     ws.cell(row, 1, "No entries")
                     row += 1
-                
-                # Total
-                total_key = f"{section_key}_total"
-                ws.cell(row, 1, f"{section_title} Total")
-                ws.cell(row, 2, data.get(total_key, ''))
+
+                # Credit Subtotals by Tag
+                tag_totals = [
+                    ('cash_purchase_total', 'Cash Purchase Total'),
+                    ('credit_invoices_total', 'Credit Invoices Total'),
+                    ('employee_oth_total', 'Employee OTH Total'),
+                    ('customer_oth_total', 'Customer OTH Total'),
+                    ('bar_oth_total', 'Bar OTH Total'),
+                    ('store_total', 'Store Total')
+                ]
+
+                for total_key, total_label in tag_totals:
+                    ws.cell(row, 1, total_label)
+                    ws.cell(row, 2, data.get(total_key, ''))
+                    row += 1
+
+                # Credit Grand Total
+                ws.cell(row, 1, "Credit Grand Total")
+                ws.cell(row, 2, data.get('credit_grand_total', ''))
                 row += 2
             
             # Summary Results

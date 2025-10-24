@@ -197,16 +197,17 @@ RAWAD_FORM_SCHEMA = {
             ]
         },
         {
-            "title": "Cash Purchase",
+            "title": "Credit",
             "type": "dynamic_list",
             "fields": [
                 {
-                    "key": "cash_purchase",
-                    "label": "Cash Purchase Entries",
+                    "key": "credit",
+                    "label": "Credit Entries",
                     "type": "dynamic_list",
                     "list_fields": [
                         {"key": "amount", "label": "Amount", "type": "number"},
                         {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
+                        {"key": "tag", "label": "Tag", "type": "select", "options": ["Cash purchase", "Credit invoices", "Employee OTH", "Customer OTH", "Bar OTH", "Store"]},
                         {"key": "name", "label": "Name", "type": "text"}
                     ]
                 },
@@ -217,22 +218,6 @@ RAWAD_FORM_SCHEMA = {
                     "required": False,
                     "readonly": True,
                     "calculated": True
-                }
-            ]
-        },
-        {
-            "title": "Credit Invoices",
-            "type": "dynamic_list",
-            "fields": [
-                {
-                    "key": "credit_invoices",
-                    "label": "Credit Invoice Entries",
-                    "type": "dynamic_list",
-                    "list_fields": [
-                        {"key": "amount", "label": "Amount", "type": "number"},
-                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
-                        {"key": "name", "label": "Name", "type": "text"}
-                    ]
                 },
                 {
                     "key": "credit_invoices_total",
@@ -241,98 +226,42 @@ RAWAD_FORM_SCHEMA = {
                     "required": False,
                     "readonly": True,
                     "calculated": True
-                }
-            ]
-        },
-        {
-            "title": "Employee On the House",
-            "type": "dynamic_list",
-            "fields": [
-                {
-                    "key": "employee_on_house",
-                    "label": "Employee On the House Entries",
-                    "type": "dynamic_list",
-                    "list_fields": [
-                        {"key": "amount", "label": "Amount", "type": "number"},
-                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
-                        {"key": "name", "label": "Name", "type": "text"}
-                    ]
                 },
                 {
-                    "key": "employee_on_house_total",
-                    "label": "Employee On the House Total",
+                    "key": "employee_oth_total",
+                    "label": "Employee OTH Total",
                     "type": "number",
                     "required": False,
                     "readonly": True,
                     "calculated": True
-                }
-            ]
-        },
-        {
-            "title": "Customer On the House",
-            "type": "dynamic_list",
-            "fields": [
-                {
-                    "key": "customer_on_house",
-                    "label": "Customer On the House Entries",
-                    "type": "dynamic_list",
-                    "list_fields": [
-                        {"key": "amount", "label": "Amount", "type": "number"},
-                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
-                        {"key": "name", "label": "Name", "type": "text"}
-                    ]
                 },
                 {
-                    "key": "customer_on_house_total",
-                    "label": "Customer On the House Total",
+                    "key": "customer_oth_total",
+                    "label": "Customer OTH Total",
                     "type": "number",
                     "required": False,
                     "readonly": True,
                     "calculated": True
-                }
-            ]
-        },
-        {
-            "title": "Bar On the House",
-            "type": "dynamic_list",
-            "fields": [
-                {
-                    "key": "bar_on_house",
-                    "label": "Bar On the House Entries",
-                    "type": "dynamic_list",
-                    "list_fields": [
-                        {"key": "amount", "label": "Amount", "type": "number"},
-                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
-                        {"key": "name", "label": "Name", "type": "text"}
-                    ]
                 },
                 {
-                    "key": "bar_on_house_total",
-                    "label": "Bar On the House Total",
+                    "key": "bar_oth_total",
+                    "label": "Bar OTH Total",
                     "type": "number",
                     "required": False,
                     "readonly": True,
                     "calculated": True
-                }
-            ]
-        },
-        {
-            "title": "Store",
-            "type": "dynamic_list",
-            "fields": [
-                {
-                    "key": "store",
-                    "label": "Store Entries",
-                    "type": "dynamic_list",
-                    "list_fields": [
-                        {"key": "amount", "label": "Amount", "type": "number"},
-                        {"key": "currency", "label": "Currency", "type": "select", "options": ["lebanese", "dollar"]},
-                        {"key": "name", "label": "Name", "type": "text"}
-                    ]
                 },
                 {
                     "key": "store_total",
                     "label": "Store Total",
+                    "type": "number",
+                    "required": False,
+                    "readonly": True,
+                    "calculated": True
+                },
+                {
+                    "key": "credit_grand_total",
+                    "label": "Credit Grand Total",
                     "type": "number",
                     "required": False,
                     "readonly": True,

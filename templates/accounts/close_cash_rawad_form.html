@@ -194,30 +194,70 @@ document.addEventListener('DOMContentLoaded', function() {
         entries.forEach((entry, index) => {
             const entryDiv = document.createElement('div');
             entryDiv.className = 'row mb-2 p-2 border rounded';
-            entryDiv.innerHTML = `
-                <div class="col-md-4">
-                    <label class="form-label">Amount</label>
-                    <input type="number" class="form-control" name="${sectionKey}[${index}][amount]" 
-                           value="${entry.amount || ''}" step="any" onchange="calculateSectionTotal('${sectionKey}')" />
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Currency</label>
-                    <select class="form-control" name="${sectionKey}[${index}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
-                        <option value="lebanese" ${entry.currency === 'lebanese' ? 'selected' : ''}>Lebanese</option>
-                        <option value="dollar" ${entry.currency === 'dollar' ? 'selected' : ''}>Dollar</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" name="${sectionKey}[${index}][name]" 
-                           value="${entry.name || ''}" />
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${index})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
+            
+            if (sectionKey === 'credit') {
+                entryDiv.innerHTML = `
+                    <div class="col-md-3">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-control" name="${sectionKey}[${index}][amount]" 
+                               value="${entry.amount || ''}" step="any" onchange="calculateSectionTotal('${sectionKey}')" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Currency</label>
+                        <select class="form-control" name="${sectionKey}[${index}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
+                            <option value="lebanese" ${entry.currency === 'lebanese' ? 'selected' : ''}>Lebanese</option>
+                            <option value="dollar" ${entry.currency === 'dollar' ? 'selected' : ''}>Dollar</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tag</label>
+                        <select class="form-control" name="${sectionKey}[${index}][tag]" onchange="calculateSectionTotal('${sectionKey}')">
+                            <option value="">Select Tag...</option>
+                            <option value="Cash purchase" ${entry.tag === 'Cash purchase' ? 'selected' : ''}>Cash purchase</option>
+                            <option value="Credit invoices" ${entry.tag === 'Credit invoices' ? 'selected' : ''}>Credit invoices</option>
+                            <option value="Employee OTH" ${entry.tag === 'Employee OTH' ? 'selected' : ''}>Employee OTH</option>
+                            <option value="Customer OTH" ${entry.tag === 'Customer OTH' ? 'selected' : ''}>Customer OTH</option>
+                            <option value="Bar OTH" ${entry.tag === 'Bar OTH' ? 'selected' : ''}>Bar OTH</option>
+                            <option value="Store" ${entry.tag === 'Store' ? 'selected' : ''}>Store</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="${sectionKey}[${index}][name]" 
+                               value="${entry.name || ''}" />
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                entryDiv.innerHTML = `
+                    <div class="col-md-4">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-control" name="${sectionKey}[${index}][amount]" 
+                               value="${entry.amount || ''}" step="any" onchange="calculateSectionTotal('${sectionKey}')" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Currency</label>
+                        <select class="form-control" name="${sectionKey}[${index}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
+                            <option value="lebanese" ${entry.currency === 'lebanese' ? 'selected' : ''}>Lebanese</option>
+                            <option value="dollar" ${entry.currency === 'dollar' ? 'selected' : ''}>Dollar</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="${sectionKey}[${index}][name]" 
+                               value="${entry.name || ''}" />
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }
             container.appendChild(entryDiv);
         });
         
@@ -230,29 +270,68 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const entryDiv = document.createElement('div');
         entryDiv.className = 'row mb-2 p-2 border rounded';
-        entryDiv.innerHTML = `
-            <div class="col-md-4">
-                <label class="form-label">Amount</label>
-                <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][amount]" 
-                       step="any" onchange="calculateSectionTotal('${sectionKey}')" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Currency</label>
-                <select class="form-control" name="${sectionKey}[${currentEntries}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
-                    <option value="lebanese">Lebanese</option>
-                    <option value="dollar">Dollar</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Name</label>
-                <input type="text" class="form-control" name="${sectionKey}[${currentEntries}][name]" />
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
-                <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${currentEntries})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
+        
+        if (sectionKey === 'credit') {
+            entryDiv.innerHTML = `
+                <div class="col-md-3">
+                    <label class="form-label">Amount</label>
+                    <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][amount]" 
+                           step="any" onchange="calculateSectionTotal('${sectionKey}')" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Currency</label>
+                    <select class="form-control" name="${sectionKey}[${currentEntries}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
+                        <option value="lebanese">Lebanese</option>
+                        <option value="dollar">Dollar</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tag</label>
+                    <select class="form-control" name="${sectionKey}[${currentEntries}][tag]" onchange="calculateSectionTotal('${sectionKey}')">
+                        <option value="">Select Tag...</option>
+                        <option value="Cash purchase">Cash purchase</option>
+                        <option value="Credit invoices">Credit invoices</option>
+                        <option value="Employee OTH">Employee OTH</option>
+                        <option value="Customer OTH">Customer OTH</option>
+                        <option value="Bar OTH">Bar OTH</option>
+                        <option value="Store">Store</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" name="${sectionKey}[${currentEntries}][name]" />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${currentEntries})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+        } else {
+            entryDiv.innerHTML = `
+                <div class="col-md-4">
+                    <label class="form-label">Amount</label>
+                    <input type="number" class="form-control" name="${sectionKey}[${currentEntries}][amount]" 
+                           step="any" onchange="calculateSectionTotal('${sectionKey}')" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Currency</label>
+                    <select class="form-control" name="${sectionKey}[${currentEntries}][currency]" onchange="calculateSectionTotal('${sectionKey}')">
+                        <option value="lebanese">Lebanese</option>
+                        <option value="dollar">Dollar</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" name="${sectionKey}[${currentEntries}][name]" />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeDynamicEntry('${sectionKey}', ${currentEntries})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+        }
         container.appendChild(entryDiv);
     }
 
@@ -289,25 +368,70 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function calculateSectionTotal(sectionKey) {
-        const entries = getDynamicListData(sectionKey);
-        let total = 0;
-        
-        entries.forEach(entry => {
-            if (entry.currency === 'dollar') {
-                // Convert dollar to LBP using dollar rate
-                const dollarRate = parseFloat(document.querySelector('input[name="dollar_rate"]')?.value) || 1;
-                total += (entry.amount || 0) * dollarRate;
-            } else {
-                total += entry.amount || 0;
+        if (sectionKey === 'credit') {
+            calculateCreditTotals();
+        } else {
+            const entries = getDynamicListData(sectionKey);
+            let total = 0;
+            
+            entries.forEach(entry => {
+                if (entry.currency === 'dollar') {
+                    // Convert dollar to LBP using dollar rate
+                    const dollarRate = parseFloat(document.querySelector('input[name="dollar_rate"]')?.value) || 1;
+                    total += (entry.amount || 0) * dollarRate;
+                } else {
+                    total += entry.amount || 0;
+                }
+            });
+            
+            const totalField = document.querySelector(`input[name="${sectionKey.replace('_', '_')}_total"]`);
+            if (totalField) {
+                totalField.value = total.toFixed(2);
             }
-        });
-        
-        const totalField = document.querySelector(`input[name="${sectionKey.replace('_', '_')}_total"]`);
-        if (totalField) {
-            totalField.value = total.toFixed(2);
         }
         
         calculateAllTotals();
+    }
+
+    function calculateCreditTotals() {
+        const entries = getDynamicListData('credit');
+        const tagTotals = {
+            'Cash purchase': 0,
+            'Credit invoices': 0,
+            'Employee OTH': 0,
+            'Customer OTH': 0,
+            'Bar OTH': 0,
+            'Store': 0
+        };
+        
+        entries.forEach(entry => {
+            let amount = entry.amount || 0;
+            if (entry.currency === 'dollar') {
+                // Convert dollar to LBP using dollar rate
+                const dollarRate = parseFloat(document.querySelector('input[name="dollar_rate"]')?.value) || 1;
+                amount = amount * dollarRate;
+            }
+            
+            if (entry.tag && tagTotals.hasOwnProperty(entry.tag)) {
+                tagTotals[entry.tag] += amount;
+            }
+        });
+        
+        // Update individual tag totals
+        Object.keys(tagTotals).forEach(tag => {
+            const fieldName = tag.toLowerCase().replace(' ', '_').replace('oth', 'oth');
+            const totalField = document.querySelector(`input[name="${fieldName}_total"]`);
+            if (totalField) {
+                totalField.value = tagTotals[tag].toFixed(2);
+            }
+        });
+        
+        // Calculate grand total
+        const grandTotal = Object.values(tagTotals).reduce((sum, total) => sum + total, 0);
+        const grandTotalField = document.querySelector('input[name="credit_grand_total"]');
+        if (grandTotalField) {
+            grandTotalField.value = grandTotal.toFixed(2);
+        }
     }
 
     function calculateAllTotals() {
@@ -346,19 +470,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('input[name="dollar_cash_total_usd"]').value = dollarTotal.toFixed(2);
         document.querySelector('input[name="dollar_cash_total_lbp"]').value = dollarInLBP.toFixed(2);
         
-        // Calculate all dynamic section totals
-        calculateSectionTotal('cash_purchase');
-        calculateSectionTotal('credit_invoices');
-        calculateSectionTotal('employee_on_house');
-        calculateSectionTotal('customer_on_house');
-        calculateSectionTotal('bar_on_house');
-        calculateSectionTotal('store');
+        // Calculate Credit section totals
+        calculateSectionTotal('credit');
         
         // Summary Results
         const cashInHandDollar = dollarInLBP;
         const cashInHandLebanese = lebaneseTotal;
         const cashOutOfHand = specialCreditTotal + 
-            (parseFloat(document.querySelector('input[name="credit_invoices_total"]')?.value) || 0);
+            (parseFloat(document.querySelector('input[name="credit_grand_total"]')?.value) || 0);
         const grandTotal = cashInHandDollar + cashInHandLebanese + cashOutOfHand;
         
         document.querySelector('input[name="cash_in_hand_dollar"]').value = cashInHandDollar.toFixed(2);
