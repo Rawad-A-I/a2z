@@ -92,11 +92,11 @@ urlpatterns = [
     # New: A to Z master editor (editable mirror)
     path('employee/close-cash/a2z/', a2z_master_editor, name='a2z_master_editor'),
 
-    # Rawad-only Close Cash Forms
-    path('employee/close-cash/rawad/', rawad_forms_dashboard, name='rawad_forms_dashboard'),
-    path('employee/close-cash/rawad/<str:sheet_name>/', rawad_edit_close_cash_form, name='rawad_edit_close_cash_form'),
-    path('employee/close-cash/rawad/<str:sheet_name>/submit/', rawad_submit_close_cash_form, name='rawad_submit_close_cash_form'),
-    path('employee/close-cash/rawad/export/', rawad_export_excel, name='rawad_export_excel'),
+    # Employee Close Cash Forms (all 4 employees)
+    path('employee/close-cash/forms/', employee_forms_dashboard, name='employee_forms_dashboard'),
+    path('employee/close-cash/forms/<str:sheet_name>/', employee_edit_close_cash_form, name='employee_edit_close_cash_form'),
+    path('employee/close-cash/forms/<str:sheet_name>/submit/', employee_submit_close_cash_form, name='employee_submit_close_cash_form'),
+    path('employee/close-cash/forms/export/', employee_export_excel, name='employee_export_excel'),
     
     # Inventory Management URLs
     path('inventory/dashboard/', inventory_dashboard, name='inventory_dashboard'),

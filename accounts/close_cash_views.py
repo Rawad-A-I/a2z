@@ -79,10 +79,10 @@ def close_cash_dashboard(request):
         messages.error(request, 'You do not have employee access.')
         return redirect('index')
 
-    # Show Rawad entrypoint for Rawad/admin, blank for others
+    # Show employee entrypoint for employees/admin, blank for others
     context = {}
-    if is_rawad_or_admin(request.user):
-        context['show_rawad_entry'] = True
+    if is_employee_or_admin(request.user):
+        context['show_employee_entry'] = True
     
     return render(request, 'accounts/close_cash_dashboard.html', context)
 
@@ -354,22 +354,23 @@ def a2z_master_editor(request):
 # Rawad-only Forms
 # =====================
 
-def is_rawad_or_admin(user):
-    """Check if user is Rawad (case-insensitive) or admin."""
-    return user.is_superuser or user.username.lower() == 'rawad'
+def is_employee_or_admin(user):
+    """Check if user is one of the 4 employees or admin."""
+    allowed_employees = ['rawad', 'hani', 'rayan', 'ahmad']
+    return user.is_superuser or user.username.lower() in allowed_employees
 
 
 @login_required
-def rawad_forms_dashboard(request):
-    """Rawad-only forms dashboard showing available submissions."""
-    if not is_rawad_or_admin(request.user):
+def employee_forms_dashboard(request):
+    """Employee forms dashboard showing available submissions."""
+    if not is_employee_or_admin(request.user):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
-    # Get existing entries from DB
+    # Get existing entries from DB for this user
     entries = CloseCashEntry.objects.filter(
         user=request.user, 
-        workbook__iexact='Rawad.xlsx'
+        workbook__iexact='Employee_Close_Cash.xlsx'
     ).order_by('-entry_date')
     
     # Group by entry date for display
@@ -383,16 +384,16 @@ def rawad_forms_dashboard(request):
     
     context = {
         'submissions': list(submissions_by_date.values()),
-        'workbook_name': 'Rawad.xlsx',
+        'workbook_name': 'Employee_Close_Cash.xlsx',
         'is_admin': request.user.is_superuser,
     }
-    return render(request, 'accounts/close_cash_rawad_dashboard.html', context)
+    return render(request, 'accounts/close_cash_employee_dashboard.html', context)
 
 
 @login_required
-def rawad_edit_close_cash_form(request, sheet_name):
-    """Edit Rawad form for specific date sheet."""
-    if not is_rawad_or_admin(request.user):
+def employee_edit_close_cash_form(request, sheet_name):
+    """Edit employee form for specific date sheet."""
+    if not is_employee_or_admin(request.user):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
@@ -407,7 +408,7 @@ def rawad_edit_close_cash_form(request, sheet_name):
         # Load existing entry from DB for prefill (if exists)
         entry = CloseCashEntry.objects.filter(
             user=request.user,
-            workbook__iexact='Rawad.xlsx',
+            workbook__iexact='Employee_Close_Cash.xlsx',
             sheet_name=sheet_name,
             source_version='v1'
         ).order_by('-created_at').first()
@@ -419,17 +420,17 @@ def rawad_edit_close_cash_form(request, sheet_name):
         'sheet_name': sheet_name,
         'schema': RAWAD_FORM_SCHEMA,
         'values': form_values,
-        'workbook_name': 'Rawad.xlsx',
+        'workbook_name': 'Employee_Close_Cash.xlsx',
     }
-    return render(request, 'accounts/close_cash_rawad_form.html', context)
+    return render(request, 'accounts/close_cash_employee_form.html', context)
 
 
 @login_required
 @require_POST
 @transaction.atomic
-def rawad_submit_close_cash_form(request, sheet_name):
-    """Submit Rawad form data."""
-    if not is_rawad_or_admin(request.user):
+def employee_submit_close_cash_form(request, sheet_name):
+    """Submit employee form data."""
+    if not is_employee_or_admin(request.user):
         return JsonResponse({'error': 'Access denied'}, status=403)
     
     try:
@@ -481,7 +482,7 @@ def rawad_submit_close_cash_form(request, sheet_name):
     try:
         entry, created = CloseCashEntry.objects.update_or_create(
             user=request.user,
-            workbook='Rawad.xlsx',
+            workbook='Employee_Close_Cash.xlsx',
             entry_date=entry_date_obj,  # Match on entry_date instead of sheet_name
             defaults={
                 'sheet_name': sheet_name,  # Update sheet_name to new format
@@ -497,10 +498,10 @@ def rawad_submit_close_cash_form(request, sheet_name):
 
 
 @login_required
-def rawad_export_excel(request):
-    """Admin-only export of Rawad submissions as Excel file."""
-    if not request.user.is_superuser:
-        messages.error(request, 'Only administrators can export Excel files.')
+def employee_export_excel(request):
+    """Export employee submissions as Excel file."""
+    if not is_employee_or_admin(request.user):
+        messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
     try:
@@ -508,14 +509,22 @@ def rawad_export_excel(request):
         from openpyxl.styles import Font, PatternFill, Alignment
         from .rawad_form_schema import RAWAD_FORM_SCHEMA
         
-        # Get all Rawad submissions from DB
-        entries = CloseCashEntry.objects.filter(
-            workbook__iexact='Rawad.xlsx'
-        ).order_by('entry_date')
+        # Get submissions from DB - user-specific or admin (all users)
+        if request.user.is_superuser:
+            # Admin can export all submissions
+            entries = CloseCashEntry.objects.filter(
+                workbook__iexact='Employee_Close_Cash.xlsx'
+            ).order_by('user__username', 'entry_date')
+        else:
+            # Employee can only export their own submissions
+            entries = CloseCashEntry.objects.filter(
+                user=request.user,
+                workbook__iexact='Employee_Close_Cash.xlsx'
+            ).order_by('entry_date')
         
         if not entries.exists():
             messages.error(request, 'No submissions found to export.')
-            return redirect('rawad_forms_dashboard')
+            return redirect('employee_forms_dashboard')
         
         # Create new workbook
         wb = Workbook()
@@ -529,8 +538,13 @@ def rawad_export_excel(request):
         
         # For each submission, create a sheet
         for entry in entries:
-            # Create sheet with date as name
-            sheet_name = entry.entry_date.strftime('%d-%m-%Y')
+            # Create sheet with date and user info
+            if request.user.is_superuser:
+                # Admin export: include username in sheet name
+                sheet_name = f"{entry.user.username}_{entry.entry_date.strftime('%d-%m-%Y')}"
+            else:
+                # Employee export: just date
+                sheet_name = entry.entry_date.strftime('%d-%m-%Y')
             ws = wb.create_sheet(title=sheet_name)
             
             row = 1
@@ -539,6 +553,11 @@ def rawad_export_excel(request):
             # General Section
             ws.cell(row, 1, "General").font = section_font
             row += 1
+            # Add user info for admin exports
+            if request.user.is_superuser:
+                ws.cell(row, 1, "Employee")
+                ws.cell(row, 2, entry.user.username)
+                row += 1
             ws.cell(row, 1, "Black Market Daily Rate")
             ws.cell(row, 2, data.get('black_market_daily_rate', ''))
             row += 1
@@ -694,12 +713,15 @@ def rawad_export_excel(request):
             output.getvalue(),
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = f'attachment; filename="Rawad_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        if request.user.is_superuser:
+            response['Content-Disposition'] = f'attachment; filename="All_Employees_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        else:
+            response['Content-Disposition'] = f'attachment; filename="{request.user.username}_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
         return response
         
     except Exception as e:
         messages.error(request, f'Error generating Excel: {str(e)}')
-        return redirect('rawad_forms_dashboard')
+        return redirect('employee_forms_dashboard')
 
 
 @login_required

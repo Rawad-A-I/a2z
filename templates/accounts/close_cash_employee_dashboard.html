@@ -1,0 +1,91 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Rawad Close Cash Forms{% endblock %}
+
+{% block start %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-file-alt text-warning me-2"></i>Rawad Close Cash Forms</h2>
+                    <p class="text-muted mb-0">Select a date to fill or review your submission</p>
+                </div>
+                <div>
+                    <a href="{% url 'close_cash_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Close Cash
+                    </a>
+                </div>
+            </div>
+
+            {% if is_admin %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-warning">
+                                <i class="fas fa-download me-2"></i>Admin Export
+                            </h5>
+                            <p class="card-text">Download the complete Rawad.xlsx file with all submissions</p>
+                            <a href="{% url 'employee_export_excel' %}" class="btn btn-warning">
+                                <i class="fas fa-file-excel me-2"></i>Export Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>Your Submissions</h4>
+                        <a href="{% url 'employee_edit_close_cash_form' 'new' %}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>New Submission
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if submissions %}
+            <div class="row">
+                {% for submission in submissions %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-calendar-day fa-2x text-warning"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1">{{ submission.entry_date|date:"M d, Y" }}</h5>
+                                    <p class="text-muted mb-0 small">
+                                        Last updated: {{ submission.updated_at|date:"M d, Y H:i" }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'employee_edit_close_cash_form' submission.sheet_name %}" class="btn btn-primary">
+                                    <i class="fas fa-edit me-2"></i>Edit Submission
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No submissions yet</h4>
+                <p class="text-muted">Create your first close cash submission to get started.</p>
+                <a href="{% url 'rawad_edit_close_cash_form' 'new' %}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Create First Submission
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
