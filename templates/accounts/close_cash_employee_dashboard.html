@@ -48,27 +48,43 @@
                 </div>
             </div>
 
-            {% if submissions %}
+            {% if submissions_by_date %}
             <div class="row">
-                {% for submission in submissions %}
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100 shadow-sm">
+                {% for date, submissions in submissions_by_date.items %}
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-day me-2"></i>{{ date|date:"M d, Y" }}
+                                <span class="badge bg-primary ms-2">{{ submissions|length }} submission{{ submissions|length|pluralize }}</span>
+                            </h5>
+                        </div>
                         <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="me-3">
-                                    <i class="fas fa-calendar-day fa-2x text-warning"></i>
+                            <div class="row">
+                                {% for submission in submissions %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100 border">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="me-2">
+                                                    <i class="fas fa-file-alt fa-lg text-warning"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="card-title mb-0">Submission {{ forloop.counter }}</h6>
+                                                    <small class="text-muted">
+                                                        Updated: {{ submission.updated_at|date:"H:i" }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="d-grid">
+                                                <a href="{% url 'employee_edit_close_cash_form' submission.sheet_name %}" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-edit me-1"></i>Edit
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h5 class="card-title mb-1">{{ submission.entry_date|date:"M d, Y" }}</h5>
-                                    <p class="text-muted mb-0 small">
-                                        Last updated: {{ submission.updated_at|date:"M d, Y H:i" }}
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <a href="{% url 'employee_edit_close_cash_form' submission.sheet_name %}" class="btn btn-primary">
-                                    <i class="fas fa-edit me-2"></i>Edit Submission
-                                </a>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>

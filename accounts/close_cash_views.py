@@ -370,19 +370,17 @@ def employee_forms_dashboard(request):
     entries = CloseCashEntry.objects.filter(
         user=request.user, 
         workbook__iexact='Employee_Close_Cash.xlsx'
-    ).order_by('-entry_date')
+    ).order_by('-entry_date', '-created_at')
     
-    # Group by entry date for display
-    submissions_by_date = {}
+    # Group by entry date for display, but keep all submissions per date
+    from collections import defaultdict
+    submissions_by_date = defaultdict(list)
     for entry in entries:
         date_key = entry.entry_date.strftime('%Y-%m-%d')
-        if date_key not in submissions_by_date:
-            # Ensure sheet_name matches the date format for display
-            entry.sheet_name = date_key
-            submissions_by_date[date_key] = entry
+        submissions_by_date[date_key].append(entry)
     
     context = {
-        'submissions': list(submissions_by_date.values()),
+        'submissions_by_date': dict(submissions_by_date),
         'workbook_name': 'Employee_Close_Cash.xlsx',
         'is_admin': request.user.is_superuser,
     }
@@ -451,19 +449,15 @@ def employee_submit_close_cash_form(request, sheet_name):
     else:
         entry_date_obj = timezone.now().date()
     
-    # If this is a new submission (sheet_name == 'new_submission'), use the entry_date as sheet_name
-    if sheet_name == 'new_submission':
-        sheet_name = entry_date_obj.strftime('%Y-%m-%d')
-    
-        # Clean up dynamic list data - remove empty entries
-        dynamic_list_keys = ['credit']
+    # Clean up dynamic list data - remove empty entries
+    dynamic_list_keys = ['credit']
 
-        for key in dynamic_list_keys:
-            if key in data and isinstance(data[key], list):
-                # Filter out empty entries
-                data[key] = [entry for entry in data[key] if entry and
-                            (entry.get('amount') or entry.get('name'))]
-    
+    for key in dynamic_list_keys:
+        if key in data and isinstance(data[key], list):
+            # Filter out empty entries
+            data[key] = [entry for entry in data[key] if entry and
+                        (entry.get('amount') or entry.get('name'))]
+
     # Validate required calculations are present
     calculated_fields = [
         'special_credit_total', 'lebanese_cash_total', 'dollar_cash_total_usd', 
@@ -477,21 +471,51 @@ def employee_submit_close_cash_form(request, sheet_name):
         if field not in data:
             data[field] = 0
     
-    # Persist DB entry - Update if exists (match on entry_date), create if new
+    # Handle new vs existing submissions
     try:
-        entry, created = CloseCashEntry.objects.update_or_create(
-            user=request.user,
-            workbook='Employee_Close_Cash.xlsx',
-            entry_date=entry_date_obj,  # Match on entry_date instead of sheet_name
-            defaults={
-                'sheet_name': sheet_name,  # Update sheet_name to new format
-                'data_json': data,
-                'source_version': 'v1',
-            }
-        )
+        if sheet_name == 'new_submission' or sheet_name == 'new':
+            # New submission - generate unique ID
+            import uuid
+            sheet_name = f"{entry_date_obj.strftime('%Y-%m-%d')}_{uuid.uuid4().hex[:8]}"
+            
+            entry = CloseCashEntry.objects.create(
+                user=request.user,
+                workbook='Employee_Close_Cash.xlsx',
+                entry_date=entry_date_obj,
+                sheet_name=sheet_name,
+                data_json=data,
+                source_version='v1',
+            )
+            created = True
+        else:
+            # Edit existing - find by sheet_name
+            entry = CloseCashEntry.objects.get(
+                user=request.user,
+                workbook='Employee_Close_Cash.xlsx',
+                sheet_name=sheet_name
+            )
+            entry.entry_date = entry_date_obj
+            entry.data_json = data
+            entry.save()
+            created = False
         
         action = 'created' if created else 'updated'
-        return JsonResponse({'success': True, 'message': f'Form {action} successfully'})
+        
+        # Return sheet_name and redirect URL for new submissions
+        if created:
+            from django.urls import reverse
+            redirect_url = reverse('employee_edit_close_cash_form', args=[sheet_name])
+            return JsonResponse({
+                'success': True, 
+                'message': f'Form {action} successfully',
+                'sheet_name': sheet_name,
+                'redirect_url': redirect_url
+            })
+        else:
+            return JsonResponse({'success': True, 'message': f'Form {action} successfully'})
+            
+    except CloseCashEntry.DoesNotExist:
+        return JsonResponse({'error': 'Submission not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Database error: {str(e)}'}, status=500)
 

@@ -620,6 +620,12 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => {
             if (res.success) {
                 showStatus('success', '<i class="fas fa-check me-2"></i>Saved successfully');
+                // If new submission, redirect to edit page with new sheet_name
+                if (res.redirect_url) {
+                    setTimeout(() => {
+                        window.location.href = res.redirect_url;
+                    }, 1000);
+                }
             } else if (res.warning) {
                 showStatus('warning', res.warning);
             } else {
