@@ -596,6 +596,246 @@ def employee_submit_close_cash_form(request, sheet_name):
         return JsonResponse({'error': f'Database error: {str(e)}'}, status=500)
 
 
+@login_required
+def employee_export_excel(request):
+    """Export employee submissions as Excel file - each submission as separate sheet."""
+    if not is_employee_or_admin(request.user):
+        messages.error(request, 'You do not have access to this page.')
+        return redirect('index')
+    
+    try:
+        from openpyxl import Workbook
+        from django.contrib.auth.models import User
+        from django.utils import timezone
+        from io import BytesIO
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        logger.info(f"Export request from user: {request.user.username}")
+        
+        # Determine which user's data to export
+        username = request.GET.get('username', None)
+        
+        if username and request.user.is_superuser:
+            # Admin exporting specific employee's data
+            try:
+                export_user = User.objects.get(username=username)
+                logger.info(f"Admin exporting data for: {export_user.username}")
+            except User.DoesNotExist:
+                messages.error(request, f'User {username} not found.')
+                return redirect('employee_forms_dashboard')
+        else:
+            # Export logged-in user's own data
+            export_user = request.user
+            logger.info(f"User exporting their own data: {export_user.username}")
+        
+        # Get submissions for the specific user
+        entries = CloseCashEntry.objects.filter(
+            user=export_user,
+            workbook__iexact='Employee_Close_Cash.xlsx'
+        ).order_by('entry_date')
+        
+        logger.info(f"Found {entries.count()} entries for user {export_user.username}")
+        
+        if not entries.exists():
+            messages.error(request, f'No submissions found for {export_user.username}.')
+            return redirect('employee_forms_dashboard')
+        
+        # Create new workbook
+        wb = Workbook()
+        wb.remove(wb.active)  # Remove default sheet
+        
+        # Process each submission
+        for entry in entries:
+            try:
+                # Create sheet with date only
+                sheet_name = entry.entry_date.strftime('%d-%m-%Y')
+                ws = wb.create_sheet(title=sheet_name)
+                
+                data = entry.data_json
+                logger.info(f"Processing entry for date: {sheet_name}")
+                
+                # Handle both old flat structure and new nested structure
+                if 'general' in data:
+                    # New nested structure
+                    general_data = data.get('general', {})
+                    lebanese_cash_data = data.get('lebanese_cash', {})
+                    dollar_cash_data = data.get('dollar_cash', {})
+                    special_credit_data = data.get('special_credit', {})
+                else:
+                    # Old flat structure
+                    general_data = data
+                    lebanese_cash_data = data
+                    dollar_cash_data = data
+                    special_credit_data = data
+                
+                row = 1
+                
+                # General Section - just the items, no header
+                ws.cell(row, 1, "Black Market Daily Rate")
+                ws.cell(row, 2, general_data.get('black_market_daily_rate', ''))
+                row += 1
+                ws.cell(row, 1, "Cashier Name")
+                ws.cell(row, 2, general_data.get('cashier_name', ''))
+                row += 1
+                ws.cell(row, 1, "Date")
+                ws.cell(row, 2, general_data.get('date', ''))
+                row += 1
+                ws.cell(row, 1, "Shift Time")
+                ws.cell(row, 2, general_data.get('shift_time', ''))
+                row += 2
+                
+                # Lebanese Cash Section - just the items
+                lbp_bills = [
+                    ('5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
+                    ('10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
+                    ('20,000', lebanese_cash_data.get('lebanese_20000_qty', 0), 20000),
+                    ('50,000', lebanese_cash_data.get('lebanese_50000_qty', 0), 50000),
+                    ('100,000', lebanese_cash_data.get('lebanese_100000_qty', 0), 100000),
+                ]
+                
+                lbp_total = 0
+                for bill_label, qty, denomination in lbp_bills:
+                    ws.cell(row, 1, bill_label)
+                    bill_value = qty * denomination
+                    ws.cell(row, 2, bill_value)
+                    lbp_total += bill_value
+                    row += 1
+                
+                # Lebanese Cash Total
+                ws.cell(row, 1, "Lebanese Cash Total")
+                ws.cell(row, 2, lbp_total)
+                row += 2
+                
+                # Dollar Cash Section - just the items
+                dollar_bills = [
+                    ('1', dollar_cash_data.get('dollar_1_qty', 0), 1),
+                    ('5', dollar_cash_data.get('dollar_5_qty', 0), 5),
+                    ('10', dollar_cash_data.get('dollar_10_qty', 0), 10),
+                    ('20', dollar_cash_data.get('dollar_20_qty', 0), 20),
+                    ('50', dollar_cash_data.get('dollar_50_qty', 0), 50),
+                    ('100', dollar_cash_data.get('dollar_100_qty', 0), 100),
+                ]
+                
+                dollar_total_usd = 0
+                for bill_label, qty, denomination in dollar_bills:
+                    ws.cell(row, 1, f"Dollar {bill_label}")
+                    bill_value = qty * denomination
+                    ws.cell(row, 2, bill_value)
+                    dollar_total_usd += bill_value
+                    row += 1
+                
+                # Dollar Cash Rate and Totals
+                dollar_rate = dollar_cash_data.get('dollar_rate', 0)
+                ws.cell(row, 1, "Dollar Rate")
+                ws.cell(row, 2, dollar_rate)
+                row += 1
+                ws.cell(row, 1, "Dollar Total USD")
+                ws.cell(row, 2, dollar_total_usd)
+                row += 1
+                ws.cell(row, 1, "Dollar Total LBP")
+                ws.cell(row, 2, dollar_total_usd * dollar_rate)
+                row += 2
+                
+                # Special Credit Section - just the items
+                special_credit_items = [
+                    ('Rayan Invoices Credit', special_credit_data.get('rayan_invoices_credit', '')),
+                    ('Employee Invoice Credit', special_credit_data.get('employee_invoice_credit', '')),
+                    ('Delivery Shabeb co.', special_credit_data.get('delivery_shabeb_co', '')),
+                    ('Delivery Employee', special_credit_data.get('delivery_employee', '')),
+                    ('Waste Goods', special_credit_data.get('waste_goods', '')),
+                ]
+                
+                for label, value in special_credit_items:
+                    ws.cell(row, 1, label)
+                    ws.cell(row, 2, value)
+                    row += 1
+                
+                # Special Credit Total
+                ws.cell(row, 1, "Special Credit Total")
+                ws.cell(row, 2, data.get('special_credit_total', ''))
+                row += 2
+                
+                # Credit Section - just the items
+                credit_entries = data.get('credit', [])
+                if credit_entries:
+                    for entry_item in credit_entries:
+                        ws.cell(row, 1, f"Credit: {entry_item.get('name', '')}")
+                        ws.cell(row, 2, f"{entry_item.get('amount', '')} {entry_item.get('currency', '')}")
+                        if entry_item.get('tag'):
+                            ws.cell(row, 3, entry_item.get('tag'))
+                        row += 1
+                
+                # Credit Subtotals
+                tag_totals = [
+                    ('Cash Purchase Total', data.get('cash_purchase_total', '')),
+                    ('Credit Invoices Total', data.get('credit_invoices_total', '')),
+                    ('Employee OTH Total', data.get('employee_oth_total', '')),
+                    ('Customer OTH Total', data.get('customer_oth_total', '')),
+                    ('Bar OTH Total', data.get('bar_oth_total', '')),
+                    ('Store Total', data.get('store_total', '')),
+                ]
+                
+                for total_label, total_value in tag_totals:
+                    ws.cell(row, 1, total_label)
+                    ws.cell(row, 2, total_value)
+                    row += 1
+                
+                # Credit Grand Total
+                ws.cell(row, 1, "Credit Grand Total")
+                ws.cell(row, 2, data.get('credit_grand_total', ''))
+                row += 2
+                
+                # Coffee Machine Section - just the items
+                coffee_items = data.get('coffee_machine', [])
+                if coffee_items:
+                    for item in coffee_items:
+                        if item.get('tag'):  # Only show non-empty entries
+                            ws.cell(row, 1, f"Coffee: {item.get('tag', '')}")
+                            ws.cell(row, 2, f"Current: {item.get('current_amount', '')}, Daily: {item.get('daily_add', '')}")
+                            row += 1
+                
+                # Summary Results - just the items
+                summary_fields = [
+                    ('Cash in Hand (Dollar)', data.get('cash_in_hand_dollar', '')),
+                    ('Cash in Hand (Lebanese)', data.get('cash_in_hand_lebanese', '')),
+                    ('Cash Out of Hand', data.get('cash_out_of_hand', '')),
+                    ('Grand Total', data.get('grand_total', ''))
+                ]
+                
+                for key, label in summary_fields:
+                    ws.cell(row, 1, label)
+                    ws.cell(row, 2, data.get(key, ''))
+                    row += 1
+                
+            except Exception as sheet_error:
+                logger.error(f"Error processing sheet {sheet_name}: {str(sheet_error)}")
+                import traceback
+                logger.error(f"Sheet traceback: {traceback.format_exc()}")
+                continue
+        
+        # Convert to bytes
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Return as download with username-based filename
+        response = HttpResponse(
+            output.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{export_user.username}_Close_Cash_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        logger.info(f"Successfully generated Excel file for {export_user.username}")
+        return response
+        
+    except Exception as e:
+        import traceback
+        logger.error(f'Error generating Excel: {str(e)}')
+        logger.error(f'Traceback: {traceback.format_exc()}')
+        messages.error(request, f'Error generating Excel: {str(e)}')
+        return redirect('employee_forms_dashboard')
+
+
 
 
 

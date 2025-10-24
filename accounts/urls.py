@@ -89,6 +89,7 @@ urlpatterns = [
 
     # Employee Close Cash Forms (all 4 employees)
     path('employee/close-cash/forms/', employee_forms_dashboard, name='employee_forms_dashboard'),
+    path('employee/close-cash/export-excel/', employee_export_excel, name='employee_export_excel'),
     path('employee/close-cash/forms/<str:sheet_name>/delete/', employee_delete_submission, name='employee_delete_submission'),
     path('employee/close-cash/forms/<str:sheet_name>/', employee_edit_close_cash_form, name='employee_edit_close_cash_form'),
     path('employee/close-cash/forms/<str:sheet_name>/submit/', employee_submit_close_cash_form, name='employee_submit_close_cash_form'),
