@@ -193,6 +193,8 @@ class CreditEntryForm(forms.Form):
             ('Employee OTH', 'Employee OTH'),
             ('Customer OTH', 'Customer OTH'),
             ('Bar OTH', 'Bar OTH'),
+            ('Bar', 'Bar'),
+            ('Coffee Machine', 'Coffee Machine'),
             ('Store', 'Store'),
         ],
         required=False,

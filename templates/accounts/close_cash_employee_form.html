@@ -408,6 +408,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <option value="Employee OTH">Employee OTH</option>
                         <option value="Customer OTH">Customer OTH</option>
                         <option value="Bar OTH">Bar OTH</option>
+                        <option value="Bar">Bar</option>
+                        <option value="Coffee Machine">Coffee Machine</option>
                         <option value="Store">Store</option>
                     </select>
                 </div>
@@ -575,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Credit totals by tag
         let cashPurchaseTotal = 0, creditInvoicesTotal = 0, employeeOthTotal = 0;
-        let customerOthTotal = 0, barOthTotal = 0, storeTotal = 0;
+        let customerOthTotal = 0, barOthTotal = 0, barTotal = 0, coffeeMachineTotal = 0, storeTotal = 0;
         
         data.credit.forEach(entry => {
             const amount = parseFloat(entry.amount) || 0;
@@ -585,6 +587,8 @@ document.addEventListener('DOMContentLoaded', function() {
             else if (tag === 'Employee OTH') employeeOthTotal += amount;
             else if (tag === 'Customer OTH') customerOthTotal += amount;
             else if (tag === 'Bar OTH') barOthTotal += amount;
+            else if (tag === 'Bar') barTotal += amount;
+            else if (tag === 'Coffee Machine') coffeeMachineTotal += amount;
             else if (tag === 'Store') storeTotal += amount;
         });
         
@@ -593,9 +597,11 @@ document.addEventListener('DOMContentLoaded', function() {
         data.employee_oth_total = employeeOthTotal;
         data.customer_oth_total = customerOthTotal;
         data.bar_oth_total = barOthTotal;
+        data.bar_total = barTotal;
+        data.coffee_machine_total = coffeeMachineTotal;
         data.store_total = storeTotal;
         data.credit_grand_total = cashPurchaseTotal + creditInvoicesTotal + employeeOthTotal + 
-                                   customerOthTotal + barOthTotal + storeTotal;
+                                   customerOthTotal + barOthTotal + barTotal + coffeeMachineTotal + storeTotal;
         
         // Summary Results
         data.cash_in_hand_dollar = data.dollar_cash_total_lbp;
