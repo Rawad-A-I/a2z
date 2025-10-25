@@ -598,13 +598,15 @@ def employee_submit_close_cash_form(request, sheet_name):
 
 @login_required
 def employee_export_excel(request):
-    """Export employee submissions as Excel file - each submission as separate sheet."""
+    """Export employee submissions as Excel file matching General_close_cash.xlsx format exactly."""
     if not is_employee_or_admin(request.user):
         messages.error(request, 'You do not have access to this page.')
         return redirect('index')
     
     try:
         from openpyxl import Workbook
+        from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+        from openpyxl.utils import get_column_letter
         from django.contrib.auth.models import User
         from django.utils import timezone
         from io import BytesIO
@@ -669,144 +671,174 @@ def employee_export_excel(request):
                     dollar_cash_data = data
                     special_credit_data = data
                 
-                row = 1
+                # === SECTION 1: General Info + Lebanese/Dollar Cash (Rows 2-11) ===
                 
-                # General Section - just the items, no header
-                ws.cell(row, 1, "Black Market Daily Rate")
-                ws.cell(row, 2, general_data.get('black_market_daily_rate', ''))
-                row += 1
-                ws.cell(row, 1, "Cashier Name")
-                ws.cell(row, 2, general_data.get('cashier_name', ''))
-                row += 1
-                ws.cell(row, 1, "Date")
-                ws.cell(row, 2, general_data.get('date', ''))
-                row += 1
-                ws.cell(row, 1, "Shift Time")
-                ws.cell(row, 2, general_data.get('shift_time', ''))
-                row += 2
+                # General Info (A2-B11)
+                ws['A2'] = "Cashier Name"
+                ws['A3'] = general_data.get('cashier_name', '')
+                ws['A4'] = "Date"
+                ws['A5'] = general_data.get('date', '')
+                ws['A7'] = "Cashier"
+                ws['B7'] = general_data.get('cashier_name', '')
+                ws['A8'] = "Date"
+                ws['B8'] = general_data.get('date', '')
+                ws['A9'] = "Shift"
+                ws['B9'] = general_data.get('shift_time', '')
                 
-                # Lebanese Cash Section - just the items
+                # Lebanese Cash Headers (D2-H2)
+                ws['D2'] = "Denomination"
+                ws['E2'] = "#"
+                ws['F2'] = "Value"
+                ws['G2'] = "Dollar"
+                ws['H2'] = "#"
+                ws['I2'] = "Value"
+                
+                # Lebanese Cash Data (D3-G8)
                 lbp_bills = [
-                    ('5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
-                    ('10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
-                    ('20,000', lebanese_cash_data.get('lebanese_20000_qty', 0), 20000),
-                    ('50,000', lebanese_cash_data.get('lebanese_50000_qty', 0), 50000),
-                    ('100,000', lebanese_cash_data.get('lebanese_100000_qty', 0), 100000),
+                    (3, '5,000', lebanese_cash_data.get('lebanese_5000_qty', 0), 5000),
+                    (4, '10,000', lebanese_cash_data.get('lebanese_10000_qty', 0), 10000),
+                    (5, '20,000', lebanese_cash_data.get('lebanese_20000_qty', 0), 20000),
+                    (6, '50,000', lebanese_cash_data.get('lebanese_50000_qty', 0), 50000),
+                    (7, '100,000', lebanese_cash_data.get('lebanese_100000_qty', 0), 100000),
                 ]
                 
-                lbp_total = 0
-                for bill_label, qty, denomination in lbp_bills:
-                    ws.cell(row, 1, bill_label)
-                    bill_value = qty * denomination
-                    ws.cell(row, 2, bill_value)
-                    lbp_total += bill_value
-                    row += 1
+                for row_num, label, qty, denomination in lbp_bills:
+                    ws[f'D{row_num}'] = label
+                    ws[f'F{row_num}'] = qty
+                    ws[f'G{row_num}'] = f"=F{row_num}*{denomination}"
                 
-                # Lebanese Cash Total
-                ws.cell(row, 1, "Lebanese Cash Total")
-                ws.cell(row, 2, lbp_total)
-                row += 2
+                # Lebanese Total (D9-F9)
+                ws['D9'] = "Total"
+                ws['F9'] = f"=SUM(G3:G7)"
                 
-                # Dollar Cash Section - just the items
+                # Dollar Cash Data (H3-J8)
                 dollar_bills = [
-                    ('1', dollar_cash_data.get('dollar_1_qty', 0), 1),
-                    ('5', dollar_cash_data.get('dollar_5_qty', 0), 5),
-                    ('10', dollar_cash_data.get('dollar_10_qty', 0), 10),
-                    ('20', dollar_cash_data.get('dollar_20_qty', 0), 20),
-                    ('50', dollar_cash_data.get('dollar_50_qty', 0), 50),
-                    ('100', dollar_cash_data.get('dollar_100_qty', 0), 100),
+                    (3, '1', dollar_cash_data.get('dollar_1_qty', 0), 1),
+                    (4, '5', dollar_cash_data.get('dollar_5_qty', 0), 5),
+                    (5, '10', dollar_cash_data.get('dollar_10_qty', 0), 10),
+                    (6, '20', dollar_cash_data.get('dollar_20_qty', 0), 20),
+                    (7, '50', dollar_cash_data.get('dollar_50_qty', 0), 50),
+                    (8, '100', dollar_cash_data.get('dollar_100_qty', 0), 100),
                 ]
                 
-                dollar_total_usd = 0
-                for bill_label, qty, denomination in dollar_bills:
-                    ws.cell(row, 1, f"Dollar {bill_label}")
-                    bill_value = qty * denomination
-                    ws.cell(row, 2, bill_value)
-                    dollar_total_usd += bill_value
-                    row += 1
+                for row_num, label, qty, denomination in dollar_bills:
+                    ws[f'H{row_num}'] = f"${label}"
+                    ws[f'I{row_num}'] = qty
+                    ws[f'J{row_num}'] = f"=I{row_num}*{denomination}"
                 
-                # Dollar Cash Rate and Totals
+                # Dollar Totals (H9-J10)
+                ws['H9'] = "Total USD"
+                ws['I9'] = f"=SUM(J3:J8)"
+                ws['H10'] = "Total LBP"
                 dollar_rate = dollar_cash_data.get('dollar_rate', 0)
-                ws.cell(row, 1, "Dollar Rate")
-                ws.cell(row, 2, dollar_rate)
-                row += 1
-                ws.cell(row, 1, "Dollar Total USD")
-                ws.cell(row, 2, dollar_total_usd)
-                row += 1
-                ws.cell(row, 1, "Dollar Total LBP")
-                ws.cell(row, 2, dollar_total_usd * dollar_rate)
-                row += 2
+                ws['I10'] = f"=I9*{dollar_rate}"
                 
-                # Special Credit Section - just the items
+                # Special Credit (L4-M11)
                 special_credit_items = [
-                    ('Rayan Invoices Credit', special_credit_data.get('rayan_invoices_credit', '')),
-                    ('Employee Invoice Credit', special_credit_data.get('employee_invoice_credit', '')),
-                    ('Delivery Shabeb co.', special_credit_data.get('delivery_shabeb_co', '')),
-                    ('Delivery Employee', special_credit_data.get('delivery_employee', '')),
-                    ('Waste Goods', special_credit_data.get('waste_goods', '')),
+                    (4, 'Rayan Invoices Credit', special_credit_data.get('rayan_invoices_credit', '')),
+                    (5, 'Employee Invoice Credit', special_credit_data.get('employee_invoice_credit', '')),
+                    (6, 'Delivery Shabeb co.', special_credit_data.get('delivery_shabeb_co', '')),
+                    (7, 'Delivery Employee', special_credit_data.get('delivery_employee', '')),
+                    (8, 'Waste Goods', special_credit_data.get('waste_goods', '')),
                 ]
                 
-                for label, value in special_credit_items:
-                    ws.cell(row, 1, label)
-                    ws.cell(row, 2, value)
-                    row += 1
+                for row_num, label, value in special_credit_items:
+                    ws[f'L{row_num}'] = label
+                    ws[f'M{row_num}'] = value
                 
-                # Special Credit Total
-                ws.cell(row, 1, "Special Credit Total")
-                ws.cell(row, 2, data.get('special_credit_total', ''))
-                row += 2
+                # === SECTION 2: Credit Section (Rows 12-25) ===
                 
-                # Credit Section - just the items
+                # Credit Headers (A12-I12)
+                ws['A12'] = "Credit Entries"
+                ws['D12'] = "Cash Purchase"
+                ws['E12'] = "Credit Invoices"
+                ws['F12'] = "Employee OTH"
+                ws['G12'] = "Customer OTH"
+                ws['H12'] = "Bar OTH"
+                ws['I12'] = "Store"
+                
+                # Credit entries (A13-B24)
                 credit_entries = data.get('credit', [])
-                if credit_entries:
-                    for entry_item in credit_entries:
-                        ws.cell(row, 1, f"Credit: {entry_item.get('name', '')}")
-                        ws.cell(row, 2, f"{entry_item.get('amount', '')} {entry_item.get('currency', '')}")
-                        if entry_item.get('tag'):
-                            ws.cell(row, 3, entry_item.get('tag'))
-                        row += 1
+                for i, entry_item in enumerate(credit_entries[:12]):  # Limit to 12 entries
+                    row_num = 13 + i
+                    ws[f'A{row_num}'] = entry_item.get('name', '')
+                    ws[f'B{row_num}'] = f"{entry_item.get('amount', '')} {entry_item.get('currency', '')}"
+                    
+                    # Place in appropriate column based on tag
+                    tag = entry_item.get('tag', '')
+                    amount = entry_item.get('amount', 0)
+                    if tag == 'Cash purchase':
+                        ws[f'D{row_num}'] = amount
+                    elif tag == 'Credit invoices':
+                        ws[f'E{row_num}'] = amount
+                    elif tag == 'Employee OTH':
+                        ws[f'F{row_num}'] = amount
+                    elif tag == 'Customer OTH':
+                        ws[f'G{row_num}'] = amount
+                    elif tag == 'Bar OTH':
+                        ws[f'H{row_num}'] = amount
+                    elif tag == 'Store':
+                        ws[f'I{row_num}'] = amount
                 
-                # Credit Subtotals
-                tag_totals = [
-                    ('Cash Purchase Total', data.get('cash_purchase_total', '')),
-                    ('Credit Invoices Total', data.get('credit_invoices_total', '')),
-                    ('Employee OTH Total', data.get('employee_oth_total', '')),
-                    ('Customer OTH Total', data.get('customer_oth_total', '')),
-                    ('Bar OTH Total', data.get('bar_oth_total', '')),
-                    ('Store Total', data.get('store_total', '')),
-                ]
+                # Credit Totals (A24-B24)
+                ws['A24'] = "Credit Total"
+                ws['B24'] = data.get('credit_grand_total', '')
                 
-                for total_label, total_value in tag_totals:
-                    ws.cell(row, 1, total_label)
-                    ws.cell(row, 2, total_value)
-                    row += 1
+                # Category Totals (C25-I25)
+                ws['C25'] = "Totals"
+                ws['D25'] = f"=SUM(D13:D24)"
+                ws['E25'] = f"=SUM(E13:E24)"
+                ws['F25'] = f"=SUM(F13:F24)"
+                ws['G25'] = f"=SUM(G13:G24)"
+                ws['H25'] = f"=SUM(H13:H24)"
+                ws['I25'] = f"=SUM(I13:I24)"
                 
-                # Credit Grand Total
-                ws.cell(row, 1, "Credit Grand Total")
-                ws.cell(row, 2, data.get('credit_grand_total', ''))
-                row += 2
+                # === SECTION 3: Summary (Rows 26-31) ===
                 
-                # Coffee Machine Section - just the items
+                # Cash in Hand (A26-B28)
+                ws['A26'] = "Cash in Hand (Dollar)"
+                ws['B26'] = data.get('cash_in_hand_dollar', '')
+                ws['A27'] = "Cash in Hand (Lebanese)"
+                ws['B27'] = data.get('cash_in_hand_lebanese', '')
+                ws['A28'] = "Cash Out of Hand"
+                ws['B28'] = data.get('cash_out_of_hand', '')
+                
+                # Grand Total (A29-B29)
+                ws['A29'] = "Grand Total"
+                ws['B29'] = data.get('grand_total', '')
+                
+                # Additional Special Credit (D27-I31)
+                ws['D27'] = "Special Credit Total"
+                ws['E27'] = data.get('special_credit_total', '')
+                
+                # === SECTION 4: Coffee Machine (Rows 36-72) ===
+                
+                # Coffee Machine Headers (A36-E36)
+                ws['A36'] = "Coffee Machine Items"
+                ws['E36'] = "Coffee Machine Items"
+                
+                # Coffee Machine entries (A40-E66)
                 coffee_items = data.get('coffee_machine', [])
-                if coffee_items:
-                    for item in coffee_items:
-                        if item.get('tag'):  # Only show non-empty entries
-                            ws.cell(row, 1, f"Coffee: {item.get('tag', '')}")
-                            ws.cell(row, 2, f"Current: {item.get('current_amount', '')}, Daily: {item.get('daily_add', '')}")
-                            row += 1
+                for i, item in enumerate(coffee_items[:27]):  # Limit to 27 items
+                    row_num = 40 + i
+                    if item.get('tag'):  # Only show non-empty entries
+                        ws[f'A{row_num}'] = item.get('tag', '')
+                        ws[f'B{row_num}'] = f"Current: {item.get('current_amount', '')}"
+                        ws[f'C{row_num}'] = f"Daily: {item.get('daily_add', '')}"
+                        ws[f'E{row_num}'] = item.get('tag', '')
+                        ws[f'F{row_num}'] = f"Current: {item.get('current_amount', '')}"
+                        ws[f'G{row_num}'] = f"Daily: {item.get('daily_add', '')}"
                 
-                # Summary Results - just the items
-                summary_fields = [
-                    ('Cash in Hand (Dollar)', data.get('cash_in_hand_dollar', '')),
-                    ('Cash in Hand (Lebanese)', data.get('cash_in_hand_lebanese', '')),
-                    ('Cash Out of Hand', data.get('cash_out_of_hand', '')),
-                    ('Grand Total', data.get('grand_total', ''))
-                ]
+                # Coffee Totals (A67-C67, E72-G72)
+                ws['A67'] = "Coffee Total"
+                ws['B67'] = "Total"
+                ws['C67'] = "Total"
+                ws['E72'] = "Coffee Total"
+                ws['F72'] = "Total"
+                ws['G72'] = "Total"
                 
-                for key, label in summary_fields:
-                    ws.cell(row, 1, label)
-                    ws.cell(row, 2, data.get(key, ''))
-                    row += 1
+                # Apply formatting
+                _apply_excel_formatting(ws)
                 
             except Exception as sheet_error:
                 logger.error(f"Error processing sheet {sheet_name}: {str(sheet_error)}")
@@ -834,6 +866,33 @@ def employee_export_excel(request):
         logger.error(f'Traceback: {traceback.format_exc()}')
         messages.error(request, f'Error generating Excel: {str(e)}')
         return redirect('employee_forms_dashboard')
+
+def _apply_excel_formatting(ws):
+    """Apply formatting to match General_close_cash.xlsx style."""
+    from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+    
+    # Define styles
+    header_font = Font(bold=True)
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Apply headers formatting
+    for row in range(2, 12):
+        for col in range(1, 15):
+            cell = ws.cell(row=row, column=col)
+            if cell.value and isinstance(cell.value, str) and any(keyword in str(cell.value).lower() for keyword in ['denomination', 'total', 'cashier', 'date', 'shift']):
+                cell.font = header_font
+    
+    # Apply borders to data areas
+    for row in range(2, 75):
+        for col in range(1, 15):
+            cell = ws.cell(row=row, column=col)
+            if cell.value:
+                cell.border = border
 
 
 
