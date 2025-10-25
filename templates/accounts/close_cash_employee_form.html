@@ -32,7 +32,7 @@
                             <button class="accordion-button" type="button" data-bs-toggle="collapse" 
                                     data-bs-target="#collapse-general" aria-expanded="true" aria-controls="collapse-general">
                                 <i class="fas fa-folder me-2"></i>General
-                            </button>
+                        </button>
                         </h2>
                         <div id="collapse-general" class="accordion-collapse collapse show" 
                              aria-labelledby="heading-general" data-bs-parent="#formSections">
@@ -45,8 +45,8 @@
                                     <div class="col-md-6">
                                         {{ general_form.cashier_name.label_tag }}
                                         {{ general_form.cashier_name }}
-                                    </div>
-                                </div>
+                    </div>
+                </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         {{ general_form.date.label_tag }}
@@ -55,14 +55,14 @@
                                     <div class="col-md-6">
                                         {{ general_form.shift_time.label_tag }}
                                         {{ general_form.shift_time }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                     <!-- Lebanese Cash Section -->
-                    <div class="accordion-item">
+            <div class="accordion-item">
                         <h2 class="accordion-header" id="heading-lebanese">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
                                     data-bs-target="#collapse-lebanese" aria-expanded="false" aria-controls="collapse-lebanese">
@@ -92,16 +92,16 @@
                                     <div class="col-md-2">
                                         {{ lebanese_cash_form.lebanese_100000_qty.label_tag }}
                                         {{ lebanese_cash_form.lebanese_100000_qty }}
-                                    </div>
+                        </div>
                                     <div class="col-md-2">
                                         <label class="form-label fw-bold">Total</label>
                                         <input type="number" class="form-control" id="lebanese-total" readonly 
-                                               style="background-color: #f8f9fa; border-color: #dee2e6;" />
-                                    </div>
-                                </div>
+                                       style="background-color: #f8f9fa; border-color: #dee2e6;" />
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
                     <!-- Dollar Cash Section -->
                     <div class="accordion-item">
@@ -134,8 +134,8 @@
                                     <div class="col-md-2">
                                         {{ dollar_cash_form.dollar_50_qty.label_tag }}
                                         {{ dollar_cash_form.dollar_50_qty }}
-                                    </div>
-                                    <div class="col-md-2">
+                    </div>
+                    <div class="col-md-2">
                                         {{ dollar_cash_form.dollar_100_qty.label_tag }}
                                         {{ dollar_cash_form.dollar_100_qty }}
                                     </div>
@@ -149,8 +149,8 @@
                                         <label class="form-label fw-bold">Total USD</label>
                                         <input type="number" class="form-control" id="dollar-total-usd" readonly 
                                                style="background-color: #f8f9fa; border-color: #dee2e6;" />
-                                    </div>
-                                    <div class="col-md-3">
+                    </div>
+                    <div class="col-md-3">
                                         <label class="form-label fw-bold">Total LBP</label>
                                         <input type="number" class="form-control" id="dollar-total-lbp" readonly 
                                                style="background-color: #f8f9fa; border-color: #dee2e6;" />
@@ -241,12 +241,12 @@
                                             <div class="col-md-4">
                                                 {{ form.tag.label_tag }}
                                                 {{ form.tag }}
-                                            </div>
-                                            <div class="col-md-1 d-flex align-items-end">
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
                                                 <button type="button" class="btn btn-sm btn-danger remove-credit-entry">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                                         </div>
                                     {% endfor %}
                                 </div>
@@ -277,19 +277,19 @@
                                             <div class="col-md-3">
                                                 {{ form.current_amount.label_tag }}
                                                 {{ form.current_amount }}
-                                            </div>
-                                            <div class="col-md-3">
+                    </div>
+                    <div class="col-md-3">
                                                 {{ form.daily_add.label_tag }}
                                                 {{ form.daily_add }}
-                                            </div>
+                    </div>
                                             <div class="col-md-5">
                                                 {{ form.tag.label_tag }}
                                                 {{ form.tag }}
-                                            </div>
-                                            <div class="col-md-1 d-flex align-items-end">
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
                                                 <button type="button" class="btn btn-sm btn-danger remove-coffee-entry">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                            <i class="fas fa-trash"></i>
+                        </button>
                                             </div>
                                         </div>
                                     {% endfor %}
@@ -384,39 +384,39 @@ document.addEventListener('DOMContentLoaded', function() {
         newForm.className = 'row mb-2 p-2 border rounded credit-entry';
         newForm.innerHTML = `
             <div class="col-md-2">
-                <label class="form-label">Amount</label>
+                    <label class="form-label">Amount</label>
                 <input type="number" class="form-control" name="form-${formCount}-amount" step="any" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Currency</label>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Currency</label>
                 <select class="form-control" name="form-${formCount}-currency">
                     <option value="">Select...</option>
                     <option value="Lebanese">Lebanese</option>
                     <option value="Dollar">Dollar</option>
-                </select>
-            </div>
-            <div class="col-md-3">
+                    </select>
+                </div>
+                <div class="col-md-3">
                 <label class="form-label">Name</label>
                 <input type="text" class="form-control" name="form-${formCount}-name" />
             </div>
             <div class="col-md-4">
-                <label class="form-label">Tag</label>
+                    <label class="form-label">Tag</label>
                 <select class="form-control" name="form-${formCount}-tag">
                     <option value="">Select...</option>
-                    <option value="Cash purchase">Cash purchase</option>
-                    <option value="Credit invoices">Credit invoices</option>
-                    <option value="Employee OTH">Employee OTH</option>
-                    <option value="Customer OTH">Customer OTH</option>
-                    <option value="Bar OTH">Bar OTH</option>
-                    <option value="Store">Store</option>
-                </select>
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
+                        <option value="Cash purchase">Cash purchase</option>
+                        <option value="Credit invoices">Credit invoices</option>
+                        <option value="Employee OTH">Employee OTH</option>
+                        <option value="Customer OTH">Customer OTH</option>
+                        <option value="Bar OTH">Bar OTH</option>
+                        <option value="Store">Store</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
                 <button type="button" class="btn btn-sm btn-danger remove-credit-entry">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
         
         container.appendChild(newForm);
         totalForms.value = formCount + 1;
@@ -434,8 +434,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="col-md-3">
                 <label class="form-label">Current Amount</label>
                 <input type="number" class="form-control" name="form-${formCount}-current_amount" step="any" />
-            </div>
-            <div class="col-md-3">
+                </div>
+                <div class="col-md-3">
                 <label class="form-label">Daily Add</label>
                 <input type="number" class="form-control" name="form-${formCount}-daily_add" step="any" />
             </div>
@@ -462,14 +462,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     <option value="Zanjabil w 3asal">Zanjabil w 3asal</option>
                     <option value="Gaz 12.5 kg.">Gaz 12.5 kg.</option>
                     <option value="Gaz 10 kg.">Gaz 10 kg.</option>
-                </select>
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
                 <button type="button" class="btn btn-sm btn-danger remove-coffee-entry">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
         
         container.appendChild(newForm);
         totalForms.value = formCount + 1;
@@ -612,7 +612,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Log the data structure before sending
         console.log('=== FORM SUBMISSION DEBUG ===');
-        console.log('Form data entries collected:', formData.entries());
+        console.log('Form data entries collected:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
         console.log('Organized data structure:');
         console.log('  General:', data.general);
         console.log('  Lebanese Cash:', data.lebanese_cash);
