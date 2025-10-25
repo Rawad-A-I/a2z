@@ -472,8 +472,8 @@ def employee_edit_close_cash_form(request, sheet_name):
     special_credit_form = SpecialCreditForm(initial=special_credit_initial)
     
     # Initialize formsets
-    credit_formset = CreditEntryFormSet(initial=credit_initial)
-    coffee_machine_formset = CoffeeMachineEntryFormSet(initial=coffee_machine_initial)
+    credit_formset = CreditEntryFormSet(initial=credit_initial, prefix='credit')
+    coffee_machine_formset = CoffeeMachineEntryFormSet(initial=coffee_machine_initial, prefix='coffee')
     
     context = {
         'sheet_name': sheet_name,

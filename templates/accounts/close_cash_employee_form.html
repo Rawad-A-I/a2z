@@ -233,8 +233,8 @@
                                             <div class="col-md-2">
                                                 {{ form.currency.label_tag }}
                                                 {{ form.currency }}
-                                            </div>
-                                            <div class="col-md-3">
+                    </div>
+                    <div class="col-md-3">
                                                 {{ form.name.label_tag }}
                                                 {{ form.name }}
                                             </div>
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add Credit Entry
     document.getElementById('add-credit-entry').addEventListener('click', function() {
         const container = document.getElementById('credit-entries');
-        const totalForms = document.querySelector('[name="form-TOTAL_FORMS"]');
+        const totalForms = document.querySelector('[name="credit-TOTAL_FORMS"]');
         const formCount = parseInt(totalForms.value);
         
         const newForm = document.createElement('div');
@@ -385,11 +385,11 @@ document.addEventListener('DOMContentLoaded', function() {
         newForm.innerHTML = `
             <div class="col-md-2">
                     <label class="form-label">Amount</label>
-                <input type="number" class="form-control" name="form-${formCount}-amount" step="any" />
+                <input type="number" class="form-control" name="credit-${formCount}-amount" step="any" />
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Currency</label>
-                <select class="form-control" name="form-${formCount}-currency">
+                <select class="form-control" name="credit-${formCount}-currency">
                     <option value="">Select...</option>
                     <option value="Lebanese">Lebanese</option>
                     <option value="Dollar">Dollar</option>
@@ -397,11 +397,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="col-md-3">
                 <label class="form-label">Name</label>
-                <input type="text" class="form-control" name="form-${formCount}-name" />
+                <input type="text" class="form-control" name="credit-${formCount}-name" />
             </div>
             <div class="col-md-4">
                     <label class="form-label">Tag</label>
-                <select class="form-control" name="form-${formCount}-tag">
+                <select class="form-control" name="credit-${formCount}-tag">
                     <option value="">Select...</option>
                         <option value="Cash purchase">Cash purchase</option>
                         <option value="Credit invoices">Credit invoices</option>
@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add Coffee Machine Entry
     document.getElementById('add-coffee-entry').addEventListener('click', function() {
         const container = document.getElementById('coffee-entries');
-        const totalForms = document.querySelector('[name="form-TOTAL_FORMS"]');
+        const totalForms = document.querySelector('[name="coffee-TOTAL_FORMS"]');
         const formCount = parseInt(totalForms.value);
         
         const newForm = document.createElement('div');
@@ -433,15 +433,15 @@ document.addEventListener('DOMContentLoaded', function() {
         newForm.innerHTML = `
             <div class="col-md-3">
                 <label class="form-label">Current Amount</label>
-                <input type="number" class="form-control" name="form-${formCount}-current_amount" step="any" />
+                <input type="number" class="form-control" name="coffee-${formCount}-current_amount" step="any" />
                 </div>
                 <div class="col-md-3">
                 <label class="form-label">Daily Add</label>
-                <input type="number" class="form-control" name="form-${formCount}-daily_add" step="any" />
+                <input type="number" class="form-control" name="coffee-${formCount}-daily_add" step="any" />
             </div>
             <div class="col-md-5">
                 <label class="form-label">Tag</label>
-                <select class="form-control" name="form-${formCount}-tag">
+                <select class="form-control" name="coffee-${formCount}-tag">
                     <option value="">Select...</option>
                     <option value="Paper Cup Small">Paper Cup Small</option>
                     <option value="Paper Cup Big">Paper Cup Big</option>
@@ -502,33 +502,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Collect all form data organized by section
         for (let [key, value] of formData.entries()) {
             // Handle formset data (credit and coffee_machine)
-            if (key.startsWith('form-') && key.includes('-')) {
+            if (key.startsWith('credit-') || key.startsWith('coffee-')) {
                 const parts = key.split('-');
-                const formIndex = parseInt(parts[0].replace('form', ''));
-                const fieldName = parts.slice(1).join('-');
+                const prefix = parts[0]; // 'credit' or 'coffee'
+                const formIndex = parseInt(parts[1]);
+                const fieldName = parts.slice(2).join('-');
                 
-                // Determine if this is credit or coffee_machine based on field names
-                if (fieldName === 'amount' || fieldName === 'currency' || fieldName === 'name') {
-                    // This is a credit entry
+                if (prefix === 'credit') {
                     if (!data.credit[formIndex]) data.credit[formIndex] = {};
                     data.credit[formIndex][fieldName] = value;
-                } else if (fieldName === 'current_amount' || fieldName === 'daily_add') {
-                    // This is a coffee_machine entry
+                } else if (prefix === 'coffee') {
                     if (!data.coffee_machine[formIndex]) data.coffee_machine[formIndex] = {};
                     data.coffee_machine[formIndex][fieldName] = value;
-                } else if (fieldName === 'tag') {
-                    // Tag field could be for either credit or coffee_machine
-                    // We need to check which formset this belongs to by checking other fields
-                    // For now, we'll check if the index already exists in credit or coffee_machine
-                    if (data.credit[formIndex] && Object.keys(data.credit[formIndex]).length > 0) {
-                        data.credit[formIndex][fieldName] = value;
-                    } else if (data.coffee_machine[formIndex] && Object.keys(data.coffee_machine[formIndex]).length > 0) {
-                        data.coffee_machine[formIndex][fieldName] = value;
-                    } else {
-                        // Default to coffee_machine if not sure
-                        if (!data.coffee_machine[formIndex]) data.coffee_machine[formIndex] = {};
-                        data.coffee_machine[formIndex][fieldName] = value;
-                    }
                 }
             }
             // Handle general section fields
