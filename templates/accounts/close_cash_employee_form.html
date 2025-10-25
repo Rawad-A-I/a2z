@@ -550,6 +550,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // Convert credit and coffee_machine objects to arrays
+        data.credit = Object.values(data.credit).filter(entry => 
+            entry.amount || entry.currency || entry.name || entry.tag
+        );
+        data.coffee_machine = Object.values(data.coffee_machine).filter(entry => 
+            entry.current_amount || entry.daily_add || entry.tag
+        );
+        
         // Calculate and add totals
         // Lebanese Cash Total
         const lbpQty5000 = parseFloat(data.lebanese_cash.lebanese_5000_qty) || 0;
